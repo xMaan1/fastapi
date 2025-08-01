@@ -5,3 +5,5 @@ Lib
 Scripts
 pyvenv.cfg
 *.pem
+
+.env
