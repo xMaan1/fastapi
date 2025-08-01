@@ -73,26 +73,27 @@ def signup(user_data: UserCreate):
 def login(user_credentials: UserLogin):
     """Login user and return JWT tokens"""
     user = get_user_by_username(user_credentials.username)
-    
-    if not user or not verify_password(user_credentials.password, user["hashed_password"]):
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
         )
-    
+    if not verify_password(user_credentials.password, user["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
     if not user["is_active"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
-    
     # Create tokens
     access_token = create_access_token(
         data={"sub": user["username"]},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     refresh_token = create_refresh_token(data={"sub": user["username"]})
-    
     return Token(
         access_token=access_token,
         refresh_token=refresh_token
