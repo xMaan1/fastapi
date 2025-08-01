@@ -140,6 +140,20 @@ def get_current_user_info(current_user: dict = Depends(get_current_user)):
         is_active=current_user["is_active"]
     )
 
+@app.get("/users", response_model=list[User])
+def get_all_users():
+    """Get all users (public endpoint)"""
+    from .database import users_db
+    users_list = []
+    for user_id, user_data in users_db.items():
+        users_list.append(User(
+            id=user_id,
+            username=user_data["username"],
+            email=user_data["email"],
+            is_active=user_data["is_active"]
+        ))
+    return users_list
+
 @app.get("/protected")
 def protected_route(current_user: dict = Depends(get_current_user)):
     """Example protected route"""
