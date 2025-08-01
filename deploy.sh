@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "🔁 Pulling latest changes from Git..."
-cd /fastapi || exit
 git pull origin main
 
 echo "📦 Installing dependencies..."
