@@ -134,26 +134,29 @@ def refresh_token(token_data: TokenRefresh):
     )
 
 @app.get("/me", response_model=User)
-def get_current_user_info(current_user: dict = Depends(get_current_user)):
+def get_current_user_info(current_user: object = Depends(get_current_user)):
     """Get current user information"""
     return User(
-        id=current_user["id"],
-        username=current_user["username"],
-        email=current_user["email"],
-        is_active=current_user["is_active"]
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        is_active=current_user.is_active
     )
 
+from sqlalchemy.orm import Session
+
 @app.get("/users", response_model=list[User])
-def get_all_users():
+def get_all_users(db: Session = Depends(get_db)):
     """Get all users (public endpoint)"""
-    from .database import users_db
+    from .database import User as DBUser
+    users = db.query(DBUser).all()
     users_list = []
-    for user_id, user_data in users_db.items():
+    for user in users:
         users_list.append(User(
-            id=user_id,
-            username=user_data["username"],
-            email=user_data["email"],
-            is_active=user_data["is_active"]
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_active=user.is_active
         ))
     return users_list
 
