@@ -15,6 +15,9 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Import User model so users table is included in metadata
+from .database import User
+
 # Association table for plan features
 plan_features = Table(
     'plan_features',

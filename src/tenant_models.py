@@ -130,8 +130,6 @@ class TenantUser(TenantUserBase):
     joinedAt: datetime
     createdAt: datetime
     updatedAt: datetime
-    # Remove User reference to avoid forward ref issues
-    # user: Optional['User'] = None
     tenant: Optional[Tenant] = None
 
     class Config:
