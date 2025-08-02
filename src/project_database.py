@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from .project_models import ProjectStatus, ProjectPriority, TaskStatus, TaskPriority, UserRole
+from src.project_models import ProjectStatus, ProjectPriority, TaskStatus, TaskPriority, UserRole
 
 # Use the same database as the existing auth system
 from .database import engine, SessionLocal, Base

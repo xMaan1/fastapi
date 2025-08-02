@@ -14,13 +14,13 @@ from sqlalchemy.orm import Session
 # Add the src directory to the path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from project_database import (
+from src.project_database import (
     get_project_db, create_project_tables,
     create_project_user, create_project, create_task,
     ProjectUser, Project as DBProject, Task as DBTask
 )
-from project_models import UserRole, ProjectStatus, ProjectPriority, TaskStatus, TaskPriority
-from auth import get_password_hash
+from src.project_models import UserRole, ProjectStatus, ProjectPriority, TaskStatus, TaskPriority
+from src.auth import get_password_hash
 
 def seed_database():
     """Seed the database with initial data"""
