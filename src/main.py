@@ -15,11 +15,11 @@ def on_startup():
     create_project_tables()
     create_tenant_tables()
 
-# Include all routes with /api prefix
-app.include_router(auth.router, prefix="/api")
-app.include_router(users.router, prefix="/api")
-app.include_router(projects.router, prefix="/api")
-app.include_router(tasks.router, prefix="/api")
+# Include all routes
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(projects.router)
+app.include_router(tasks.router)
 app.include_router(tenants.router)
 
 # Add CORS middleware for frontend integration
