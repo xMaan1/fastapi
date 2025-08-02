@@ -104,7 +104,7 @@ class ProjectActivity(BaseModel):
     description: str
     performedBy: str
     performedAt: datetime
-    metadata: Optional[dict] = None
+    meta_data: Optional[dict] = None
 
 class Project(ProjectBase):
     id: str

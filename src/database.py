@@ -20,7 +20,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
 def create_tables():
-    Base.metadata.create_all(bind=engine)
+    Base.meta_data.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
