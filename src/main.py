@@ -11,10 +11,17 @@ from .auth import (
     verify_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from .database import get_user_by_username, get_user_by_email, create_user
+from .database import get_user_by_username, get_user_by_email, create_user, get_db, create_tables
+from sqlalchemy.orm import Session
 from .dependencies import get_current_user
 
+
 app = FastAPI(title="FastAPI JWT Auth", version="1.0.0")
+
+# Ensure tables are created at startup
+@app.on_event("startup")
+def on_startup():
+    create_tables()
 
 # Add CORS middleware for frontend integration
 app.add_middleware(
@@ -30,38 +37,34 @@ def read_root():
     return {"message": "FastAPI JWT Authentication API", "status": "running"}
 
 @app.post("/signup", response_model=UserResponse)
-def signup(user_data: UserCreate):
+def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
     # Check if user already exists
-    if get_user_by_username(user_data.username):
+    if get_user_by_username(user_data.username, db):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
-    
-    if get_user_by_email(user_data.email):
+    if get_user_by_email(user_data.email, db):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
     # Hash password and create user
     hashed_password = get_password_hash(user_data.password)
-    user = create_user(user_data.username, user_data.email, hashed_password)
-    
+    user = create_user(user_data.username, user_data.email, hashed_password, db)
     # Create tokens
     access_token = create_access_token(
-        data={"sub": user["username"]},
+        data={"sub": user.username},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    refresh_token = create_refresh_token(data={"sub": user["username"]})
-    
+    refresh_token = create_refresh_token(data={"sub": user.username})
     return UserResponse(
         user=User(
-            id=user["id"],
-            username=user["username"],
-            email=user["email"],
-            is_active=user["is_active"]
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            is_active=user.is_active
         ),
         tokens=Token(
             access_token=access_token,
@@ -70,30 +73,30 @@ def signup(user_data: UserCreate):
     )
 
 @app.post("/login", response_model=Token)
-def login(user_credentials: UserLogin):
+def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     """Login user and return JWT tokens"""
-    user = get_user_by_username(user_credentials.username)
+    user = get_user_by_username(user_credentials.username, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
         )
-    if not verify_password(user_credentials.password, user["hashed_password"]):
+    if not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password"
         )
-    if not user["is_active"]:
+    if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
     # Create tokens
     access_token = create_access_token(
-        data={"sub": user["username"]},
+        data={"sub": user.username},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    refresh_token = create_refresh_token(data={"sub": user["username"]})
+    refresh_token = create_refresh_token(data={"sub": user.username})
     return Token(
         access_token=access_token,
         refresh_token=refresh_token
