@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import create_tables
 from .project_database import create_project_tables
-from .routes import auth, users, projects, tasks
+from .tenant_database import create_tenant_tables
+from .routes import auth, users, projects, tasks, tenants
 
 app = FastAPI(title="SparkCo ERP - Project Management API", version="1.0.0")
 
@@ -12,12 +13,14 @@ app = FastAPI(title="SparkCo ERP - Project Management API", version="1.0.0")
 def on_startup():
     create_tables()
     create_project_tables()
+    create_tenant_tables()
 
 # Include all routes with /api prefix
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(projects.router, prefix="/api")
 app.include_router(tasks.router, prefix="/api")
+app.include_router(tenants.router)
 
 # Add CORS middleware for frontend integration
 app.add_middleware(

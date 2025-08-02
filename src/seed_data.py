@@ -20,6 +20,8 @@ from src.project_database import (
     ProjectUser, Project as DBProject, Task as DBTask
 )
 from src.project_models import UserRole, ProjectStatus, ProjectPriority, TaskStatus, TaskPriority
+from src.tenant_database import get_tenant_db, create_tenant_tables, create_plan
+from src.tenant_models import PlanType, PlanFeature
 from src.auth import get_password_hash
 
 def seed_database():
@@ -28,10 +30,14 @@ def seed_database():
     print("Creating database tables...")
     # Create tables
     create_project_tables()
+    create_tenant_tables()
     
-    # Get database session
+    # Get database sessions
     db_gen = get_project_db()
     db = next(db_gen)
+    
+    tenant_db_gen = get_tenant_db()
+    tenant_db = next(tenant_db_gen)
     
     try:
         # Check if data already exists
@@ -262,6 +268,63 @@ def seed_database():
             task = create_task(task_data, db)
             print(f"Created task: {task.title}")
         
+        # Create subscription plans
+        plans_data = [
+            {
+                "name": "Starter",
+                "description": "Perfect for small teams getting started with project management",
+                "plan_type": PlanType.STARTER,
+                "price": 29.0,
+                "billing_cycle": "monthly",
+                "max_projects": 10,
+                "max_users": 5,
+                "features": [
+                    PlanFeature.API_ACCESS.value
+                ],
+                "is_active": True
+            },
+            {
+                "name": "Professional",
+                "description": "Ideal for growing teams that need advanced features",
+                "plan_type": PlanType.PROFESSIONAL,
+                "price": 79.0,
+                "billing_cycle": "monthly",
+                "max_projects": 50,
+                "max_users": 25,
+                "features": [
+                    PlanFeature.API_ACCESS.value,
+                    PlanFeature.ADVANCED_REPORTING.value,
+                    PlanFeature.PRIORITY_SUPPORT.value,
+                    PlanFeature.ADVANCED_PERMISSIONS.value
+                ],
+                "is_active": True
+            },
+            {
+                "name": "Enterprise",
+                "description": "For large organizations with complex project management needs",
+                "plan_type": PlanType.ENTERPRISE,
+                "price": 199.0,
+                "billing_cycle": "monthly",
+                "max_projects": None,  # Unlimited
+                "max_users": None,     # Unlimited
+                "features": [
+                    PlanFeature.UNLIMITED_PROJECTS.value,
+                    PlanFeature.ADVANCED_REPORTING.value,
+                    PlanFeature.CUSTOM_INTEGRATIONS.value,
+                    PlanFeature.PRIORITY_SUPPORT.value,
+                    PlanFeature.CUSTOM_BRANDING.value,
+                    PlanFeature.API_ACCESS.value,
+                    PlanFeature.ADVANCED_PERMISSIONS.value,
+                    PlanFeature.AUDIT_LOGS.value
+                ],
+                "is_active": True
+            }
+        ]
+        
+        for plan_data in plans_data:
+            plan = create_plan(plan_data, tenant_db)
+            print(f"Created plan: {plan.name}")
+        
         print("Database seeded successfully!")
         
     except Exception as e:
@@ -269,6 +332,7 @@ def seed_database():
         db.rollback()
     finally:
         db.close()
+        tenant_db.close()
 
 def main():
     """Main function to run the seed script"""
