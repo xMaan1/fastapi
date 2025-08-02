@@ -208,3 +208,7 @@ class TenantInvitation(TenantInvitationBase):
 
     class Config:
         from_attributes = True
+
+# --- Ensure forward refs are resolved for Pydantic v2 ---
+TenantUser.model_rebuild()
+Tenant.model_rebuild()
