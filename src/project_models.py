@@ -98,13 +98,15 @@ class ProjectUpdate(BaseModel):
     clientEmail: Optional[str] = None
     notes: Optional[str] = None
 
+from pydantic import Field
+
 class ProjectActivity(BaseModel):
     id: str
     type: str
     description: str
     performedBy: str
     performedAt: datetime
-    meta_data: Optional[dict] = None
+    metadata: Optional[dict] = Field(None, alias="activity_metadata")
 
 class Project(ProjectBase):
     id: str

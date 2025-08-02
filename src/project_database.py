@@ -13,7 +13,7 @@ from .database import engine, SessionLocal, Base
 # Association table for project team members
 project_team_members = Table(
     'project_team_members',
-    Base.meta_data,
+    Base.metadata,
     Column('project_id', String, ForeignKey('projects.id'), primary_key=True),
     Column('user_id', String, ForeignKey('project_users.id'), primary_key=True)
 )
@@ -97,14 +97,14 @@ class ProjectActivity(Base):
     description = Column(Text, nullable=False)
     performedBy = Column(String, nullable=False)
     performedAt = Column(DateTime, default=datetime.utcnow)
-    meta_data = Column(Text, nullable=True)  # JSON string
+    activity_metadata = Column(Text, nullable=True)  # JSON string
 
     # Relationships
     project = relationship("Project", back_populates="activities")
 
 def create_project_tables():
     """Create all project-related tables"""
-    Base.meta_data.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 def get_project_db():
     """Get database session for project operations"""
