@@ -1,10 +1,7 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Dict, Any, TYPE_CHECKING
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
-
-if TYPE_CHECKING:
-    from .models import User
 
 class PlanType(str, Enum):
     STARTER = "starter"
@@ -132,21 +129,12 @@ class TenantUser(TenantUserBase):
     joinedAt: datetime
     createdAt: datetime
     updatedAt: datetime
-    user: Optional['User'] = None  # type: ignore[name-defined]
+    # Remove User reference to avoid forward ref issues
+    # user: Optional['User'] = None
     tenant: Optional[Tenant] = None
 
     class Config:
         from_attributes = True
-
-    # Pydantic v2: update forward refs for User
-    @classmethod
-    def model_rebuild(cls):
-        super().model_rebuild()
-        try:
-            from .models import User
-            cls.model_rebuild_forward_refs(User=User)
-        except ImportError:
-            pass
 
 # Response models
 class PlansResponse(BaseModel):
@@ -208,7 +196,3 @@ class TenantInvitation(TenantInvitationBase):
 
     class Config:
         from_attributes = True
-
-# --- Ensure forward refs are resolved for Pydantic v2 ---
-TenantUser.model_rebuild()
-Tenant.model_rebuild()
