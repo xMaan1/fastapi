@@ -15,6 +15,7 @@ from ..tenant_models import (
     SubscribeRequest, TenantResponse, TenantUserResponse
 )
 from ..project_database import get_project_user_by_email, get_project_db
+from ..database import get_db
 from ..dependencies import get_current_user
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
