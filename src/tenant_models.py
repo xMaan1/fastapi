@@ -75,7 +75,8 @@ class Tenant(TenantBase):
     createdAt: datetime
     updatedAt: datetime
     currentPlan: Plan
-    subscription: Optional['Subscription'] = None
+    # Remove Subscription forward ref to avoid issues
+    # subscription: Optional['Subscription'] = None
 
     class Config:
         from_attributes = True
@@ -169,11 +170,6 @@ class TenantUserResponse(BaseModel):
     role: TenantRole
     isActive: bool
     joinedAt: datetime
-
-# User create for tenant users
-class TenantUserCreate(BaseModel):
-    email: str
-    role: TenantRole
 
 # Invitation models
 class TenantInvitationBase(BaseModel):
