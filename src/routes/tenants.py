@@ -169,12 +169,20 @@ async def get_tenant_users_list(
     from ..unified_database import User as DBUser
     user_ids = [tu.userId for tu in tenant_users]
     users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
-    # Attach tenant role to each user (as user.userRole)
+    # Attach tenant role to each user (as user.userRole) and return as Pydantic User models
+    from ..unified_models import User as UserModel
     user_id_to_role = {str(tu.userId): tu.role for tu in tenant_users}
-    user_dicts = []
+    user_list = []
     for user in users:
-        user_dict = user.to_dict() if hasattr(user, 'to_dict') else {c.name: getattr(user, c.name) for c in user.__table__.columns}
-        user_dict['userRole'] = user_id_to_role.get(str(user.id))
-        user_dict['userId'] = str(user.id)
-        user_dicts.append(user_dict)
-    return {"users": user_dicts}
+        user_list.append(UserModel(
+            userId=str(user.id),
+            userName=user.userName,
+            email=user.email,
+            firstName=user.firstName,
+            lastName=user.lastName,
+            userRole=user_id_to_role.get(str(user.id)) or user.userRole,
+            avatar=user.avatar,
+            isActive=user.isActive,
+            permissions=[]
+        ))
+    return {"users": user_list}
