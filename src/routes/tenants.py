@@ -16,7 +16,7 @@ from ..unified_database import (
 from ..unified_models import (
     Plan, PlansResponse, TenantCreate, Tenant, SubscriptionCreate,
     TenantUserCreate, TenantRole, SubscriptionStatus, TenantUsersResponse,
-    SubscribeRequest, CustomRole, CustomRoleCreate, CustomRoleUpdate, Permission
+    SubscribeRequest, CustomRole, CustomRoleCreate, CustomRoleUpdate, Permission, UsersResponse
 )
 
 
