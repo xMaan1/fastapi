@@ -186,6 +186,7 @@ class TaskBase(BaseModel):
     estimatedHours: Optional[float] = None
     actualHours: float = 0.0
     tags: List[str] = []
+    parentTaskId: Optional[str] = None  # For subtasks
 
 class TaskCreate(TaskBase):
     project: str  # project ID
@@ -201,6 +202,26 @@ class TaskUpdate(BaseModel):
     estimatedHours: Optional[float] = None
     actualHours: Optional[float] = None
     tags: Optional[List[str]] = None
+    parentTaskId: Optional[str] = None
+
+class SubTask(BaseModel):
+    id: str
+    title: str
+    description: Optional[str] = None
+    status: TaskStatus
+    priority: TaskPriority
+    assignedTo: Optional[Dict[str, str]] = None
+    dueDate: Optional[str] = None
+    estimatedHours: Optional[float] = None
+    actualHours: float = 0.0
+    tags: List[str] = []
+    createdBy: Dict[str, str]
+    completedAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
 
 class Task(TaskBase):
     id: str
@@ -210,6 +231,9 @@ class Task(TaskBase):
     completedAt: Optional[datetime] = None
     createdAt: datetime
     updatedAt: datetime
+    subtasks: List[SubTask] = []
+    subtaskCount: int = 0
+    completedSubtaskCount: int = 0
 
     class Config:
         from_attributes = True

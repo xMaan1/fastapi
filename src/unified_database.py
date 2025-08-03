@@ -231,6 +231,7 @@ class Task(Base):
     projectId = Column(UUID(as_uuid=True), ForeignKey("projects.id"), nullable=False)
     assignedToId = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     createdById = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    parentTaskId = Column(UUID(as_uuid=True), ForeignKey("tasks.id"))  # For subtasks
     dueDate = Column(String)  # Store as string for compatibility
     estimatedHours = Column(Float)
     actualHours = Column(Float, default=0.0)
@@ -243,6 +244,8 @@ class Task(Base):
     project = relationship("Project", back_populates="tasks")
     assignedTo = relationship("User", foreign_keys=[assignedToId], back_populates="assigned_tasks")
     createdBy = relationship("User", foreign_keys=[createdById], back_populates="created_tasks")
+    parent_task = relationship("Task", remote_side=[id], back_populates="subtasks")
+    subtasks = relationship("Task", back_populates="parent_task")
 
 # Database functions
 def create_tables():
@@ -399,10 +402,44 @@ def delete_task(task_id: str, db: Session, tenant_id: str = None) -> bool:
     
     task = query.first()
     if task:
+        # Delete all subtasks first
+        subtasks = db.query(Task).filter(Task.parentTaskId == task_id).all()
+        for subtask in subtasks:
+            db.delete(subtask)
+        
         db.delete(task)
         db.commit()
         return True
     return False
+
+# Subtask functions
+def get_subtasks_by_parent(parent_task_id: str, db: Session, tenant_id: str = None) -> List[Task]:
+    query = db.query(Task).filter(Task.parentTaskId == parent_task_id)
+    if tenant_id:
+        query = query.filter(Task.tenant_id == tenant_id)
+    return query.all()
+
+def get_main_tasks_by_project(project_id: str, db: Session, tenant_id: str = None) -> List[Task]:
+    """Get only main tasks (not subtasks) for a project"""
+    query = db.query(Task).filter(
+        Task.projectId == project_id,
+        Task.parentTaskId.is_(None)
+    )
+    if tenant_id:
+        query = query.filter(Task.tenant_id == tenant_id)
+    return query.all()
+
+def get_task_with_subtasks(task_id: str, db: Session, tenant_id: str = None) -> Optional[Task]:
+    """Get a task with all its subtasks loaded"""
+    query = db.query(Task).filter(Task.id == task_id)
+    if tenant_id:
+        query = query.filter(Task.tenant_id == tenant_id)
+    
+    task = query.first()
+    if task:
+        # Load subtasks
+        task.subtasks = get_subtasks_by_parent(task_id, db, tenant_id)
+    return task
 
 # Subscription functions
 def create_subscription(subscription_data: dict, db: Session) -> Subscription:
