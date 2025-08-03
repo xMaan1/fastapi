@@ -157,38 +157,32 @@ async def get_tenant_users_list(
     db: Session = Depends(get_db)
 ):
     """Get all users in a tenant, with their tenant role info"""
-    try:
-        # Verify user has access to tenant
-        user_tenants = get_user_tenants(str(current_user.id), db)
-        user_tenant = next((tu for tu in user_tenants if str(tu.tenantId) == tenant_id), None)
-        if not user_tenant:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this tenant"
-            )
-        tenant_users = get_tenant_users(tenant_id, db)
-        from ..unified_database import User as DBUser
-        user_ids = [tu.userId for tu in tenant_users]
-        users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
-        # Attach tenant role to each user (as user.userRole) and return as Pydantic User models
-        from ..unified_models import User as UserModel
-        user_id_to_role = {str(tu.userId): tu.role for tu in tenant_users}
-        user_list = []
-        for user in users:
-            user_list.append(UserModel(
-                userId=str(user.id),
-                userName=user.userName,
-                email=user.email,
-                firstName=user.firstName,
-                lastName=user.lastName,
-                userRole=user_id_to_role.get(str(user.id)) or user.userRole,
-                avatar=user.avatar,
-                isActive=user.isActive,
-                permissions=[]
-            ))
-        return {"users": user_list}
-    except Exception as e:
-        import traceback
-        print("Error in get_tenant_users_list:", e)
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+    # Verify user has access to tenant
+    user_tenants = get_user_tenants(str(current_user.id), db)
+    user_tenant = next((tu for tu in user_tenants if str(tu.tenantId) == tenant_id), None)
+    if not user_tenant:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this tenant"
+        )
+    tenant_users = get_tenant_users(tenant_id, db)
+    from ..unified_database import User as DBUser
+    user_ids = [tu.userId for tu in tenant_users]
+    users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
+    user_id_to_role = {str(tu.userId): tu.role for tu in tenant_users}
+    user_dicts = []
+    for user in users:
+        user_dict = {
+            "userId": str(user.id),
+            "userName": user.userName,
+            "email": user.email,
+            "firstName": user.firstName,
+            "lastName": user.lastName,
+            "userRole": user.userRole,  # global role only
+            "tenantRole": user_id_to_role.get(str(user.id)),  # per-tenant role
+            "avatar": user.avatar,
+            "isActive": user.isActive,
+            "permissions": []
+        }
+        user_dicts.append(user_dict)
+    return {"users": user_dicts}
