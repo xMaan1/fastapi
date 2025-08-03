@@ -170,11 +170,11 @@ async def get_tenant_users_list(
     user_ids = [tu.userId for tu in tenant_users]
     users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
     # Attach tenant role to each user (as user.userRole)
-    user_id_to_role = {tu.userId: tu.role for tu in tenant_users}
+    user_id_to_role = {str(tu.userId): tu.role for tu in tenant_users}
     user_dicts = []
     for user in users:
         user_dict = user.to_dict() if hasattr(user, 'to_dict') else {c.name: getattr(user, c.name) for c in user.__table__.columns}
-        user_dict['userRole'] = user_id_to_role.get(user.id) or user_id_to_role.get(str(user.id))
+        user_dict['userRole'] = user_id_to_role.get(str(user.id))
         user_dict['userId'] = str(user.id)
         user_dicts.append(user_dict)
     return {"users": user_dicts}
