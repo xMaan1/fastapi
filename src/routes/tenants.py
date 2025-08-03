@@ -26,13 +26,14 @@ async def get_available_plans(db: Session = Depends(get_db)):
 
 @router.post("/subscribe")
 async def subscribe_to_plan(
-    plan_id: str,
-    tenant_name: str,
+    req: SubscribeRequest,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Subscribe to a plan and create a new tenant"""
-    
+    plan_id = req.planId
+    tenant_name = req.tenantName
+    domain = req.domain
     # Verify plan exists
     plan = get_plan_by_id(plan_id, db)
     if not plan:
