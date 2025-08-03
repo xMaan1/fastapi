@@ -1,8 +1,11 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, timedelta
 import uuid
+
+router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 from ..unified_database import (
     get_db, get_plans, get_plan_by_id, create_tenant, 
@@ -15,35 +18,9 @@ from ..unified_models import (
     TenantUserCreate, TenantRole, SubscriptionStatus, TenantUsersResponse,
     SubscribeRequest, CustomRole, CustomRoleCreate, CustomRoleUpdate, Permission
 )
-# --- Custom Roles & Permissions Endpoints ---
 
-@router.get("/{tenant_id}/custom-roles", response_model=List[CustomRole], dependencies=[Depends(require_tenant_admin_or_super_admin)])
-async def list_custom_roles(tenant_id: str, db: Session = Depends(get_db)):
-    return get_custom_roles(tenant_id, db)
 
-@router.post("/{tenant_id}/custom-roles", response_model=CustomRole, dependencies=[Depends(require_tenant_admin_or_super_admin)])
-async def create_custom_role_endpoint(tenant_id: str, data: CustomRoleCreate, db: Session = Depends(get_db)):
-    role_data = data.dict()
-    role_data["tenantId"] = tenant_id
-    return create_custom_role(role_data, db)
-
-@router.put("/{tenant_id}/custom-roles/{role_id}", response_model=CustomRole, dependencies=[Depends(require_tenant_admin_or_super_admin)])
-async def update_custom_role_endpoint(tenant_id: str, role_id: str, data: CustomRoleUpdate, db: Session = Depends(get_db)):
-    return update_custom_role(role_id, data.dict(exclude_unset=True), db)
-
-@router.delete("/{tenant_id}/custom-roles/{role_id}", dependencies=[Depends(require_tenant_admin_or_super_admin)])
-async def delete_custom_role_endpoint(tenant_id: str, role_id: str, db: Session = Depends(get_db)):
-    success = delete_custom_role(role_id, db)
-    if not success:
-        raise HTTPException(status_code=404, detail="Custom role not found")
-    return {"success": True}
-
-@router.get("/permissions", response_model=List[Permission], dependencies=[Depends(get_current_user)])
-async def list_permissions(db: Session = Depends(get_db)):
-    return get_permissions(db)
 from ..dependencies import get_current_user, require_super_admin, require_tenant_admin_or_super_admin
-
-router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 @router.get("/plans", response_model=PlansResponse, dependencies=[Depends(require_super_admin)])
 async def get_available_plans(db: Session = Depends(get_db)):
