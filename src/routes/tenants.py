@@ -4,24 +4,22 @@ from typing import List
 from datetime import datetime, timedelta
 import uuid
 
-from ..tenant_database import (
-    get_tenant_db, get_plans, get_plan_by_id, create_tenant, 
+from ..unified_database import (
+    get_db, get_plans, get_plan_by_id, create_tenant, 
     create_subscription, create_tenant_user, get_user_tenants,
     get_tenant_by_id, get_tenant_users, get_subscription_by_tenant
 )
-from ..tenant_models import (
+from ..unified_models import (
     Plan, PlansResponse, TenantCreate, Tenant, SubscriptionCreate,
     TenantUserCreate, TenantRole, SubscriptionStatus, TenantUsersResponse,
-    SubscribeRequest, TenantResponse, TenantUserResponse
+    SubscribeRequest
 )
-from ..project_database import get_project_user_by_email, get_project_db
-from ..database import get_db
 from ..dependencies import get_current_user
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 @router.get("/plans", response_model=PlansResponse)
-async def get_available_plans(db: Session = Depends(get_tenant_db)):
+async def get_available_plans(db: Session = Depends(get_db)):
     """Get all available subscription plans"""
     plans = get_plans(db)
     return PlansResponse(plans=plans)
@@ -31,13 +29,12 @@ async def subscribe_to_plan(
     plan_id: str,
     tenant_name: str,
     current_user = Depends(get_current_user),
-    tenant_db: Session = Depends(get_tenant_db),
-    user_db: Session = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """Subscribe to a plan and create a new tenant"""
     
     # Verify plan exists
-    plan = get_plan_by_id(plan_id, tenant_db)
+    plan = get_plan_by_id(plan_id, db)
     if not plan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -52,30 +49,30 @@ async def subscribe_to_plan(
         "settings": {}
     }
     
-    tenant = create_tenant(tenant_data, tenant_db)
+    tenant = create_tenant(tenant_data, db)
     
     # Create subscription (trial for now)
     subscription_data = {
-        "tenant_id": tenant.id,
-        "plan_id": plan.id,
-        "status": SubscriptionStatus.TRIAL,
-        "start_date": datetime.utcnow(),
-        "end_date": datetime.utcnow() + timedelta(days=14),  # 14-day trial
-        "auto_renew": True
+        "tenantId": tenant.id,
+        "planId": plan.id,
+        "status": SubscriptionStatus.TRIAL.value,
+        "startDate": datetime.utcnow(),
+        "endDate": datetime.utcnow() + timedelta(days=14),  # 14-day trial
+        "autoRenew": True
     }
     
-    subscription = create_subscription(subscription_data, tenant_db)
+    subscription = create_subscription(subscription_data, db)
     
     # Add user as owner
     tenant_user_data = {
-        "tenant_id": tenant.id,
-        "user_id": current_user.id,
-        "role": TenantRole.OWNER,
+        "tenantId": tenant.id,
+        "userId": current_user.id,
+        "role": TenantRole.OWNER.value,
         "permissions": ["*"],  # Full permissions for owner
-        "is_active": True
+        "isActive": True
     }
     
-    tenant_user = create_tenant_user(tenant_user_data, tenant_db)
+    tenant_user = create_tenant_user(tenant_user_data, db)
     
     return {
         "success": True,
@@ -88,28 +85,28 @@ async def subscribe_to_plan(
         "subscription": {
             "id": str(subscription.id),
             "status": subscription.status,
-            "trial_ends": subscription.end_date
+            "trial_ends": subscription.endDate
         }
     }
 
 @router.get("/my-tenants")
 async def get_my_tenants(
     current_user = Depends(get_current_user),
-    db: Session = Depends(get_tenant_db)
+    db: Session = Depends(get_db)
 ):
     """Get all tenants for the current user"""
-    tenant_users = get_user_tenants(current_user.id, db)
+    tenant_users = get_user_tenants(str(current_user.id), db)
     
     tenants = []
     for tenant_user in tenant_users:
-        tenant = get_tenant_by_id(str(tenant_user.tenant_id), db)
+        tenant = get_tenant_by_id(str(tenant_user.tenantId), db)
         if tenant:
             tenants.append({
                 "id": str(tenant.id),
                 "name": tenant.name,
                 "domain": tenant.domain,
                 "role": tenant_user.role,
-                "joined_at": tenant_user.joined_at
+                "joined_at": tenant_user.joinedAt
             })
     
     return {"tenants": tenants}
@@ -118,7 +115,7 @@ async def get_my_tenants(
 async def get_tenant(
     tenant_id: str,
     current_user = Depends(get_current_user),
-    db: Session = Depends(get_tenant_db)
+    db: Session = Depends(get_db)
 ):
     """Get tenant details"""
     tenant = get_tenant_by_id(tenant_id, db)
@@ -129,8 +126,8 @@ async def get_tenant(
         )
     
     # Check if user has access to this tenant
-    tenant_users = get_user_tenants(current_user.id, db)
-    user_tenant = next((tu for tu in tenant_users if str(tu.tenant_id) == tenant_id), None)
+    tenant_users = get_user_tenants(str(current_user.id), db)
+    user_tenant = next((tu for tu in tenant_users if str(tu.tenantId) == tenant_id), None)
     
     if not user_tenant:
         raise HTTPException(
@@ -145,19 +142,19 @@ async def get_tenant(
         "description": tenant.description,
         "settings": tenant.settings,
         "user_role": user_tenant.role,
-        "created_at": tenant.created_at
+        "created_at": tenant.createdAt
     }
 
 @router.get("/{tenant_id}/users", response_model=TenantUsersResponse)
 async def get_tenant_users_list(
     tenant_id: str,
     current_user = Depends(get_current_user),
-    db: Session = Depends(get_tenant_db)
+    db: Session = Depends(get_db)
 ):
     """Get all users in a tenant"""
     # Verify user has access to tenant
-    user_tenants = get_user_tenants(current_user.id, db)
-    user_tenant = next((tu for tu in user_tenants if str(tu.tenant_id) == tenant_id), None)
+    user_tenants = get_user_tenants(str(current_user.id), db)
+    user_tenant = next((tu for tu in user_tenants if str(tu.tenantId) == tenant_id), None)
     
     if not user_tenant:
         raise HTTPException(
