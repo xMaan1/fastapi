@@ -7,24 +7,51 @@ import uuid
 from ..unified_database import (
     get_db, get_plans, get_plan_by_id, create_tenant, 
     create_subscription, create_tenant_user, get_user_tenants,
-    get_tenant_by_id, get_tenant_users, get_subscription_by_tenant
+    get_tenant_by_id, get_tenant_users, get_subscription_by_tenant,
+    get_permissions, create_permission, get_custom_roles, create_custom_role, update_custom_role, delete_custom_role
 )
 from ..unified_models import (
     Plan, PlansResponse, TenantCreate, Tenant, SubscriptionCreate,
     TenantUserCreate, TenantRole, SubscriptionStatus, TenantUsersResponse,
-    SubscribeRequest
+    SubscribeRequest, CustomRole, CustomRoleCreate, CustomRoleUpdate, Permission
 )
-from ..dependencies import get_current_user
+# --- Custom Roles & Permissions Endpoints ---
+
+@router.get("/{tenant_id}/custom-roles", response_model=List[CustomRole], dependencies=[Depends(require_tenant_admin_or_super_admin)])
+async def list_custom_roles(tenant_id: str, db: Session = Depends(get_db)):
+    return get_custom_roles(tenant_id, db)
+
+@router.post("/{tenant_id}/custom-roles", response_model=CustomRole, dependencies=[Depends(require_tenant_admin_or_super_admin)])
+async def create_custom_role_endpoint(tenant_id: str, data: CustomRoleCreate, db: Session = Depends(get_db)):
+    role_data = data.dict()
+    role_data["tenantId"] = tenant_id
+    return create_custom_role(role_data, db)
+
+@router.put("/{tenant_id}/custom-roles/{role_id}", response_model=CustomRole, dependencies=[Depends(require_tenant_admin_or_super_admin)])
+async def update_custom_role_endpoint(tenant_id: str, role_id: str, data: CustomRoleUpdate, db: Session = Depends(get_db)):
+    return update_custom_role(role_id, data.dict(exclude_unset=True), db)
+
+@router.delete("/{tenant_id}/custom-roles/{role_id}", dependencies=[Depends(require_tenant_admin_or_super_admin)])
+async def delete_custom_role_endpoint(tenant_id: str, role_id: str, db: Session = Depends(get_db)):
+    success = delete_custom_role(role_id, db)
+    if not success:
+        raise HTTPException(status_code=404, detail="Custom role not found")
+    return {"success": True}
+
+@router.get("/permissions", response_model=List[Permission], dependencies=[Depends(get_current_user)])
+async def list_permissions(db: Session = Depends(get_db)):
+    return get_permissions(db)
+from ..dependencies import get_current_user, require_super_admin, require_tenant_admin_or_super_admin
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 
-@router.get("/plans", response_model=PlansResponse)
+@router.get("/plans", response_model=PlansResponse, dependencies=[Depends(require_super_admin)])
 async def get_available_plans(db: Session = Depends(get_db)):
     """Get all available subscription plans"""
     plans = get_plans(db)
     return PlansResponse(plans=plans)
 
-@router.post("/subscribe")
+@router.post("/subscribe", dependencies=[Depends(require_super_admin)])
 async def subscribe_to_plan(
     req: SubscribeRequest,
     current_user = Depends(get_current_user),
@@ -146,7 +173,7 @@ async def get_tenant(
         "created_at": tenant.createdAt
     }
 
-@router.get("/{tenant_id}/users", response_model=TenantUsersResponse)
+@router.get("/{tenant_id}/users", response_model=TenantUsersResponse, dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def get_tenant_users_list(
     tenant_id: str,
     current_user = Depends(get_current_user),

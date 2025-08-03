@@ -8,11 +8,11 @@ from ..unified_database import (
     get_user_by_id, create_user, get_all_users
 )
 from ..auth import get_password_hash
-from ..dependencies import get_current_user, get_tenant_context
+from ..dependencies import get_current_user, get_tenant_context, require_super_admin
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.get("", response_model=UsersResponse)
+@router.get("", response_model=UsersResponse, dependencies=[Depends(require_super_admin)])
 async def get_users(
     db: Session = Depends(get_db),
     tenant_context: Optional[dict] = Depends(get_tenant_context)
@@ -35,7 +35,7 @@ async def get_users(
     
     return UsersResponse(users=user_list)
 
-@router.get("/{user_id}", response_model=User)
+@router.get("/{user_id}", response_model=User, dependencies=[Depends(require_super_admin)])
 async def get_user(
     user_id: str, 
     db: Session = Depends(get_db),
@@ -61,7 +61,7 @@ async def get_user(
         permissions=[]
     )
 
-@router.post("", response_model=User)
+@router.post("", response_model=User, dependencies=[Depends(require_super_admin)])
 async def create_new_user(
     user_data: UserCreate, 
     current_user = Depends(get_current_user),
@@ -105,7 +105,7 @@ async def create_new_user(
         permissions=[]
     )
 
-@router.put("/{user_id}", response_model=User)
+@router.put("/{user_id}", response_model=User, dependencies=[Depends(require_super_admin)])
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
@@ -150,7 +150,7 @@ async def update_user(
         permissions=[]
     )
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", dependencies=[Depends(require_super_admin)])
 async def delete_user(
     user_id: str,
     current_user = Depends(get_current_user),

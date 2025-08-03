@@ -6,6 +6,7 @@ from enum import Enum
 # Enums
 class UserRole(str, Enum):
     SUPER_ADMIN = "super_admin"
+    ADMIN = "admin"
     PROJECT_MANAGER = "project_manager"
     TEAM_MEMBER = "team_member"
     CLIENT = "client"
@@ -63,6 +64,30 @@ class TenantRole(str, Enum):
     MANAGER = "manager"
     MEMBER = "member"
     VIEWER = "viewer"
+
+class Permission(BaseModel):
+    code: str  # e.g. 'manage_projects', 'view_reports'
+    label: str  # Human-readable label
+
+class CustomRoleBase(BaseModel):
+    tenantId: str
+    name: str
+    permissions: List[str]  # List of permission codes
+
+class CustomRoleCreate(CustomRoleBase):
+    pass
+
+class CustomRoleUpdate(BaseModel):
+    name: Optional[str] = None
+    permissions: Optional[List[str]] = None
+
+class CustomRole(CustomRoleBase):
+    id: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
 
 # Base Models
 class UserBase(BaseModel):

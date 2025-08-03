@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from ..dependencies import require_super_admin
 from sqlalchemy.orm import Session
 
 from ..unified_database import get_db, get_plans
@@ -6,7 +7,7 @@ from ..unified_models import PlansResponse
 
 router = APIRouter(prefix="/plans", tags=["plans"])
 
-@router.get("", response_model=PlansResponse)
+@router.get("", response_model=PlansResponse, dependencies=[Depends(require_super_admin)])
 async def get_available_plans(db: Session = Depends(get_db)):
     """Get all available subscription plans"""
     plans = get_plans(db)

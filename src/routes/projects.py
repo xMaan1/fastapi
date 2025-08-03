@@ -12,7 +12,7 @@ from ..unified_database import (
     get_all_projects, update_project, delete_project, get_tasks_by_project,
     User, Project as DBProject, Task as DBTask
 )
-from ..dependencies import get_current_user, get_tenant_context
+from ..dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -99,7 +99,7 @@ async def get_project(
     
     return transform_project_to_response(project)
 
-@router.post("", response_model=Project)
+@router.post("", response_model=Project, dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def create_new_project(
     project_data: ProjectCreate, 
     current_user = Depends(get_current_user),
@@ -144,7 +144,7 @@ async def create_new_project(
     
     return transform_project_to_response(db_project)
 
-@router.put("/{project_id}", response_model=Project)
+@router.put("/{project_id}", response_model=Project, dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def update_existing_project(
     project_id: str, 
     project_data: ProjectUpdate, 
@@ -179,7 +179,7 @@ async def update_existing_project(
     
     return transform_project_to_response(updated_project)
 
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def delete_existing_project(
     project_id: str, 
     current_user = Depends(get_current_user),

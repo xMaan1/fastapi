@@ -1,3 +1,25 @@
+def require_super_admin(current_user = Depends(get_current_user)):
+    if getattr(current_user, 'userRole', None) != 'super_admin':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Super admin privileges required.'
+        )
+    return current_user
+
+def require_tenant_admin_or_super_admin(
+    current_user = Depends(get_current_user),
+    tenant_context = Depends(get_tenant_context)
+):
+    # Allow if super admin
+    if getattr(current_user, 'userRole', None) == 'super_admin':
+        return current_user
+    # Allow if tenant admin (role == 'admin')
+    if tenant_context and tenant_context.get('user_role') == 'admin':
+        return current_user
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail='Tenant admin or super admin privileges required.'
+    )
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .auth import verify_token

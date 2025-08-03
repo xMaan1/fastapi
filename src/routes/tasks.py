@@ -11,7 +11,7 @@ from ..unified_database import (
     get_tasks_by_project, update_task, delete_task,
     Task as DBTask
 )
-from ..dependencies import get_current_user, get_tenant_context
+from ..dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -94,7 +94,7 @@ async def get_task(
     
     return transform_task_to_response(task)
 
-@router.post("", response_model=Task)
+@router.post("", response_model=Task, dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def create_new_task(
     task_data: TaskCreate, 
     current_user = Depends(get_current_user),
@@ -132,7 +132,7 @@ async def create_new_task(
     
     return transform_task_to_response(db_task)
 
-@router.put("/{task_id}", response_model=Task)
+@router.put("/{task_id}", response_model=Task, dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def update_existing_task(
     task_id: str, 
     task_data: TaskUpdate, 
@@ -172,7 +172,7 @@ async def update_existing_task(
     
     return transform_task_to_response(updated_task)
 
-@router.delete("/{task_id}")
+@router.delete("/{task_id}", dependencies=[Depends(require_tenant_admin_or_super_admin)])
 async def delete_existing_task(
     task_id: str, 
     current_user = Depends(get_current_user),

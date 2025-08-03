@@ -1,3 +1,60 @@
+# CustomRole and Permission models
+class Permission(Base):
+    __tablename__ = "permissions"
+    code = Column(String, primary_key=True, index=True)  # e.g. 'manage_projects'
+    label = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CustomRole(Base):
+    __tablename__ = "custom_roles"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    name = Column(String, nullable=False)
+    permissions = Column(JSON, default=[])
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    tenant = relationship("Tenant")
+
+# CustomRole/Permission DB functions
+def get_permissions(db: Session) -> List[Permission]:
+    return db.query(Permission).all()
+
+def create_permission(permission_data: dict, db: Session) -> Permission:
+    db_perm = Permission(**permission_data)
+    db.add(db_perm)
+    db.commit()
+    db.refresh(db_perm)
+    return db_perm
+
+def get_custom_roles(tenant_id: str, db: Session) -> List[CustomRole]:
+    return db.query(CustomRole).filter(CustomRole.tenantId == tenant_id).all()
+
+def create_custom_role(role_data: dict, db: Session) -> CustomRole:
+    db_role = CustomRole(**role_data)
+    db.add(db_role)
+    db.commit()
+    db.refresh(db_role)
+    return db_role
+
+def update_custom_role(role_id: str, update_data: dict, db: Session) -> CustomRole:
+    role = db.query(CustomRole).filter(CustomRole.id == role_id).first()
+    if role:
+        for key, value in update_data.items():
+            if hasattr(role, key) and value is not None:
+                setattr(role, key, value)
+        db.commit()
+        db.refresh(role)
+    return role
+
+def delete_custom_role(role_id: str, db: Session) -> bool:
+    role = db.query(CustomRole).filter(CustomRole.id == role_id).first()
+    if role:
+        db.delete(role)
+        db.commit()
+        return True
+    return False
 import os
 import uuid
 from datetime import datetime, timedelta

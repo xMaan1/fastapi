@@ -184,13 +184,25 @@ def seed_database():
             print("No existing users found. Creating sample users...")
             # Create new users only if none exist
             users_data = [
+                # True super admin (not tied to a tenant)
+                {
+                    "tenant_id": None,
+                    "userName": "superadmin",
+                    "email": "superadmin@admin.com",
+                    "firstName": "Super",
+                    "lastName": "Admin",
+                    "userRole": UserRole.SUPER_ADMIN.value,
+                    "hashedPassword": get_password_hash("superadmin123"),
+                    "isActive": True
+                },
+                # Admin for SparkCo Demo tenant
                 {
                     "tenant_id": demo_tenant.id,
                     "userName": "admin",
                     "email": "admin@sparkco.com",
                     "firstName": "System",
                     "lastName": "Administrator",
-                    "userRole": UserRole.SUPER_ADMIN.value,
+                    "userRole": UserRole.ADMIN.value,
                     "hashedPassword": get_password_hash("admin123"),
                     "isActive": True
                 },
