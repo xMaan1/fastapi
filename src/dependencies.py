@@ -57,9 +57,11 @@ def get_tenant_context(
             detail="Access denied to this tenant"
         )
     
+    # Normalize role to lower-case string for consistent checks
+    user_role = str(user_tenant.role).lower()
     return {
         "tenant": tenant,
-        "user_role": user_tenant.role,
+        "user_role": user_role,
         "permissions": user_tenant.permissions,
         "tenant_id": x_tenant_id
     }
@@ -79,8 +81,8 @@ def require_tenant_admin_or_super_admin(
     # Allow if super admin
     if getattr(current_user, 'userRole', None) == 'super_admin':
         return current_user
-    # Allow if tenant admin or project manager (role == 'admin' or 'manager')
-    if tenant_context and tenant_context.get('user_role') in ('admin', 'manager'):
+    # Allow if tenant admin or project manager (role == 'admin' or 'project_manager')
+    if tenant_context and tenant_context.get('user_role') in ['admin', 'project_manager']:
         return current_user
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
