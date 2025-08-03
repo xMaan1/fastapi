@@ -57,8 +57,6 @@ def get_tenant_context(
             detail="Access denied to this tenant"
         )
 
-    # Debug: print actual role and tenant id for troubleshooting
-    print(f"[DEBUG] get_tenant_context: user_tenant.role = {user_tenant.role}, normalized = {str(user_tenant.role).lower()}, tenant_id = {x_tenant_id}")
     # Normalize role to lower-case string for consistent checks
     user_role = str(user_tenant.role).lower()
     return {

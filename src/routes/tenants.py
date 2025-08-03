@@ -150,7 +150,7 @@ async def get_tenant(
         "created_at": tenant.createdAt
     }
 
-@router.get("/{tenant_id}/users", response_model=TenantUsersResponse, dependencies=[Depends(require_tenant_admin_or_super_admin)])
+@router.get("/{tenant_id}/users", response_model=TenantUsersResponse)
 async def get_tenant_users_list(
     tenant_id: str,
     current_user = Depends(get_current_user),
