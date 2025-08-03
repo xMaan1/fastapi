@@ -92,11 +92,16 @@ async def get_project(
     tenant_context: Optional[dict] = Depends(get_tenant_context)
 ):
     """Get a specific project"""
+    import uuid
     tenant_id = tenant_context["tenant_id"] if tenant_context else None
+    # Validate project_id is a valid UUID
+    try:
+        uuid.UUID(str(project_id))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid project_id format. Must be a UUID.")
     project = get_project_by_id(project_id, db, tenant_id=tenant_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
     return transform_project_to_response(project)
 
 @router.post("", response_model=Project, dependencies=[Depends(require_tenant_admin_or_super_admin)])

@@ -168,8 +168,13 @@ async def get_tenant_users_list(
         )
     
     tenant_users = get_tenant_users(tenant_id, db)
-    
+    # Get actual User objects for each tenant user
+    user_ids = [tu.userId for tu in tenant_users]
+    users = db.query(get_db()._entity_zero().class_).filter(get_db()._entity_zero().class_.id.in_(user_ids)).all() if user_ids else []
+    # Fallback: safer way to get User objects
+    from ..unified_database import User as DBUser
+    users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
     return TenantUsersResponse(
-        users=tenant_users,
-        pagination={"total": len(tenant_users), "page": 1, "per_page": 50}
+        users=users,
+        pagination={"total": len(users), "page": 1, "per_page": 50}
     )
