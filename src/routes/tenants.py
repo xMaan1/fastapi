@@ -150,31 +150,31 @@ async def get_tenant(
         "created_at": tenant.createdAt
     }
 
-@router.get("/{tenant_id}/users", response_model=TenantUsersResponse)
+@router.get("/{tenant_id}/users", response_model=UsersResponse)
 async def get_tenant_users_list(
     tenant_id: str,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get all users in a tenant"""
+    """Get all users in a tenant, with their tenant role info"""
     # Verify user has access to tenant
     user_tenants = get_user_tenants(str(current_user.id), db)
     user_tenant = next((tu for tu in user_tenants if str(tu.tenantId) == tenant_id), None)
-    
     if not user_tenant:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied to this tenant"
         )
-    
     tenant_users = get_tenant_users(tenant_id, db)
-    # Get actual User objects for each tenant user
-    user_ids = [tu.userId for tu in tenant_users]
-    users = db.query(get_db()._entity_zero().class_).filter(get_db()._entity_zero().class_.id.in_(user_ids)).all() if user_ids else []
-    # Fallback: safer way to get User objects
     from ..unified_database import User as DBUser
+    user_ids = [tu.userId for tu in tenant_users]
     users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
-    return TenantUsersResponse(
-        users=users,
-        pagination={"total": len(users), "page": 1, "per_page": 50}
-    )
+    # Attach tenant role to each user (as user.userRole)
+    user_id_to_role = {tu.userId: tu.role for tu in tenant_users}
+    user_dicts = []
+    for user in users:
+        user_dict = user.to_dict() if hasattr(user, 'to_dict') else {c.name: getattr(user, c.name) for c in user.__table__.columns}
+        user_dict['userRole'] = user_id_to_role.get(user.id) or user_id_to_role.get(str(user.id))
+        user_dict['userId'] = str(user.id)
+        user_dicts.append(user_dict)
+    return {"users": user_dicts}
