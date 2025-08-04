@@ -1,0 +1,45 @@
+# Node modules
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Test coverage
+coverage/
+
+# Misc
+*.local
+*.log
+*.pid
+*.seed
+*.tgz
+
+# TypeScript
+*.tsbuildinfo
+
+# SASS
+.sass-cache/
+
+# Optional: lock files
+# package-lock.json
+yarn.lock
+pnpm-lock.yaml
