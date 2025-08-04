@@ -211,10 +211,6 @@ class ApiService {
     return this.get(`/tenants/${tenantId}`);
   }
 
-  async getTenantUsers(tenantId: string) {
-    return this.get(`/tenants/${tenantId}/users`);
-  }
-
   // Project endpoints
   async getProjects() {
     return this.get('/projects');
