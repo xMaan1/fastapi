@@ -10,6 +10,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '../../../components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
 import { Separator } from '../../../components/ui/separator';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
   Menu as MenuIcon,
   Building2,
@@ -34,26 +35,21 @@ interface TenantInfo {
 const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const { user, logout } = useAuth();
   const router = useRouter();
   const params = useParams();
   const tenantId = params?.tenantId ? (params.tenantId as string) : '';
 
   useEffect(() => {
     fetchTenantInfo();
-    loadUserInfo();
   }, [tenantId]);
 
   const fetchTenantInfo = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
       const response = await axios.get(`http://localhost:8000/api/tenants/${tenantId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
       });
 
       setTenantInfo(response.data);
@@ -63,18 +59,8 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
     }
   };
 
-  const loadUserInfo = () => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      setUser(JSON.parse(userStr));
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('selectedTenant');
-    router.push('/login');
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleSwitchWorkspace = () => {
@@ -188,11 +174,11 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
                   <Button variant="ghost" className="flex items-center space-x-2 px-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-gradient-primary text-white text-sm">
-                        {user?.username?.charAt(0).toUpperCase() || 'U'}
+                        {user?.userName?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden sm:block text-sm font-medium text-gray-700">
-                      {user?.username || 'User'}
+                      {user?.userName || 'User'}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>

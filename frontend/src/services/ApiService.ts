@@ -27,7 +27,7 @@ class ApiService {
     this.sessionManager = new SessionManager();
 
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -197,26 +197,34 @@ class ApiService {
   // Auth endpoints
   async login(credentials: { email: string; password: string }) {
     try {
+      console.log('ApiService.login called with credentials:', credentials);
       const response = await this.post('/auth/login', credentials);
+      console.log('Login API response:', response);
 
       // Store session after successful login
       if (response.success && response.token && response.user) {
+        console.log('Login successful, storing session');
         this.sessionManager.setSession(response.token, response.user);
 
         // Fetch user's tenants ONCE during login and store in localStorage
         try {
+          console.log('Fetching user tenants...');
           const tenantsResponse = await this.getMyTenants();
+          console.log('Tenants response:', tenantsResponse);
           if (tenantsResponse.tenants && tenantsResponse.tenants.length > 0) {
             // Store all tenants in localStorage
             this.setUserTenants(tenantsResponse.tenants);
 
             // Set the first tenant as current tenant
             this.setTenantId(tenantsResponse.tenants[0].id);
+            console.log('Set current tenant to:', tenantsResponse.tenants[0].id);
           }
         } catch (tenantError) {
           console.warn('Could not fetch tenants:', tenantError);
           // Continue without tenant - some endpoints might still work
         }
+      } else {
+        console.log('Login response missing required fields:', response);
       }
 
       return response;

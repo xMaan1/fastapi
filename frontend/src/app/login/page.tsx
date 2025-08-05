@@ -1,30 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../../components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { AuthForm } from '../../components/auth';
-import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginPage() {
-  const { user } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      router.push('/');
-    }
-  }, [user, router]);
-
   const handleLoginSuccess = () => {
+    // Use router.push for smoother navigation
     router.push('/');
   };
-
-  if (user) {
-    return null; // Prevent flash of login form
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

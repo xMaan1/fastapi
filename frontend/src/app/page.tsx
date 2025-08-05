@@ -20,7 +20,7 @@ import {
   BarChart3,
   Loader2
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { apiService } from '../services/ApiService';
 import { Project } from '../models/project/Project';
 import { DashboardLayout } from '../components/layout';
@@ -50,18 +50,21 @@ export default function DashboardPage() {
   const [starredProjects, setStarredProjects] = useState<string[]>([]);
 
   useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+    console.log('DashboardPage Debug:', { user, loading });
+    // AuthGuard ensures user is authenticated, so we can directly fetch data
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
+    console.log('Fetching dashboard data...');
     try {
       setLoading(true);
       const [projectsResponse, usersResponse] = await Promise.all([
         apiService.getProjects(),
         apiService.getUsers().catch(() => ({ users: [] }))
       ]);
+
+      console.log('Dashboard data fetched:', { projectsResponse, usersResponse });
 
       const projectsData = projectsResponse.projects || [];
       const usersData = usersResponse.users || [];
