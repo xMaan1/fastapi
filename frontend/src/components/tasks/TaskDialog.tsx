@@ -35,6 +35,7 @@ interface TaskDialogProps {
   parentTask?: Task;
   loading?: boolean;
   error?: string;
+  defaultProjectId?: string;
 }
 
 const statusOptions = [
@@ -60,9 +61,9 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   users,
   parentTask,
   loading = false,
-  error
+  error,
+  defaultProjectId
 }) => {
-  // Only include 'project' when creating a task
   const [formData, setFormData] = useState<any>({
     title: '',
     description: '',
@@ -89,7 +90,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
         description: task.description || '',
         status: task.status,
         priority: task.priority,
-        assignedTo: task.assignedTo?.id || '',
+        assignedTo: task.assignedTo?.id || 'unassigned',
         dueDate: task.dueDate || '',
         estimatedHours: task.estimatedHours || 0,
         actualHours: task.actualHours || 0,
@@ -102,16 +103,16 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
         description: '',
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
-        project: parentTask?.project || '',
+        project: defaultProjectId || '',
         parentTaskId: parentTask?.id,
-        assignedTo: '',
+        assignedTo: 'unassigned',
         dueDate: '',
         estimatedHours: 0,
         actualHours: 0,
         tags: []
       });
     }
-  }, [task, parentTask]);
+  }, [task, parentTask, defaultProjectId]);
 
   const handleInputChange = (field: string, value: unknown) => {
     setFormData((prev: typeof formData) => ({
@@ -139,7 +140,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
     
     // Clean up empty values
     if (!submitData.description?.trim()) delete submitData.description;
-    if (!submitData.assignedTo) delete submitData.assignedTo;
+    if (submitData.assignedTo === 'unassigned') delete submitData.assignedTo;
     if (!submitData.dueDate) delete submitData.dueDate;
     if (!submitData.estimatedHours) delete submitData.estimatedHours;
     if (!submitData.actualHours) delete submitData.actualHours;
@@ -148,8 +149,13 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
     onSubmit(submitData);
   };
 
+  const handleClose = () => {
+    setTagInput('');
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold bg-gradient-primary bg-clip-text text-transparent">
@@ -275,7 +281,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name} ({user.email})
@@ -375,7 +381,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
           <Button
             type="button"
             variant="outline"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
           >
             Cancel

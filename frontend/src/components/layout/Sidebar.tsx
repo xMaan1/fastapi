@@ -159,10 +159,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group",
                   isActive
-                    ? "bg-gradient-to-r text-white shadow-lg transform scale-[1.02]"
+                    ? "bg-gradient-primary text-white shadow-lg transform scale-[1.02]"
                     : "text-gray-700 hover:bg-gray-100 hover:transform hover:scale-[1.01]"
                 )}
-                style={isActive ? { backgroundImage: `linear-gradient(135deg, var(--tw-gradient-stops))` } : {}}
               >
                 <div className={cn(
                   "p-2 rounded-lg transition-colors",

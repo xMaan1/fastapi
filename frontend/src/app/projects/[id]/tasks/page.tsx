@@ -13,13 +13,13 @@ import { Card, CardContent } from '../../../../components/ui/card';
 import { Alert, AlertDescription } from '../../../../components/ui/alert';
 import { Progress } from '../../../../components/ui/progress';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../../components/ui/breadcrumb';
+import { ErrorBoundary } from '../../../../components/ErrorBoundary';
 import { 
   ArrowLeft, 
   CheckSquare, 
   CheckCircle, 
   Clock, 
   Play, 
-  X,
   Loader2
 } from 'lucide-react';
 
@@ -265,7 +265,9 @@ export default function ProjectTasksPage() {
         </Card>
 
         {/* Task Management */}
-        <TaskList projectId={projectId} showProjectFilter={false} />
+        <ErrorBoundary>
+          <TaskList projectId={projectId} showProjectFilter={false} />
+        </ErrorBoundary>
       </div>
     </DashboardLayout>
   );

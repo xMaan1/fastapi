@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { Avatar, AvatarFallback } from '../../components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import { Progress } from '../../components/ui/progress';
 import {
   MoreVertical,
@@ -134,7 +134,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <div className="flex items-center gap-1">
               <User className="h-4 w-4 text-gray-400" />
               <Avatar className="h-6 w-6">
-                <AvatarFallback>{task.assignedTo.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="text-xs bg-gradient-primary text-white">
+                  {task.assignedTo.name.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <span className="text-xs text-gray-700">{task.assignedTo.name}</span>
             </div>

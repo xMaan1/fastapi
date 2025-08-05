@@ -592,6 +592,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         }))}
         loading={dialogLoading}
         error={dialogError ?? undefined}
+        defaultProjectId={projectId}
       />
     </div>
   );
