@@ -22,7 +22,7 @@ class ApiService {
   private sessionManager: SessionManager;
   private publicEndpoints = ['/auth/login', '/auth/register'];
   private currentTenantId: string | null = null;
-  
+
   constructor() {
     this.sessionManager = new SessionManager();
 
@@ -33,7 +33,17 @@ class ApiService {
       },
       timeout: 10000,
     });
-    
+
+    // Initialize tenant ID from localStorage if available
+    if (typeof window !== 'undefined') {
+      this.currentTenantId = localStorage.getItem('currentTenantId');
+      if (this.currentTenantId) {
+        console.log('ApiService initialized with tenant ID:', this.currentTenantId);
+      } else {
+        console.log('ApiService initialized without tenant ID');
+      }
+    }
+
     this.setupInterceptors();
   }
 
@@ -45,6 +55,7 @@ class ApiService {
         localStorage.setItem('currentTenantId', tenantId);
       } else {
         localStorage.removeItem('currentTenantId');
+        localStorage.removeItem('userTenants');
       }
     }
   }
@@ -57,6 +68,53 @@ class ApiService {
       return localStorage.getItem('currentTenantId');
     }
     return null;
+  }
+
+  // Store user tenants in localStorage
+  setUserTenants(tenants: any[]) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('userTenants', JSON.stringify(tenants));
+    }
+  }
+
+  // Get user tenants from localStorage
+  getUserTenants(): any[] {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('userTenants');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (error) {
+          console.error('Error parsing stored tenants:', error);
+          localStorage.removeItem('userTenants');
+        }
+      }
+    }
+    return [];
+  }
+
+  // Get current tenant info from localStorage
+  getCurrentTenant(): any | null {
+    const tenantId = this.getTenantId();
+    if (!tenantId) return null;
+
+    const tenants = this.getUserTenants();
+    return tenants.find(t => t.id === tenantId) || null;
+  }
+
+  // Force refresh tenants from API (for admin operations)
+  async refreshTenants(): Promise<any[]> {
+    try {
+      const tenantsResponse = await this.getMyTenants();
+      if (tenantsResponse.tenants) {
+        this.setUserTenants(tenantsResponse.tenants);
+        return tenantsResponse.tenants;
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to refresh tenants:', error);
+      throw error;
+    }
   }
 
   private setupInterceptors() {
@@ -78,7 +136,7 @@ class ApiService {
             }
           }
         }
-        
+
         const token = this.sessionManager.getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -140,12 +198,25 @@ class ApiService {
   async login(credentials: { email: string; password: string }) {
     try {
       const response = await this.post('/auth/login', credentials);
-      console.log('Login response:', response);
-      
+
       // Store session after successful login
       if (response.success && response.token && response.user) {
         this.sessionManager.setSession(response.token, response.user);
-        console.log('Session stored successfully');
+
+        // Fetch user's tenants ONCE during login and store in localStorage
+        try {
+          const tenantsResponse = await this.getMyTenants();
+          if (tenantsResponse.tenants && tenantsResponse.tenants.length > 0) {
+            // Store all tenants in localStorage
+            this.setUserTenants(tenantsResponse.tenants);
+
+            // Set the first tenant as current tenant
+            this.setTenantId(tenantsResponse.tenants[0].id);
+          }
+        } catch (tenantError) {
+          console.warn('Could not fetch tenants:', tenantError);
+          // Continue without tenant - some endpoints might still work
+        }
       }
 
       return response;
@@ -170,16 +241,41 @@ class ApiService {
   }
 
   async logout() {
-    return this.post('/auth/logout');
+    try {
+      const response = await this.post('/auth/logout');
+      // Clear all tenant information on logout
+      this.setTenantId(null);
+      return response;
+    } catch (error) {
+      // Clear tenant even if logout request fails
+      this.setTenantId(null);
+      throw error;
+    }
   }
 
   // User endpoints
   async getUsers() {
+    // Use tenant-scoped endpoint if tenant is available, otherwise fallback to global
+    const tenantId = this.getTenantId();
+    if (tenantId) {
+      console.log('Using tenant-scoped users endpoint for tenant:', tenantId);
+      return this.getTenantUsers(tenantId);
+    }
+    console.log('Using global users endpoint (no tenant available)');
     return this.get('/users');
   }
 
   async getTenantUsers(tenantId: string) {
     return this.get(`/tenants/${tenantId}/users`);
+  }
+
+  // Get users for current tenant
+  async getCurrentTenantUsers() {
+    const tenantId = this.getTenantId();
+    if (!tenantId) {
+      throw new Error('No tenant selected');
+    }
+    return this.getTenantUsers(tenantId);
   }
 
   async getUser(id: string) {
@@ -189,7 +285,7 @@ class ApiService {
   async updateUser(id: string, data: any) {
     return this.put(`/users/${id}`, data);
   }
-  
+
   async deleteUser(id: string) {
     return this.delete(`/users/${id}`);
   }
@@ -201,7 +297,7 @@ class ApiService {
   async subscribeToPlan(data: { planId: string; tenantName: string; domain?: string }) {
     return this.post('/tenants/subscribe', data);
   }
-  
+
   // Tenant endpoints
   async getMyTenants() {
     return this.get('/tenants/my-tenants');
@@ -209,6 +305,19 @@ class ApiService {
 
   async getTenant(tenantId: string) {
     return this.get(`/tenants/${tenantId}`);
+  }
+
+  async switchTenant(tenantId: string) {
+    // Verify user has access to this tenant using stored tenants (no API call)
+    const storedTenants = this.getUserTenants();
+    const tenant = storedTenants.find((t: any) => t.id === tenantId);
+
+    if (!tenant) {
+      throw new Error('Access denied to this tenant');
+    }
+
+    this.setTenantId(tenantId);
+    return tenant;
   }
 
   // Project endpoints
@@ -254,7 +363,7 @@ class ApiService {
     if (params?.mainTasksOnly !== undefined) queryParams.append('main_tasks_only', params.mainTasksOnly.toString());
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    
+
     const url = `/tasks${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return this.get(url);
   }
@@ -294,24 +403,24 @@ class ApiService {
   async healthCheck() {
     return this.get('/health');
   }
-  
+
   // Custom Roles & Permissions
   async getCustomRoles(tenantId: string) {
     return this.get(`/tenants/${tenantId}/custom-roles`);
   }
-  
+
   async createCustomRole(tenantId: string, data: { name: string; permissions: string[] }) {
     return this.post(`/tenants/${tenantId}/custom-roles`, data);
   }
-  
+
   async updateCustomRole(tenantId: string, roleId: string, data: { name?: string; permissions?: string[] }) {
     return this.put(`/tenants/${tenantId}/custom-roles/${roleId}`, data);
   }
-  
+
   async deleteCustomRole(tenantId: string, roleId: string) {
     return this.delete(`/tenants/${tenantId}/custom-roles/${roleId}`);
   }
-  
+
   async getPermissions() {
     return this.get('/tenants/permissions');
   }

@@ -5,10 +5,20 @@ import { User, LoginCredentials } from '@/src/models/auth';
 import { apiService } from '@/src/services/ApiService';
 import { SessionManager } from '@/src/services/SessionManager';
 
+interface Tenant {
+  id: string;
+  name: string;
+  domain: string;
+  role: string;
+  joined_at: string;
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -17,15 +27,29 @@ export function useAuth() {
   useEffect(() => {
     if (!mounted) return;
 
-    const initializeAuth = async () => {
+    const initializeAuth = () => {
       try {
         const sessionManager = new SessionManager();
         const session = sessionManager.getSession();
         
         if (session && session.token && session.user) {
-          // For now, just use the stored user data without API validation
-          // to avoid SSR issues. We can validate on protected routes.
           setUser(session.user);
+          
+          // Load tenants from localStorage (no API call)
+          const storedTenants = apiService.getUserTenants();
+          if (storedTenants.length > 0) {
+            setTenants(storedTenants);
+            
+            // Get current tenant from localStorage
+            const currentTenant = apiService.getCurrentTenant();
+            if (currentTenant) {
+              setCurrentTenant(currentTenant);
+            } else {
+              // Fallback to first tenant if no current tenant is set
+              setCurrentTenant(storedTenants[0]);
+              apiService.setTenantId(storedTenants[0].id);
+            }
+          }
         } else {
           setUser(null);
         }
@@ -47,7 +71,20 @@ export function useAuth() {
       
       if (response.success && response.user) {
         setUser(response.user);
-        // Session is already stored in apiService.login()
+        
+        // Tenants are already fetched and stored during apiService.login()
+        // Just load them from localStorage
+        const storedTenants = apiService.getUserTenants();
+        if (storedTenants.length > 0) {
+          setTenants(storedTenants);
+          
+          // Current tenant is already set during login, just get it
+          const currentTenant = apiService.getCurrentTenant();
+          if (currentTenant) {
+            setCurrentTenant(currentTenant);
+          }
+        }
+        
         return true;
       }
       return false;
@@ -59,12 +96,33 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    const sessionManager = new SessionManager();
-    setUser(null);
-    sessionManager.clearSession();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      const sessionManager = new SessionManager();
+      setUser(null);
+      setTenants([]);
+      setCurrentTenant(null);
+      sessionManager.clearSession();
+      apiService.setTenantId(null);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+  };
+
+  const switchTenant = async (tenantId: string): Promise<boolean> => {
+    try {
+      // This now uses localStorage, no API call
+      const tenant = await apiService.switchTenant(tenantId);
+      setCurrentTenant(tenant);
+      return true;
+    } catch (error) {
+      console.error('Failed to switch tenant:', error);
+      return false;
     }
   };
 
@@ -76,5 +134,8 @@ export function useAuth() {
     logout,
     loading,
     isAuthenticated,
+    tenants,
+    currentTenant,
+    switchTenant,
   };
 }

@@ -40,13 +40,6 @@ const allMenuItems = [
     gradient: 'from-green-500 to-teal-600'
   },
   { 
-    text: 'Tasks', 
-    icon: CheckSquare, 
-    path: '/tasks', 
-    roles: ['admin', 'project_manager', 'team_member', 'client', 'viewer', 'super_admin'],
-    gradient: 'from-orange-500 to-red-600'
-  },
-  { 
     text: 'Team', 
     icon: Users, 
     path: '/team', 

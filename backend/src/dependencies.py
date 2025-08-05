@@ -78,15 +78,23 @@ def require_tenant_admin_or_super_admin(
     current_user = Depends(get_current_user),
     tenant_context = Depends(get_tenant_context)
 ):
-    # Allow if super admin
+    print(f"DEBUG: User {current_user.email} with global role: {current_user.userRole}")
+    print(f"DEBUG: Tenant context: {tenant_context}")
+    
+    # Allow if super admin (global role) - only for cross-tenant operations
     if getattr(current_user, 'userRole', None) == 'super_admin':
+        print("DEBUG: Allowed as super admin")
         return current_user
-    # Allow if tenant admin or project manager (role == 'admin' or 'project_manager')
-    if tenant_context and tenant_context.get('user_role') in ['admin', 'project_manager']:
+    
+    # For tenant-specific operations, check tenant role only
+    if tenant_context and tenant_context.get('user_role') in ['admin', 'manager', 'owner']:
+        print(f"DEBUG: Allowed with tenant role: {tenant_context.get('user_role')}")
         return current_user
+    
+    print(f"DEBUG: Access denied - tenant role: {tenant_context.get('user_role') if tenant_context else 'No tenant context'}")
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail='Tenant admin, project manager, or super admin privileges required.'
+        detail='Tenant admin, manager, or owner role required.'
     )
 
     # (function removed, as only one correct definition should exist)

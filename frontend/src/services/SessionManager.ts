@@ -99,6 +99,11 @@ class SessionManager {
   clearSession(): void {
     this.removeToken();
     this.removeUser();
+    // Also clear tenant-related data
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentTenantId');
+      localStorage.removeItem('userTenants');
+    }
   }
 
   // Session validation
