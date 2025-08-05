@@ -50,21 +50,17 @@ export default function DashboardPage() {
   const [starredProjects, setStarredProjects] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log('DashboardPage Debug:', { user, loading });
     // AuthGuard ensures user is authenticated, so we can directly fetch data
     fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {
-    console.log('Fetching dashboard data...');
     try {
       setLoading(true);
       const [projectsResponse, usersResponse] = await Promise.all([
         apiService.getProjects(),
         apiService.getUsers().catch(() => ({ users: [] }))
       ]);
-
-      console.log('Dashboard data fetched:', { projectsResponse, usersResponse });
 
       const projectsData = projectsResponse.projects || [];
       const usersData = usersResponse.users || [];

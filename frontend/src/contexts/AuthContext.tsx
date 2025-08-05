@@ -32,11 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
 
-  // Debug user state changes
-  useEffect(() => {
-    console.log('AuthContext - User state changed:', { user, isAuthenticated: !!user });
-  }, [user]);
-
   useEffect(() => {
     const initializeAuth = () => {
       try {
@@ -44,7 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const session = sessionManager.getSession();
         
         if (session && session.token && session.user) {
-          console.log('AuthContext - Initializing auth with session:', session.user);
           setUser(session.user);
           
           // Load tenants from localStorage (no API call)
@@ -63,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } else {
-          console.log('AuthContext - No session found, setting user to null');
           setUser(null);
         }
       } catch (error) {
@@ -79,35 +72,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
-      console.log('AuthContext - Login attempt with credentials:', credentials);
       setLoading(true);
       const response = await apiService.login(credentials);
       
-      console.log('AuthContext - Login response:', response);
-      
       if (response.success && response.user) {
-        console.log('AuthContext - Login successful, setting user:', response.user);
         setUser(response.user);
         
         // Tenants are already fetched and stored during apiService.login()
         // Just load them from localStorage
         const storedTenants = apiService.getUserTenants();
-        console.log('AuthContext - Stored tenants:', storedTenants);
         if (storedTenants.length > 0) {
           setTenants(storedTenants);
           
           // Current tenant is already set during login, just get it
           const currentTenant = apiService.getCurrentTenant();
-          console.log('AuthContext - Current tenant:', currentTenant);
           if (currentTenant) {
             setCurrentTenant(currentTenant);
           }
         }
         
-        console.log('AuthContext - Login completed successfully');
         return true;
       }
-      console.log('AuthContext - Login failed - no success or user in response');
       return false;
     } catch (error) {
       console.error('AuthContext - Login failed:', error);

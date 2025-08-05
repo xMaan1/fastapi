@@ -24,11 +24,6 @@ export function useAuth() {
     setMounted(true);
   }, []);
 
-  // Debug user state changes
-  useEffect(() => {
-    console.log('User state changed:', { user, isAuthenticated: !!user });
-  }, [user]);
-
   useEffect(() => {
     if (!mounted) return;
 
@@ -38,7 +33,6 @@ export function useAuth() {
         const session = sessionManager.getSession();
         
         if (session && session.token && session.user) {
-          console.log('Initializing auth with session:', session.user);
           setUser(session.user);
           
           // Load tenants from localStorage (no API call)
@@ -57,7 +51,6 @@ export function useAuth() {
             }
           }
         } else {
-          console.log('No session found, setting user to null');
           setUser(null);
         }
       } catch (error) {
@@ -73,37 +66,27 @@ export function useAuth() {
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
-      console.log('Login attempt with credentials:', credentials);
       setLoading(true);
       const response = await apiService.login(credentials);
       
-      console.log('Login response:', response);
-      
       if (response.success && response.user) {
-        console.log('Login successful, setting user:', response.user);
         setUser(response.user);
         
         // Tenants are already fetched and stored during apiService.login()
         // Just load them from localStorage
         const storedTenants = apiService.getUserTenants();
-        console.log('Stored tenants:', storedTenants);
         if (storedTenants.length > 0) {
           setTenants(storedTenants);
           
           // Current tenant is already set during login, just get it
           const currentTenant = apiService.getCurrentTenant();
-          console.log('Current tenant:', currentTenant);
           if (currentTenant) {
             setCurrentTenant(currentTenant);
           }
         }
         
-        console.log('Login completed successfully, user state should be updated');
-        // Force a small delay to ensure state updates
-        await new Promise(resolve => setTimeout(resolve, 100));
         return true;
       }
-      console.log('Login failed - no success or user in response');
       return false;
     } catch (error) {
       console.error('Login failed:', error);
