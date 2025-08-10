@@ -3,16 +3,16 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import json
 
-from ..unified_models import (
+from ...models.unified_models import (
     Project, ProjectCreate, ProjectUpdate, ProjectsResponse, TeamMember,
     TasksResponse, Task
 )
-from ..unified_database import (
+from ...config.unified_database import (
     get_db, get_user_by_id, create_project, get_project_by_id,
     get_all_projects, update_project, delete_project, get_tasks_by_project,
     User, Project as DBProject, Task as DBTask
 )
-from ..dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
+from ...api.dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -258,8 +258,8 @@ async def get_project_team_members(
     tenant_context: Optional[dict] = Depends(get_tenant_context)
 ):
     """Get all available team members for project assignment"""
-    from ..unified_models import UserRole
-    from ..unified_database import get_all_users
+    from ...models.unified_models import UserRole
+    from ...config.unified_database import get_all_users
     
     # Get all active users who can be team members
     tenant_id = tenant_context["tenant_id"] if tenant_context else None

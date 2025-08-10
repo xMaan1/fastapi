@@ -1,8 +1,8 @@
 
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from .auth import verify_token
-from .unified_database import get_db, get_user_by_email, get_user_tenants, get_tenant_by_id
+from ..core.auth import verify_token
+from ..config.unified_database import get_db, get_user_by_email, get_user_tenants, get_tenant_by_id
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -64,6 +64,22 @@ def get_tenant_context(
         "user_role": user_role,
         "permissions": user_tenant.permissions,
         "tenant_id": x_tenant_id
+    }
+
+def get_current_tenant(
+    tenant_context = Depends(get_tenant_context)
+):
+    """Get current tenant from context"""
+    if not tenant_context:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tenant context required"
+        )
+    return {
+        "id": tenant_context["tenant_id"],
+        "name": tenant_context["tenant"].name,
+        "domain": tenant_context["tenant"].domain,
+        "isActive": tenant_context["tenant"].isActive
     }
 
 def require_super_admin(current_user = Depends(get_current_user)):

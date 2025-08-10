@@ -471,3 +471,108 @@ def get_tenant_users(tenant_id: str, db: Session) -> List[TenantUser]:
         TenantUser.tenantId == tenant_id,
         TenantUser.isActive == True
     ).all()
+
+# Event model and functions
+class Event(Base):
+    __tablename__ = "events"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    eventType = Column(String, nullable=False, default="meeting")  # meeting, workshop, deadline, other
+    startDate = Column(DateTime, nullable=False)
+    endDate = Column(DateTime, nullable=False)
+    timezone = Column(String, default="UTC")
+    location = Column(String)
+    isOnline = Column(Boolean, default=True)
+    googleMeetLink = Column(String)
+    googleCalendarEventId = Column(String)
+    recurrenceType = Column(String)  # none, daily, weekly, monthly, yearly
+    recurrenceData = Column(JSON)  # Store recurrence rules as JSON
+    reminderMinutes = Column(Integer, default=15)  # Minutes before event
+    participants = Column(JSON, default=[])  # List of participant emails
+    discussionPoints = Column(JSON, default=[])  # List of discussion points
+    attachments = Column(JSON, default=[])  # List of attachment URLs
+    projectId = Column(UUID(as_uuid=True), ForeignKey("projects.id"))
+    status = Column(String, default="scheduled")  # scheduled, in_progress, completed, cancelled
+    createdById = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    project = relationship("Project")
+    createdBy = relationship("User", foreign_keys=[createdById])
+
+# Event functions
+def get_event_by_id(event_id: str, db: Session, tenant_id: str = None) -> Optional[Event]:
+    query = db.query(Event).filter(Event.id == event_id)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    return query.first()
+
+def get_all_events(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[Event]:
+    query = db.query(Event)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def create_event(event_data: dict, db: Session) -> Event:
+    db_event = Event(**event_data)
+    db.add(db_event)
+    db.commit()
+    db.refresh(db_event)
+    return db_event
+
+def update_event(event_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[Event]:
+    query = db.query(Event).filter(Event.id == event_id)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    
+    event = query.first()
+    if event:
+        for key, value in update_data.items():
+            if hasattr(event, key) and value is not None:
+                setattr(event, key, value)
+        event.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(event)
+    return event
+
+def delete_event(event_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(Event).filter(Event.id == event_id)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    
+    event = query.first()
+    if event:
+        db.delete(event)
+        db.commit()
+        return True
+    return False
+
+def get_events_by_project(project_id: str, db: Session, tenant_id: str = None) -> List[Event]:
+    query = db.query(Event).filter(Event.projectId == project_id)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    return query.all()
+
+def get_events_by_user(user_id: str, db: Session, tenant_id: str = None) -> List[Event]:
+    query = db.query(Event).filter(Event.createdById == user_id)
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    return query.all()
+
+def get_upcoming_events(db: Session, tenant_id: str = None, days: int = 7) -> List[Event]:
+    from datetime import datetime, timedelta
+    start_date = datetime.utcnow()
+    end_date = start_date + timedelta(days=days)
+    
+    query = db.query(Event).filter(
+        Event.startDate >= start_date,
+        Event.startDate <= end_date
+    )
+    if tenant_id:
+        query = query.filter(Event.tenant_id == tenant_id)
+    return query.order_by(Event.startDate).all()

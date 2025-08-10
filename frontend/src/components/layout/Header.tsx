@@ -17,8 +17,7 @@ import {
   Bell, 
   Settings, 
   LogOut, 
-  User,
-  Search
+  User
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getInitials } from '../../lib/utils';
@@ -42,7 +41,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        {/* Left side - Menu button and Logo */}
+        {/* Left side - Menu button */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -52,27 +51,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="hidden sm:block text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              SparkCo ERP
-            </span>
-          </div>
-        </div>
-
-        {/* Center - Search (hidden on mobile) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <input
-              type="text"
-              placeholder="Search projects, tasks..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-blue-500 focus:outline-none transition-colors"
-            />
-          </div>
         </div>
 
         {/* Right side - Notifications and User menu */}

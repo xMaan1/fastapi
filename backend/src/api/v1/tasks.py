@@ -4,15 +4,15 @@ from typing import Optional, List
 import json
 from datetime import datetime
 
-from ..unified_models import Task, TaskCreate, TaskUpdate, TasksResponse, SubTask
-from ..unified_database import (
+from ...models.unified_models import Task, TaskCreate, TaskUpdate, TasksResponse, SubTask
+from ...config.unified_database import (
     get_db, get_user_by_email, get_user_by_id,
     get_project_by_id, create_task, get_task_by_id, get_all_tasks,
     get_tasks_by_project, update_task, delete_task,
     get_subtasks_by_parent, get_main_tasks_by_project, get_task_with_subtasks,
     Task as DBTask
 )
-from ..dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
+from ...api.dependencies import get_current_user, get_tenant_context, require_tenant_admin_or_super_admin
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

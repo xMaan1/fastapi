@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
@@ -15,7 +15,9 @@ import {
   UserCheck,
   Building,
   CreditCard,
-  X
+  Calendar,
+  X,
+  Search
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,6 +40,13 @@ const allMenuItems = [
     path: '/projects', 
     roles: ['admin', 'project_manager', 'team_member', 'client', 'viewer', 'super_admin'],
     gradient: 'from-green-500 to-teal-600'
+  },
+  { 
+    text: 'Events', 
+    icon: Calendar, 
+    path: '/events', 
+    roles: ['admin', 'project_manager', 'team_member', 'client', 'viewer', 'super_admin'],
+    gradient: 'from-orange-500 to-red-600'
   },
   { 
     text: 'Team', 
@@ -94,18 +103,25 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleNavigation = (path: string) => {
     router.push(path);
     onClose();
   };
 
-  // Filter menu items by user role
+  // Filter menu items by user role and search query
   const menuItems = useMemo(() => {
     if (!user) return [];
     const role = user.userRole;
-    return allMenuItems.filter(item => item.roles.includes(role));
-  }, [user]);
+    const filteredByRole = allMenuItems.filter(item => item.roles.includes(role));
+    
+    if (!searchQuery.trim()) return filteredByRole;
+    
+    return filteredByRole.filter(item => 
+      item.text.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [user, searchQuery]);
 
   return (
     <>
@@ -123,31 +139,22 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         open ? "translate-x-0" : "-translate-x-full",
         "md:translate-x-0 md:static md:z-auto"
       )}>
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                SparkCo ERP
-              </h2>
-              <p className="text-xs text-gray-500">Project Management</p>
-            </div>
+        {/* Search Bar */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search menu items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-blue-500 focus:outline-none transition-colors text-sm"
+            />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="md:hidden"
-          >
-            <X className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
             const Icon = item.icon;
@@ -186,10 +193,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               </button>
             );
           })}
+          
+          {menuItems.length === 0 && searchQuery && (
+            <div className="text-center py-8 text-gray-500">
+              <p className="text-sm">No menu items found</p>
+              <p className="text-xs mt-1">Try a different search term</p>
+            </div>
+          )}
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+        <div className="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-1">Powered by</p>
             <p className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">

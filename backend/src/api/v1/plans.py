@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
-from ..dependencies import require_super_admin
+from ...api.dependencies import require_super_admin
 from sqlalchemy.orm import Session
 
-from ..unified_database import get_db, get_plans
-from ..unified_models import PlansResponse
+from ...config.unified_database import get_db, get_plans
+from ...models.unified_models import PlansResponse
 
 router = APIRouter(prefix="/plans", tags=["plans"])
 

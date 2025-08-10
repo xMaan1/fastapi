@@ -7,20 +7,20 @@ import uuid
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 
-from ..unified_database import (
+from ...config.unified_database import (
     get_db, get_plans, get_plan_by_id, create_tenant, 
     create_subscription, create_tenant_user, get_user_tenants,
     get_tenant_by_id, get_tenant_users, get_subscription_by_tenant,
     get_permissions, create_permission, get_custom_roles, create_custom_role, update_custom_role, delete_custom_role
 )
-from ..unified_models import (
+from ...models.unified_models import (
     Plan, PlansResponse, TenantCreate, Tenant, SubscriptionCreate,
     TenantUserCreate, TenantRole, SubscriptionStatus, TenantUsersResponse,
     SubscribeRequest, CustomRole, CustomRoleCreate, CustomRoleUpdate, Permission, UsersResponse
 )
 
 
-from ..dependencies import get_current_user, require_super_admin, require_tenant_admin_or_super_admin
+from ...api.dependencies import get_current_user, require_super_admin, require_tenant_admin_or_super_admin
 
 @router.get("/plans", response_model=PlansResponse, dependencies=[Depends(require_super_admin)])
 async def get_available_plans(db: Session = Depends(get_db)):
@@ -166,7 +166,7 @@ async def get_tenant_users_list(
             detail="Access denied to this tenant"
         )
     tenant_users = get_tenant_users(tenant_id, db)
-    from ..unified_database import User as DBUser
+    from ...config.unified_database import User as DBUser
     user_ids = [tu.userId for tu in tenant_users]
     users = db.query(DBUser).filter(DBUser.id.in_(user_ids)).all() if user_ids else []
     user_id_to_role = {str(tu.userId): tu.role for tu in tenant_users}

@@ -17,7 +17,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-class ApiService {
+export class ApiService {
   private client: AxiosInstance;
   private sessionManager: SessionManager;
   private publicEndpoints = ['/auth/login', '/auth/register'];
@@ -419,7 +419,108 @@ class ApiService {
   }
   // Test connection
   async testConnection() {
-    return this.get('/');
+    try {
+      const response = await this.get('/health');
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Event methods
+  async getEvents(params?: {
+    project?: string;
+    user?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.project) queryParams.append('project_id', params.project);
+      if (params?.user) queryParams.append('user_id', params.user);
+      if (params?.status) queryParams.append('status_filter', params.status);
+      if (params?.page) queryParams.append('skip', ((params.page - 1) * (params.limit || 100)).toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+      const url = `/events?${queryParams.toString()}`;
+      const response = await this.get(url);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getEvent(id: string) {
+    try {
+      const response = await this.get(`/events/${id}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createEvent(data: any) {
+    try {
+      const response = await this.post('/events', data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateEvent(id: string, data: any) {
+    try {
+      const response = await this.put(`/events/${id}`, data);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteEvent(id: string) {
+    try {
+      const response = await this.delete(`/events/${id}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUpcomingEvents(days: number = 7) {
+    try {
+      const response = await this.get(`/events/upcoming?days=${days}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async joinEvent(id: string) {
+    try {
+      const response = await this.post(`/events/${id}/join`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async leaveEvent(id: string) {
+    try {
+      const response = await this.post(`/events/${id}/leave`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async regenerateMeetLink(id: string) {
+    try {
+      const response = await this.post(`/events/${id}/regenerate-meet-link`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
