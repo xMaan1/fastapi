@@ -120,4 +120,3 @@ celerybeat.pid
 dmypy.json
 client_secrets.json
 token.pickle
-google_meet_service.py
