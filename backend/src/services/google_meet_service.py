@@ -1,15 +1,13 @@
 import os
 import json
-import pickle
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# If modifying these scopes, delete the file token.pickle.
+# If modifying these scopes, update the service account permissions accordingly
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 class GoogleMeetService:
@@ -19,78 +17,35 @@ class GoogleMeetService:
         self._load_credentials()
     
     def _load_credentials(self):
-        """Load or create Google API credentials"""
-        token_path = 'token.pickle'
-        
-        # Load existing credentials
-        if os.path.exists(token_path):
-            with open(token_path, 'rb') as token:
-                self.credentials = pickle.load(token)
-        
-        # If there are no (valid) credentials available, let the user log in
-        if not self.credentials or not self.credentials.valid:
-            if self.credentials and self.credentials.expired and self.credentials.refresh_token:
-                try:
-                    self.credentials.refresh(Request())
-                except Exception as e:
-                    print(f"Token refresh failed: {e}")
-                    self.credentials = None
+        """Load Google API credentials using service account"""
+        try:
+            # Use service account credentials
+            service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            if not service_account_path:
+                raise Exception("GOOGLE_APPLICATION_CREDENTIALS environment variable not set")
             
-            if not self.credentials:
-                try:
-                    # Create client_secrets.json if it doesn't exist
-                    if not os.path.exists('client_secrets.json'):
-                        self._create_client_secrets_file()
-                    
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        'client_secrets.json', SCOPES)
-                    self.credentials = flow.run_local_server(port=8080)
-                    
-                except Exception as e:
-                    print(f"OAuth flow failed: {e}")
-                    print("\n=== OAuth Configuration Required ===")
-                    print("Please follow these steps to configure OAuth:")
-                    print("1. Go to https://console.cloud.google.com")
-                    print("2. Select your project: divine-voice-468406-d4")
-                    print("3. Go to APIs & Services > Credentials")
-                    print("4. Edit your OAuth 2.0 Client ID")
-                    print("5. Add these URLs to 'Authorized redirect URIs':")
-                    print("   - http://localhost:8080")
-                    print("   - http://localhost:8080/")
-                    print("   - http://127.0.0.1:8080")
-                    print("   - http://127.0.0.1:8080/")
-                    print("   - https://your-aws-domain.com (for production)")
-                    print("   - http://your-aws-ip:8000 (for production)")
-                    print("6. Click Save")
-                    print("7. Restart your application")
-                    print("================================")
-                    raise Exception(f"OAuth configuration failed: {e}")
-                
-                # Save the credentials for the next run
-                if self.credentials:
-                    with open(token_path, 'wb') as token:
-                        pickle.dump(self.credentials, token)
-        
-        if self.credentials:
+            if not os.path.exists(service_account_path):
+                raise Exception(f"Service account file not found at: {service_account_path}")
+            
+            # Load service account credentials
+            self.credentials = service_account.Credentials.from_service_account_file(
+                service_account_path,
+                scopes=SCOPES
+            )
+            
+            # Build the service
             self.service = build('calendar', 'v3', credentials=self.credentials)
-        else:
-            raise Exception("Failed to obtain Google API credentials")
-    
-    def _create_client_secrets_file(self):
-        """Create client_secrets.json from environment variables"""
-        client_secrets = {
-            "web": {
-                "client_id": "515705092070-f106o0bdqni5lksvs1fu4clhsbgq1hfu.apps.googleusercontent.com",
-                "project_id": "divine-voice-468406-d4",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_secret": "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"
-            }
-        }
-        
-        with open('client_secrets.json', 'w') as f:
-            json.dump(client_secrets, f, indent=2)
+            
+            print("✅ Google API credentials loaded successfully using service account")
+            
+        except Exception as e:
+            print(f"❌ Failed to load Google API credentials: {e}")
+            print("Make sure:")
+            print("1. GOOGLE_APPLICATION_CREDENTIALS environment variable is set")
+            print("2. Service account file exists and is readable")
+            print("3. Service account has Calendar API access enabled")
+            print("4. Service account has proper permissions for Google Calendar")
+            raise Exception(f"Google API configuration failed: {e}")
     
     def create_meeting(self, event_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a Google Calendar event with Google Meet"""
@@ -98,32 +53,22 @@ class GoogleMeetService:
             if not self.service:
                 raise Exception("Google Calendar service not available")
             
-            # Prepare event data for Google Calendar
-            start_time = event_data.get('startDate')
-            end_time = event_data.get('endDate')
-            title = event_data.get('title', 'Meeting')
-            description = event_data.get('description', '')
-            
-            # Convert to RFC3339 format
-            if isinstance(start_time, str):
-                start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
-            if isinstance(end_time, str):
-                end_time = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
-            
+            # Prepare event data
             event = {
-                'summary': title,
-                'description': description,
+                'summary': event_data.get('summary', 'Meeting'),
+                'description': event_data.get('description', ''),
                 'start': {
-                    'dateTime': start_time.isoformat(),
+                    'dateTime': event_data.get('start_time'),
                     'timeZone': event_data.get('timezone', 'UTC'),
                 },
                 'end': {
-                    'dateTime': end_time.isoformat(),
+                    'dateTime': event_data.get('end_time'),
                     'timeZone': event_data.get('timezone', 'UTC'),
                 },
+                'attendees': event_data.get('attendees', []),
                 'conferenceData': {
                     'createRequest': {
-                        'requestId': f"meet_{int(datetime.now().timestamp())}",
+                        'requestId': f"meet-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
                         'conferenceSolutionKey': {
                             'type': 'hangoutsMeet'
                         }
@@ -132,30 +77,25 @@ class GoogleMeetService:
             }
             
             # Create the event
-            event_result = self.service.events().insert(
+            event = self.service.events().insert(
                 calendarId='primary',
                 body=event,
                 conferenceDataVersion=1
             ).execute()
             
-            # Extract the meet link
+            # Extract meeting link
             meet_link = None
-            if 'conferenceData' in event_result and 'entryPoints' in event_result['conferenceData']:
-                for entry_point in event_result['conferenceData']['entryPoints']:
-                    if entry_point['entryPointType'] == 'video':
-                        meet_link = entry_point['uri']
+            if 'conferenceData' in event and 'entryPoints' in event['conferenceData']:
+                for entry in event['conferenceData']['entryPoints']:
+                    if entry['entryPointType'] == 'video':
+                        meet_link = entry['uri']
                         break
             
-            if not meet_link:
-                # Fallback: try to get the meet link from the event
-                meet_link = event_result.get('hangoutLink')
-            
             return {
                 'success': True,
-                'event_id': event_result['id'],
+                'event_id': event['id'],
                 'meet_link': meet_link,
-                'meet_code': event_result.get('id'),
-                'message': 'Google Meet link created successfully'
+                'event': event
             }
             
         except HttpError as error:
@@ -163,137 +103,165 @@ class GoogleMeetService:
             return {
                 'success': False,
                 'error': str(error),
-                'message': 'Failed to create Google Meet via API'
+                'error_details': error.error_details if hasattr(error, 'error_details') else None
             }
         except Exception as e:
-            print(f"Error creating Google Meet: {e}")
+            print(f"Unexpected error creating meeting: {e}")
             return {
                 'success': False,
-                'error': str(e),
-                'message': 'Failed to create Google Meet'
+                'error': str(e)
             }
     
-    def update_meeting(self, calendar_event_id: str, event_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Update a Google Calendar event"""
-        try:
-            if not self.service:
-                raise Exception("Google Calendar service not available")
-            
-            # Prepare updated event data
-            start_time = event_data.get('startDate')
-            end_time = event_data.get('endDate')
-            title = event_data.get('title', 'Meeting')
-            description = event_data.get('description', '')
-            
-            # Convert to RFC3339 format
-            if isinstance(start_time, str):
-                start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
-            if isinstance(end_time, str):
-                end_time = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
-            
-            event = {
-                'summary': title,
-                'description': description,
-                'start': {
-                    'dateTime': start_time.isoformat(),
-                    'timeZone': event_data.get('timezone', 'UTC'),
-                },
-                'end': {
-                    'dateTime': end_time.isoformat(),
-                    'timeZone': event_data.get('timezone', 'UTC'),
-                }
-            }
-            
-            # Update the event
-            event_result = self.service.events().update(
-                calendarId='primary',
-                eventId=calendar_event_id,
-                body=event
-            ).execute()
-            
-            return {
-                'success': True,
-                'event_id': event_result['id'],
-                'message': 'Google Calendar event updated successfully'
-            }
-            
-        except HttpError as error:
-            print(f"Google Calendar API error: {error}")
-            return {
-                'success': False,
-                'error': str(error),
-                'message': 'Failed to update Google Calendar event'
-            }
-        except Exception as e:
-            print(f"Error updating Google Calendar event: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'message': 'Failed to update Google Calendar event'
-            }
-    
-    def delete_meeting(self, calendar_event_id: str) -> Dict[str, Any]:
-        """Delete a Google Calendar event"""
-        try:
-            if not self.service:
-                raise Exception("Google Calendar service not available")
-            
-            self.service.events().delete(
-                calendarId='primary',
-                eventId=calendar_event_id
-            ).execute()
-            
-            return {
-                'success': True,
-                'message': 'Google Calendar event deleted successfully'
-            }
-            
-        except HttpError as error:
-            print(f"Google Calendar API error: {error}")
-            return {
-                'success': False,
-                'error': str(error),
-                'message': 'Failed to delete Google Calendar event'
-            }
-        except Exception as e:
-            print(f"Error deleting Google Calendar event: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'message': 'Failed to delete Google Calendar event'
-            }
-    
-    def get_meeting_details(self, calendar_event_id: str) -> Dict[str, Any]:
-        """Get details of a Google Calendar event"""
+    def get_meeting(self, event_id: str) -> Dict[str, Any]:
+        """Get a specific meeting/event"""
         try:
             if not self.service:
                 raise Exception("Google Calendar service not available")
             
             event = self.service.events().get(
                 calendarId='primary',
-                eventId=calendar_event_id
+                eventId=event_id
             ).execute()
             
             return {
                 'success': True,
-                'event': event,
-                'message': 'Google Calendar event retrieved successfully'
+                'event': event
             }
             
         except HttpError as error:
             print(f"Google Calendar API error: {error}")
             return {
                 'success': False,
-                'error': str(error),
-                'message': 'Failed to retrieve Google Calendar event'
+                'error': str(error)
             }
         except Exception as e:
-            print(f"Error retrieving Google Calendar event: {e}")
+            print(f"Unexpected error getting meeting: {e}")
             return {
                 'success': False,
-                'error': str(e),
-                'message': 'Failed to retrieve Google Calendar event'
+                'error': str(e)
             }
-
-# Create a global instance
-google_meet_service = GoogleMeetService()
+    
+    def update_meeting(self, event_id: str, event_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update an existing meeting/event"""
+        try:
+            if not self.service:
+                raise Exception("Google Calendar service not available")
+            
+            # Get existing event first
+            existing_event = self.service.events().get(
+                calendarId='primary',
+                eventId=event_id
+            ).execute()
+            
+            # Update fields
+            if 'summary' in event_data:
+                existing_event['summary'] = event_data['summary']
+            if 'description' in event_data:
+                existing_event['description'] = event_data['description']
+            if 'start_time' in event_data:
+                existing_event['start']['dateTime'] = event_data['start_time']
+            if 'end_time' in event_data:
+                existing_event['end']['dateTime'] = event_data['end_time']
+            if 'attendees' in event_data:
+                existing_event['attendees'] = event_data['attendees']
+            
+            # Update the event
+            updated_event = self.service.events().update(
+                calendarId='primary',
+                eventId=event_id,
+                body=existing_event
+            ).execute()
+            
+            return {
+                'success': True,
+                'event_id': updated_event['id'],
+                'event': updated_event
+            }
+            
+        except HttpError as error:
+            print(f"Google Calendar API error: {error}")
+            return {
+                'success': False,
+                'error': str(error)
+            }
+        except Exception as e:
+            print(f"Unexpected error updating meeting: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def delete_meeting(self, event_id: str) -> Dict[str, Any]:
+        """Delete a meeting/event"""
+        try:
+            if not self.service:
+                raise Exception("Google Calendar service not available")
+            
+            self.service.events().delete(
+                calendarId='primary',
+                eventId=event_id
+            ).execute()
+            
+            return {
+                'success': True,
+                'message': f'Event {event_id} deleted successfully'
+            }
+            
+        except HttpError as error:
+            print(f"Google Calendar API error: {error}")
+            return {
+                'success': False,
+                'error': str(error)
+            }
+        except Exception as e:
+            print(f"Unexpected error deleting meeting: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def list_meetings(self, time_min: str = None, time_max: str = None, max_results: int = 10) -> Dict[str, Any]:
+        """List meetings/events within a time range"""
+        try:
+            if not self.service:
+                raise Exception("Google Calendar service not available")
+            
+            # Set default time range if not provided
+            if not time_min:
+                time_min = datetime.now().isoformat() + 'Z'
+            if not time_max:
+                time_max = (datetime.now() + timedelta(days=7)).isoformat() + 'Z'
+            
+            events_result = self.service.events().list(
+                calendarId='primary',
+                timeMin=time_min,
+                timeMax=time_max,
+                maxResults=max_results,
+                singleEvents=True,
+                orderBy='startTime'
+            ).execute()
+            
+            events = events_result.get('items', [])
+            
+            return {
+                'success': True,
+                'events': events,
+                'count': len(events)
+            }
+            
+        except HttpError as error:
+            print(f"Google Calendar API error: {error}")
+            return {
+                'success': False,
+                'error': str(error)
+            }
+        except Exception as e:
+            print(f"Unexpected error listing meetings: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def is_service_available(self) -> bool:
+        """Check if Google Calendar service is available"""
+        return self.service is not None and self.credentials is not None

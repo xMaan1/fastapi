@@ -536,7 +536,7 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+                  Are you sure you want to delete &quot;{projectToDelete?.name}&quot;? This action cannot be undone.
                 </p>
               </CardContent>
               <CardContent className="flex justify-end gap-2 pt-0">

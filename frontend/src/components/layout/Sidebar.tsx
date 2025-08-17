@@ -17,7 +17,12 @@ import {
   CreditCard,
   Calendar,
   X,
-  Search
+  Search,
+  TrendingUp,
+  Target,
+  UserPlus,
+  FileText,
+  DollarSign
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -40,6 +45,55 @@ const allMenuItems = [
     path: '/projects', 
     roles: ['admin', 'project_manager', 'team_member', 'client', 'viewer', 'super_admin'],
     gradient: 'from-green-500 to-teal-600'
+  },
+  { 
+    text: 'Sales', 
+    icon: TrendingUp, 
+    path: '/sales', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-violet-500 to-purple-600'
+  },
+  { 
+    text: 'Leads', 
+    icon: Target, 
+    path: '/sales/leads', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-indigo-500 to-blue-600'
+  },
+  { 
+    text: 'Opportunities', 
+    icon: DollarSign, 
+    path: '/sales/opportunities', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-emerald-500 to-green-600'
+  },
+  { 
+    text: 'Contacts', 
+    icon: UserPlus, 
+    path: '/sales/contacts', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-cyan-500 to-blue-600'
+  },
+  { 
+    text: 'Companies', 
+    icon: Building, 
+    path: '/sales/companies', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-gray-500 to-gray-700'
+  },
+  { 
+    text: 'Quotes', 
+    icon: FileText, 
+    path: '/sales/quotes', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-orange-500 to-red-600'
+  },
+  { 
+    text: 'Contracts', 
+    icon: FileText, 
+    path: '/sales/contracts', 
+    roles: ['admin', 'project_manager', 'team_member', 'super_admin'],
+    gradient: 'from-rose-500 to-pink-600'
   },
   { 
     text: 'Events', 

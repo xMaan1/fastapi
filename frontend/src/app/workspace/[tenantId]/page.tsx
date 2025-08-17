@@ -100,7 +100,7 @@ export default function WorkspacePage() {
             </h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Welcome to your organization's workspace
+            Welcome to your organization&apos;s workspace
           </p>
         </div>
 

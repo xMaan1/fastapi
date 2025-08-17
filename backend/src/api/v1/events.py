@@ -7,7 +7,7 @@ import uuid
 from ...config.unified_database import get_db, get_event_by_id, get_all_events, create_event, update_event, delete_event, get_events_by_project, get_events_by_user, get_upcoming_events
 from ...models.unified_models import EventCreate, EventUpdate, Event, EventResponse, EventType, EventStatus, RecurrenceType
 from ...api.dependencies import get_current_user, get_current_tenant
-from ...services.google_meet_service import google_meet_service
+from ...services.google_meet_service import GoogleMeetService
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -78,6 +78,7 @@ async def create_new_event(
         
         # Create Google Meet event if online
         if event_data.get('isOnline', True):
+            google_meet_service = GoogleMeetService()
             meet_result = google_meet_service.create_meeting(event_data)
             if meet_result['success']:
                 event_data['googleMeetLink'] = meet_result.get('meet_link')
@@ -219,6 +220,7 @@ async def update_existing_event(
         
         # Update Google Calendar event if it exists
         if existing_event.googleCalendarEventId and update_data:
+            google_meet_service = GoogleMeetService()
             meet_result = google_meet_service.update_meeting(
                 existing_event.googleCalendarEventId,
                 update_data
@@ -265,6 +267,7 @@ async def delete_existing_event(
         
         # Delete from Google Calendar if it exists
         if existing_event.googleCalendarEventId:
+            google_meet_service = GoogleMeetService()
             meet_result = google_meet_service.delete_meeting(existing_event.googleCalendarEventId)
             if not meet_result['success']:
                 print(f"Google Calendar deletion failed: {meet_result.get('error')}")
@@ -313,6 +316,7 @@ async def regenerate_meet_link(
             )
         
         # Generate new Google Meet link
+        google_meet_service = GoogleMeetService()
         meet_result = google_meet_service.create_meeting({
             'id': str(existing_event.id),
             'title': existing_event.title,

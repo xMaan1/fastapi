@@ -424,3 +424,421 @@ class Event(EventBase):
 class EventResponse(BaseModel):
     events: List[Event]
     pagination: Optional[dict] = None
+
+# Sales Module Enums and Models
+class LeadStatus(str, Enum):
+    NEW = "new"
+    CONTACTED = "contacted"
+    QUALIFIED = "qualified"
+    PROPOSAL = "proposal"
+    NEGOTIATION = "negotiation"
+    WON = "won"
+    LOST = "lost"
+
+class LeadSource(str, Enum):
+    WEBSITE = "website"
+    REFERRAL = "referral"
+    SOCIAL_MEDIA = "social_media"
+    EMAIL_CAMPAIGN = "email_campaign"
+    COLD_OUTREACH = "cold_outreach"
+    TRADE_SHOW = "trade_show"
+    OTHER = "other"
+
+class OpportunityStage(str, Enum):
+    PROSPECTING = "prospecting"
+    QUALIFICATION = "qualification"
+    PROPOSAL = "proposal"
+    NEGOTIATION = "negotiation"
+    CLOSED_WON = "closed_won"
+    CLOSED_LOST = "closed_lost"
+
+class QuoteStatus(str, Enum):
+    DRAFT = "draft"
+    SENT = "sent"
+    VIEWED = "viewed"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+class ContractStatus(str, Enum):
+    DRAFT = "draft"
+    PENDING_SIGNATURE = "pending_signature"
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    TERMINATED = "terminated"
+
+class ContactType(str, Enum):
+    LEAD = "lead"
+    CUSTOMER = "customer"
+    PARTNER = "partner"
+    VENDOR = "vendor"
+
+# Lead Models
+class LeadBase(BaseModel):
+    firstName: str
+    lastName: str
+    email: EmailStr
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    jobTitle: Optional[str] = None
+    leadSource: LeadSource = LeadSource.WEBSITE
+    status: LeadStatus = LeadStatus.NEW
+    assignedTo: Optional[str] = None  # user ID
+    notes: Optional[str] = None
+    tags: List[str] = []
+    estimatedValue: Optional[float] = None
+    expectedCloseDate: Optional[str] = None
+
+class LeadCreate(LeadBase):
+    pass
+
+class LeadUpdate(BaseModel):
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    jobTitle: Optional[str] = None
+    leadSource: Optional[LeadSource] = None
+    status: Optional[LeadStatus] = None
+    assignedTo: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+    estimatedValue: Optional[float] = None
+    expectedCloseDate: Optional[str] = None
+
+class Lead(LeadBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    assignedToUser: Optional[Dict[str, str]] = None
+    activities: List[Dict[str, Any]] = []
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Contact Models
+class ContactBase(BaseModel):
+    firstName: str
+    lastName: str
+    email: EmailStr
+    phone: Optional[str] = None
+    jobTitle: Optional[str] = None
+    department: Optional[str] = None
+    contactType: ContactType = ContactType.CUSTOMER
+    isPrimary: bool = False
+    notes: Optional[str] = None
+    tags: List[str] = []
+
+class ContactCreate(ContactBase):
+    companyId: str
+
+class ContactUpdate(BaseModel):
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    jobTitle: Optional[str] = None
+    department: Optional[str] = None
+    contactType: Optional[ContactType] = None
+    isPrimary: Optional[bool] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class Contact(ContactBase):
+    id: str
+    companyId: str
+    tenantId: str
+    createdBy: str
+    activities: List[Dict[str, Any]] = []
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Company Models
+class CompanyBase(BaseModel):
+    name: str
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postalCode: Optional[str] = None
+    annualRevenue: Optional[float] = None
+    employeeCount: Optional[int] = None
+    description: Optional[str] = None
+    tags: List[str] = []
+
+class CompanyCreate(CompanyBase):
+    pass
+
+class CompanyUpdate(BaseModel):
+    name: Optional[str] = None
+    industry: Optional[str] = None
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postalCode: Optional[str] = None
+    annualRevenue: Optional[float] = None
+    employeeCount: Optional[int] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class Company(CompanyBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    contacts: List[Contact] = []
+    opportunities: List[Dict[str, Any]] = []
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Opportunity Models
+class OpportunityBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    stage: OpportunityStage = OpportunityStage.PROSPECTING
+    amount: float
+    probability: int = 50  # percentage
+    expectedCloseDate: str
+    leadSource: LeadSource = LeadSource.WEBSITE
+    assignedTo: Optional[str] = None  # user ID
+    notes: Optional[str] = None
+    tags: List[str] = []
+
+class OpportunityCreate(OpportunityBase):
+    leadId: Optional[str] = None
+    companyId: Optional[str] = None
+    contactId: Optional[str] = None
+
+class OpportunityUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    stage: Optional[OpportunityStage] = None
+    amount: Optional[float] = None
+    probability: Optional[int] = None
+    expectedCloseDate: Optional[str] = None
+    leadSource: Optional[LeadSource] = None
+    assignedTo: Optional[str] = None
+    notes: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class Opportunity(OpportunityBase):
+    id: str
+    leadId: Optional[str] = None
+    companyId: Optional[str] = None
+    contactId: Optional[str] = None
+    tenantId: str
+    createdBy: str
+    assignedToUser: Optional[Dict[str, str]] = None
+    activities: List[Dict[str, Any]] = []
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Quote Models
+class QuoteItem(BaseModel):
+    description: str
+    quantity: int = 1
+    unitPrice: float
+    discount: float = 0.0
+    total: float
+
+class QuoteBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    opportunityId: str
+    validUntil: str
+    terms: Optional[str] = None
+    notes: Optional[str] = None
+    items: List[QuoteItem] = []
+    subtotal: float = 0.0
+    taxRate: float = 0.0
+    taxAmount: float = 0.0
+    total: float = 0.0
+
+class QuoteCreate(QuoteBase):
+    pass
+
+class QuoteUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    validUntil: Optional[str] = None
+    terms: Optional[str] = None
+    notes: Optional[str] = None
+    items: Optional[List[QuoteItem]] = None
+    subtotal: Optional[float] = None
+    taxRate: Optional[float] = None
+    taxAmount: Optional[float] = None
+    total: Optional[float] = None
+
+class Quote(QuoteBase):
+    id: str
+    quoteNumber: str
+    status: QuoteStatus = QuoteStatus.DRAFT
+    tenantId: str
+    createdBy: str
+    sentAt: Optional[datetime] = None
+    viewedAt: Optional[datetime] = None
+    acceptedAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Contract Models
+class ContractBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    opportunityId: str
+    startDate: str
+    endDate: str
+    value: float
+    terms: Optional[str] = None
+    notes: Optional[str] = None
+    autoRenew: bool = False
+    renewalTerms: Optional[str] = None
+
+class ContractCreate(ContractBase):
+    pass
+
+class ContractUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    value: Optional[float] = None
+    terms: Optional[str] = None
+    notes: Optional[str] = None
+    autoRenew: Optional[bool] = None
+    renewalTerms: Optional[str] = None
+
+class Contract(ContractBase):
+    id: str
+    contractNumber: str
+    status: ContractStatus = ContractStatus.DRAFT
+    tenantId: str
+    createdBy: str
+    signedAt: Optional[datetime] = None
+    activatedAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Sales Activity Models
+class ActivityType(str, Enum):
+    CALL = "call"
+    EMAIL = "email"
+    MEETING = "meeting"
+    NOTE = "note"
+    TASK = "task"
+    PROPOSAL_SENT = "proposal_sent"
+    QUOTE_SENT = "quote_sent"
+    CONTRACT_SIGNED = "contract_signed"
+
+class SalesActivityBase(BaseModel):
+    type: ActivityType
+    subject: str
+    description: Optional[str] = None
+    dueDate: Optional[str] = None
+    completed: bool = False
+    notes: Optional[str] = None
+
+class SalesActivityCreate(SalesActivityBase):
+    leadId: Optional[str] = None
+    opportunityId: Optional[str] = None
+    contactId: Optional[str] = None
+    companyId: Optional[str] = None
+
+class SalesActivityUpdate(BaseModel):
+    type: Optional[ActivityType] = None
+    subject: Optional[str] = None
+    description: Optional[str] = None
+    dueDate: Optional[str] = None
+    completed: Optional[bool] = None
+    notes: Optional[str] = None
+
+class SalesActivity(SalesActivityBase):
+    id: str
+    leadId: Optional[str] = None
+    opportunityId: Optional[str] = None
+    contactId: Optional[str] = None
+    companyId: Optional[str] = None
+    tenantId: str
+    createdBy: str
+    assignedTo: Optional[str] = None
+    completedAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Sales Response Models
+class LeadsResponse(BaseModel):
+    leads: List[Lead]
+    pagination: dict
+
+class ContactsResponse(BaseModel):
+    contacts: List[Contact]
+    pagination: dict
+
+class CompaniesResponse(BaseModel):
+    companies: List[Company]
+    pagination: dict
+
+class OpportunitiesResponse(BaseModel):
+    opportunities: List[Opportunity]
+    pagination: dict
+
+class QuotesResponse(BaseModel):
+    quotes: List[Quote]
+    pagination: dict
+
+class ContractsResponse(BaseModel):
+    contracts: List[Contract]
+    pagination: dict
+
+class SalesActivitiesResponse(BaseModel):
+    activities: List[SalesActivity]
+    pagination: dict
+
+# Sales Dashboard Models
+class SalesMetrics(BaseModel):
+    totalLeads: int
+    activeLeads: int
+    totalOpportunities: int
+    openOpportunities: int
+    totalRevenue: float
+    projectedRevenue: float
+    conversionRate: float
+    averageDealSize: float
+
+class SalesPipeline(BaseModel):
+    stage: str
+    count: int
+    value: float
+    probability: float
+
+class SalesDashboard(BaseModel):
+    metrics: SalesMetrics
+    pipeline: List[SalesPipeline]
+    recentActivities: List[SalesActivity]
+    topOpportunities: List[Opportunity]

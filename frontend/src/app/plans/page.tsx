@@ -110,7 +110,7 @@ export default function PlansPage() {
             Choose Your Plan
           </h1>
           <p className="text-gray-600 mt-2 text-lg">
-            Select the perfect plan for your organization's needs
+            Select the perfect plan for your organization&apos;s needs
           </p>
         </div>
 

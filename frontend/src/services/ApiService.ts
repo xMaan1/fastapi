@@ -522,6 +522,240 @@ export class ApiService {
       throw error;
     }
   }
+
+  // Sales Module Methods
+  // Lead endpoints
+  async getLeads(params?: {
+    status?: string;
+    source?: string;
+    assignedTo?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.source) queryParams.append('source', params.source);
+    if (params?.assignedTo) queryParams.append('assigned_to', params.assignedTo);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/leads${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async getLead(id: string) {
+    return this.get(`/sales/leads/${id}`);
+  }
+
+  async createLead(data: any) {
+    return this.post('/sales/leads', data);
+  }
+
+  async updateLead(id: string, data: any) {
+    return this.put(`/sales/leads/${id}`, data);
+  }
+
+  async deleteLead(id: string) {
+    return this.delete(`/sales/leads/${id}`);
+  }
+
+  // Contact endpoints
+  async getContacts(params?: {
+    companyId?: string;
+    contactType?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.companyId) queryParams.append('company_id', params.companyId);
+    if (params?.contactType) queryParams.append('contact_type', params.contactType);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/contacts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createContact(data: any) {
+    return this.post('/sales/contacts', data);
+  }
+
+  async updateContact(id: string, data: any) {
+    return this.put(`/sales/contacts/${id}`, data);
+  }
+
+  async deleteContact(id: string) {
+    return this.delete(`/sales/contacts/${id}`);
+  }
+
+  // Company endpoints
+  async getCompanies(params?: {
+    industry?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.industry) queryParams.append('industry', params.industry);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/companies${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createCompany(data: any) {
+    return this.post('/sales/companies', data);
+  }
+
+  async updateCompany(id: string, data: any) {
+    return this.put(`/sales/companies/${id}`, data);
+  }
+
+  async deleteCompany(id: string) {
+    return this.delete(`/sales/companies/${id}`);
+  }
+
+  // Opportunity endpoints
+  async getOpportunities(params?: {
+    stage?: string;
+    assignedTo?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.stage) queryParams.append('stage', params.stage);
+    if (params?.assignedTo) queryParams.append('assigned_to', params.assignedTo);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/opportunities${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createOpportunity(data: any) {
+    return this.post('/sales/opportunities', data);
+  }
+
+  async updateOpportunity(id: string, data: any) {
+    return this.put(`/sales/opportunities/${id}`, data);
+  }
+
+  async deleteOpportunity(id: string) {
+    return this.delete(`/sales/opportunities/${id}`);
+  }
+
+  // Quote endpoints
+  async getQuotes(params?: {
+    status?: string;
+    opportunityId?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/quotes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createQuote(data: any) {
+    return this.post('/sales/quotes', data);
+  }
+
+  async updateQuote(id: string, data: any) {
+    return this.put(`/sales/quotes/${id}`, data);
+  }
+
+  async deleteQuote(id: string) {
+    return this.delete(`/sales/quotes/${id}`);
+  }
+
+  // Contract endpoints
+  async getContracts(params?: {
+    status?: string;
+    opportunityId?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/contracts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createContract(data: any) {
+    return this.post('/sales/contracts', data);
+  }
+
+  async updateContract(id: string, data: any) {
+    return this.put(`/sales/contracts/${id}`, data);
+  }
+
+  async deleteContract(id: string) {
+    return this.delete(`/sales/contracts/${id}`);
+  }
+
+  // Sales Activity endpoints
+  async getSalesActivities(params?: {
+    leadId?: string;
+    opportunityId?: string;
+    contactId?: string;
+    companyId?: string;
+    type?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.leadId) queryParams.append('lead_id', params.leadId);
+    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
+    if (params?.contactId) queryParams.append('contact_id', params.contactId);
+    if (params?.companyId) queryParams.append('company_id', params.companyId);
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `/sales/activities${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return this.get(url);
+  }
+
+  async createSalesActivity(data: any) {
+    return this.post('/sales/activities', data);
+  }
+
+  // Sales Dashboard
+  async getSalesDashboard() {
+    return this.get('/sales/dashboard');
+  }
+
+  // Sales Analytics
+  async getRevenueAnalytics(period: string = 'monthly', startDate?: string, endDate?: string) {
+    const queryParams = new URLSearchParams();
+    queryParams.append('period', period);
+    if (startDate) queryParams.append('start_date', startDate);
+    if (endDate) queryParams.append('end_date', endDate);
+
+    const url = `/sales/analytics/revenue?${queryParams.toString()}`;
+    return this.get(url);
+  }
+
+  async getConversionAnalytics() {
+    return this.get('/sales/analytics/conversion');
+  }
 }
 
 export const apiService = new ApiService();

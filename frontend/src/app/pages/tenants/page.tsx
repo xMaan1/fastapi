@@ -134,7 +134,7 @@ export default function TenantsPage() {
                 No Organizations Found
               </h3>
               <p className="text-gray-600 mb-4">
-                You don't have access to any organizations yet.
+                You don&apos;t have access to any organizations yet.
               </p>
               <Button variant="outline" onClick={() => router.push('/plans')}>
                 Create Organization

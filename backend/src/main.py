@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config.unified_database import create_tables
-from .api.v1 import auth, users, projects, tasks, tenants, plans, events
+from .api.v1 import auth, users, projects, tasks, tenants, plans, events, sales
 
-app = FastAPI(title="SparkCo ERP - Project Management API", version="1.0.0")
+app = FastAPI(title="SparkCo ERP - Project Management & Sales API", version="1.0.0")
 
 # Ensure tables are created at startup
 @app.on_event("startup")
@@ -19,6 +19,7 @@ app.include_router(tasks.router)
 app.include_router(tenants.router)
 app.include_router(plans.router)
 app.include_router(events.router)
+app.include_router(sales.router)
 
 # Add CORS middleware for frontend integration
 app.add_middleware(
@@ -31,7 +32,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "SparkCo ERP - Project Management API", "status": "running"}
+    return {"message": "SparkCo ERP - Project Management & Sales API", "status": "running"}
 
 @app.get("/health")
 def health_check():

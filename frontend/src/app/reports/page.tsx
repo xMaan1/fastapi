@@ -144,7 +144,7 @@ export default function ReportsPage() {
                 Advanced Analytics Coming Soon
               </h3>
               <p className="text-gray-600 mb-4">
-                We're working on bringing you detailed analytics and reporting features.
+                We&apos;re working on bringing you detailed analytics and reporting features.
               </p>
               <Button variant="outline">
                 Request Early Access
