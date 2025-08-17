@@ -523,238 +523,299 @@ export class ApiService {
     }
   }
 
-  // Sales Module Methods
-  // Lead endpoints
-  async getLeads(params?: {
-    status?: string;
-    source?: string;
-    assignedTo?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.source) queryParams.append('source', params.source);
-    if (params?.assignedTo) queryParams.append('assigned_to', params.assignedTo);
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/leads${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  // Sales methods
+  async getSalesDashboard(): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/dashboard');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching sales dashboard:', error);
+      throw error;
+    }
   }
 
-  async getLead(id: string) {
-    return this.get(`/sales/leads/${id}`);
+  async getLeads(params: { limit?: number; status?: string; source?: string; assignedTo?: string; search?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/leads', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+      throw error;
+    }
   }
 
-  async createLead(data: any) {
-    return this.post('/sales/leads', data);
+  async createLead(leadData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/leads', leadData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating lead:', error);
+      throw error;
+    }
   }
 
-  async updateLead(id: string, data: any) {
-    return this.put(`/sales/leads/${id}`, data);
+  async updateLead(leadId: string, leadData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/leads/${leadId}`, leadData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      throw error;
+    }
   }
 
-  async deleteLead(id: string) {
-    return this.delete(`/sales/leads/${id}`);
+  async deleteLead(leadId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/leads/${leadId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      throw error;
+    }
   }
 
-  // Contact endpoints
-  async getContacts(params?: {
-    companyId?: string;
-    contactType?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.companyId) queryParams.append('company_id', params.companyId);
-    if (params?.contactType) queryParams.append('contact_type', params.contactType);
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/contacts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getContacts(params: { limit?: number; companyId?: string; contactType?: string; search?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/contacts', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      throw error;
+    }
   }
 
-  async createContact(data: any) {
-    return this.post('/sales/contacts', data);
+  async createContact(contactData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/contacts', contactData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      throw error;
+    }
   }
 
-  async updateContact(id: string, data: any) {
-    return this.put(`/sales/contacts/${id}`, data);
+  async updateContact(contactId: string, contactData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/contacts/${contactId}`, contactData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      throw error;
+    }
   }
 
-  async deleteContact(id: string) {
-    return this.delete(`/sales/contacts/${id}`);
+  async deleteContact(contactId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/contacts/${contactId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      throw error;
+    }
   }
 
-  // Company endpoints
-  async getCompanies(params?: {
-    industry?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.industry) queryParams.append('industry', params.industry);
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/companies${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getCompanies(params: { limit?: number; industry?: string; search?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/companies', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+      throw error;
+    }
   }
 
-  async createCompany(data: any) {
-    return this.post('/sales/companies', data);
+  async createCompany(companyData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/companies', companyData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating company:', error);
+      throw error;
+    }
   }
 
-  async updateCompany(id: string, data: any) {
-    return this.put(`/sales/companies/${id}`, data);
+  async updateCompany(companyId: string, companyData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/companies/${companyId}`, companyData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating company:', error);
+      throw error;
+    }
   }
 
-  async deleteCompany(id: string) {
-    return this.delete(`/sales/companies/${id}`);
+  async deleteCompany(companyId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/companies/${companyId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting company:', error);
+      throw error;
+    }
   }
 
-  // Opportunity endpoints
-  async getOpportunities(params?: {
-    stage?: string;
-    assignedTo?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.stage) queryParams.append('stage', params.stage);
-    if (params?.assignedTo) queryParams.append('assigned_to', params.assignedTo);
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/opportunities${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getOpportunities(params: { limit?: number; stage?: string; assignedTo?: string; search?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/opportunities', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching opportunities:', error);
+      throw error;
+    }
   }
 
-  async createOpportunity(data: any) {
-    return this.post('/sales/opportunities', data);
+  async createOpportunity(opportunityData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/opportunities', opportunityData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating opportunity:', error);
+      throw error;
+    }
   }
 
-  async updateOpportunity(id: string, data: any) {
-    return this.put(`/sales/opportunities/${id}`, data);
+  async updateOpportunity(opportunityId: string, opportunityData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/opportunities/${opportunityId}`, opportunityData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating opportunity:', error);
+      throw error;
+    }
   }
 
-  async deleteOpportunity(id: string) {
-    return this.delete(`/sales/opportunities/${id}`);
+  async deleteOpportunity(opportunityId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/opportunities/${opportunityId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting opportunity:', error);
+      throw error;
+    }
   }
 
-  // Quote endpoints
-  async getQuotes(params?: {
-    status?: string;
-    opportunityId?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/quotes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getQuotes(params: { limit?: number; status?: string; opportunityId?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/quotes', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+      throw error;
+    }
   }
 
-  async createQuote(data: any) {
-    return this.post('/sales/quotes', data);
+  async createQuote(quoteData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/quotes', quoteData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating quote:', error);
+      throw error;
+    }
   }
 
-  async updateQuote(id: string, data: any) {
-    return this.put(`/sales/quotes/${id}`, data);
+  async updateQuote(quoteId: string, quoteData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/quotes/${quoteId}`, quoteData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating quote:', error);
+      throw error;
+    }
   }
 
-  async deleteQuote(id: string) {
-    return this.delete(`/sales/quotes/${id}`);
+  async deleteQuote(quoteId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/quotes/${quoteId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      throw error;
+    }
   }
 
-  // Contract endpoints
-  async getContracts(params?: {
-    status?: string;
-    opportunityId?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/contracts${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getContracts(params: { limit?: number; status?: string; opportunityId?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/contracts', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching contracts:', error);
+      throw error;
+    }
   }
 
-  async createContract(data: any) {
-    return this.post('/sales/contracts', data);
+  async createContract(contractData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/contracts', contractData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating contract:', error);
+      throw error;
+    }
   }
 
-  async updateContract(id: string, data: any) {
-    return this.put(`/sales/contracts/${id}`, data);
+  async updateContract(contractId: string, contractData: any): Promise<any> {
+    try {
+      const response = await this.client.put(`/sales/contracts/${contractId}`, contractData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating contract:', error);
+      throw error;
+    }
   }
 
-  async deleteContract(id: string) {
-    return this.delete(`/sales/contracts/${id}`);
+  async deleteContract(contractId: string): Promise<any> {
+    try {
+      const response = await this.client.delete(`/sales/contracts/${contractId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting contract:', error);
+      throw error;
+    }
   }
 
-  // Sales Activity endpoints
-  async getSalesActivities(params?: {
-    leadId?: string;
-    opportunityId?: string;
-    contactId?: string;
-    companyId?: string;
-    type?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const queryParams = new URLSearchParams();
-    if (params?.leadId) queryParams.append('lead_id', params.leadId);
-    if (params?.opportunityId) queryParams.append('opportunity_id', params.opportunityId);
-    if (params?.contactId) queryParams.append('contact_id', params.contactId);
-    if (params?.companyId) queryParams.append('company_id', params.companyId);
-    if (params?.type) queryParams.append('type', params.type);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-
-    const url = `/sales/activities${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return this.get(url);
+  async getSalesActivities(params: { limit?: number; leadId?: string; opportunityId?: string; contactId?: string; companyId?: string; type?: string; page?: number } = {}): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/activities', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching sales activities:', error);
+      throw error;
+    }
   }
 
-  async createSalesActivity(data: any) {
-    return this.post('/sales/activities', data);
+  async createSalesActivity(activityData: any): Promise<any> {
+    try {
+      const response = await this.client.post('/sales/activities', activityData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating sales activity:', error);
+      throw error;
+    }
   }
 
-  // Sales Dashboard
-  async getSalesDashboard() {
-    return this.get('/sales/dashboard');
+  async getRevenueAnalytics(period: string = 'monthly', startDate?: string, endDate?: string): Promise<any> {
+    try {
+      const params: any = { period };
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      
+      const response = await this.client.get('/sales/analytics/revenue', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching revenue analytics:', error);
+      throw error;
+    }
   }
 
-  // Sales Analytics
-  async getRevenueAnalytics(period: string = 'monthly', startDate?: string, endDate?: string) {
-    const queryParams = new URLSearchParams();
-    queryParams.append('period', period);
-    if (startDate) queryParams.append('start_date', startDate);
-    if (endDate) queryParams.append('end_date', endDate);
-
-    const url = `/sales/analytics/revenue?${queryParams.toString()}`;
-    return this.get(url);
-  }
-
-  async getConversionAnalytics() {
-    return this.get('/sales/analytics/conversion');
+  async getConversionAnalytics(): Promise<any> {
+    try {
+      const response = await this.client.get('/sales/analytics/conversion');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching conversion analytics:', error);
+      throw error;
+    }
   }
 }
 
