@@ -152,7 +152,10 @@ export default function CRMLeadsPage() {
   };
 
   const handleFilterChange = (key: keyof CRMLeadFilters, value: string) => {
-    setFilters((prev: CRMLeadFilters) => ({ ...prev, [key]: value }));
+    setFilters((prev: CRMLeadFilters) => ({ 
+      ...prev, 
+      [key]: value === "all" ? undefined : value 
+    }));
     setPage(1);
   };
 
@@ -216,17 +219,17 @@ export default function CRMLeadsPage() {
             <div>
               <Label htmlFor="status">Status</Label>
               <Select
-                value={filters.status}
+                value={filters.status || "all"}
                 onValueChange={(value) => handleFilterChange("status", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   {Object.values(LeadStatus).map((status) => (
-                    <SelectItem key={status as string} value={status as string}>
-                      {(status as string).charAt(0).toUpperCase() + (status as string).slice(1)}
+                    <SelectItem key={status} value={status}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -235,18 +238,18 @@ export default function CRMLeadsPage() {
             <div>
               <Label htmlFor="source">Source</Label>
               <Select
-                value={filters.source}
+                value={filters.source || "all"}
                 onValueChange={(value) => handleFilterChange("source", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Sources" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Sources</SelectItem>
+                  <SelectItem value="all">All Sources</SelectItem>
                   {Object.values(LeadSource).map((source) => (
-                    <SelectItem key={source as string} value={source as string}>
-                      {(source as string).replace("_", " ").charAt(0).toUpperCase() +
-                        (source as string).replace("_", " ").slice(1)}
+                    <SelectItem key={source} value={source}>
+                      {source.replace("_", " ").charAt(0).toUpperCase() +
+                        source.replace("_", " ").slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>

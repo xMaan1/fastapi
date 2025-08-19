@@ -33,11 +33,17 @@ const allMenuItems: MenuItem[] = [
     gradient: "from-blue-500 to-cyan-500",
   },
   {
-    text: "Sales & CRM",
-    icon: DollarSign,
+    text: "CRM",
+    icon: Users,
     roles: ["*"],
-    gradient: "from-green-500 to-emerald-500",
+    gradient: "from-blue-500 to-indigo-500",
     subItems: [
+      {
+        text: "Dashboard",
+        icon: LayoutDashboard,
+        path: "/crm",
+        roles: ["*"],
+      },
       {
         text: "Companies",
         icon: Building,
@@ -62,6 +68,14 @@ const allMenuItems: MenuItem[] = [
         path: "/crm/opportunities",
         roles: ["*"],
       },
+    ],
+  },
+  {
+    text: "Sales",
+    icon: DollarSign,
+    roles: ["*"],
+    gradient: "from-green-500 to-emerald-500",
+    subItems: [
       {
         text: "Quotes",
         icon: FileText,
