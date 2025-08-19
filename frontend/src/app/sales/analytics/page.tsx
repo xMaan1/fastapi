@@ -18,9 +18,9 @@ import {
 import { Label } from "../../../components/ui/label";
 import { Badge } from "../../../components/ui/badge";
 import CRMService from "../../../services/CRMService";
-import { Opportunity, OpportunityStage } from "../../../models/sales";
-import { Contact, ContactStatus } from "../../../models/sales";
-import { Company, CompanyType } from "../../../models/sales";
+import { Opportunity, OpportunityStage } from "../../../models/crm";
+import { Contact, ContactType } from "../../../models/crm";
+import { Company, Industry } from "../../../models/crm";
 import { DashboardLayout } from "../../../components/layout";
 import {
   DollarSign,
@@ -142,10 +142,10 @@ export default function SalesAnalyticsPage() {
   // Contact Metrics
   const totalContacts = filteredContacts.length;
   const leadContacts = filteredContacts.filter(
-    (c) => c.status === ContactStatus.LEAD,
+    (c) => c.type === ContactType.LEAD,
   ).length;
   const customerContacts = filteredContacts.filter(
-    (c) => c.status === ContactStatus.CUSTOMER,
+    (c) => c.type === ContactType.CUSTOMER,
   ).length;
   const leadToCustomerRate =
     leadContacts > 0 ? (customerContacts / leadContacts) * 100 : 0;
@@ -153,10 +153,10 @@ export default function SalesAnalyticsPage() {
   // Company Metrics
   const totalCompanies = filteredCompanies.length;
   const customerCompanies = filteredCompanies.filter(
-    (c) => c.type === CompanyType.CUSTOMER,
+    (c) => c.industry === Industry.TECHNOLOGY,
   ).length;
   const prospectCompanies = filteredCompanies.filter(
-    (c) => c.type === CompanyType.PROSPECT,
+    (c) => c.industry === Industry.FINANCE,
   ).length;
 
   // Top Performers
@@ -186,7 +186,9 @@ export default function SalesAnalyticsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sales Analytics</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Sales Analytics
+            </h1>
             <p className="text-gray-600">
               Comprehensive sales performance insights
             </p>
@@ -278,7 +280,9 @@ export default function SalesAnalyticsPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -488,8 +492,8 @@ export default function SalesAnalyticsPage() {
                       <div>
                         <div className="font-medium">{opp.title}</div>
                         <div className="text-sm text-gray-500">
-                          {opp.stage.replace("_", " ")} • {opp.probability || 0}%
-                          probability
+                          {opp.stage.replace("_", " ")} • {opp.probability || 0}
+                          % probability
                         </div>
                       </div>
                     </div>
@@ -498,8 +502,8 @@ export default function SalesAnalyticsPage() {
                         ${opp.amount?.toLocaleString()}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {opp.closeDate
-                          ? new Date(opp.closeDate).toLocaleDateString()
+                        {opp.closedDate
+                          ? new Date(opp.closedDate).toLocaleDateString()
                           : "No close date"}
                       </div>
                     </div>

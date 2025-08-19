@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { TaskList } from "../../../../components/tasks";
@@ -40,12 +40,7 @@ export default function ProjectTasksPage() {
   const [tasksLoading, setTasksLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProject();
-    loadTasks();
-  }, [projectId]);
-
-  const loadProject = async () => {
+  const loadProject = useCallback(async () => {
     try {
       setLoading(true);
       const response = await apiService.getProject(projectId);
@@ -56,9 +51,9 @@ export default function ProjectTasksPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       setTasksLoading(true);
       const response = await apiService.getTasks({
@@ -72,7 +67,7 @@ export default function ProjectTasksPage() {
       if (Array.isArray(response)) {
         taskList = response;
       } else if (response.tasks && Array.isArray(response.tasks)) {
-        taskList = response.tasks;
+        taskList = response.data;
       } else if (response.data && Array.isArray(response.data)) {
         taskList = response.data;
       } else {
@@ -86,7 +81,12 @@ export default function ProjectTasksPage() {
     } finally {
       setTasksLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    loadProject();
+    loadTasks();
+  }, [loadProject, loadTasks]);
 
   const getTaskStats = () => {
     const totalTasks = tasks.length;

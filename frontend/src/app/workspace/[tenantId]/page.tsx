@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
@@ -33,11 +33,7 @@ export default function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchWorkspaceData();
-  }, [tenantId]);
-
-  const fetchWorkspaceData = async () => {
+  const fetchWorkspaceData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -80,7 +76,11 @@ export default function WorkspacePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchWorkspaceData();
+  }, [fetchWorkspaceData]);
 
   if (loading) {
     return (

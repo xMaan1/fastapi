@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
@@ -49,11 +49,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
   const params = useParams();
   const tenantId = params?.tenantId ? (params.tenantId as string) : "";
 
-  useEffect(() => {
-    fetchTenantInfo();
-  }, [tenantId]);
-
-  const fetchTenantInfo = async () => {
+  const fetchTenantInfo = useCallback(async () => {
     try {
       const response = await axios.get(
         `http://localhost:8000/api/tenants/${tenantId}`,
@@ -69,7 +65,11 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
       console.error("Error fetching tenant info:", error);
       router.push("/");
     }
-  };
+  }, [tenantId, router]);
+
+  useEffect(() => {
+    fetchTenantInfo();
+  }, [fetchTenantInfo]);
 
   const handleLogout = async () => {
     await logout();

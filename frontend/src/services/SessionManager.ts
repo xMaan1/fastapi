@@ -4,12 +4,14 @@ export interface SessionData {
   token: string;
   user: User;
   expiresAt?: number;
+  refreshToken?: string;
 }
 
 class SessionManager {
   private readonly TOKEN_KEY = "auth_token";
   private readonly USER_KEY = "user_data";
   private readonly EXPIRES_KEY = "token_expires";
+  private readonly REFRESH_TOKEN_KEY = "refresh_token";
 
   // Token management
   setToken(token: string, expiresIn?: number): void {
@@ -47,6 +49,22 @@ class SessionManager {
     localStorage.removeItem(this.EXPIRES_KEY);
   }
 
+  // Refresh token management
+  setRefreshToken(refreshToken: string): void {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  }
+
+  getRefreshToken(): string | null {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  removeRefreshToken(): void {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  }
+
   // User data management
   setUser(user: User): void {
     if (typeof window === "undefined") return;
@@ -76,9 +94,17 @@ class SessionManager {
   }
 
   // Session management
-  setSession(token: string, user: User, expiresIn?: number): void {
+  setSession(
+    token: string,
+    user: User,
+    expiresIn?: number,
+    refreshToken?: string,
+  ): void {
     this.setToken(token, expiresIn);
     this.setUser(user);
+    if (refreshToken) {
+      this.setRefreshToken(refreshToken);
+    }
   }
 
   getSession(): SessionData | null {
@@ -88,17 +114,20 @@ class SessionManager {
     if (!token || !user) return null;
 
     const expiresAt = localStorage.getItem(this.EXPIRES_KEY);
+    const refreshToken = this.getRefreshToken();
 
     return {
       token,
       user,
       expiresAt: expiresAt ? parseInt(expiresAt) : undefined,
+      refreshToken: refreshToken || undefined,
     };
   }
 
   clearSession(): void {
     this.removeToken();
     this.removeUser();
+    this.removeRefreshToken();
     // Also clear tenant-related data
     if (typeof window !== "undefined") {
       localStorage.removeItem("currentTenantId");
@@ -124,10 +153,36 @@ class SessionManager {
   }
 
   // Session refresh
+  async refreshAccessToken(): Promise<boolean> {
+    try {
+      const refreshToken = this.getRefreshToken();
+      if (!refreshToken) return false;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        this.setToken(data.access_token, data.expires_in);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+      return false;
+    }
+  }
+
   refreshSession(): boolean {
     if (this.isTokenExpired()) {
-      this.clearSession();
-      return false;
+      // Try to refresh instead of just clearing
+      return false; // Will be handled by async refresh
     }
     return true;
   }
@@ -136,10 +191,14 @@ class SessionManager {
   onSessionExpired(callback: () => void): void {
     if (typeof window === "undefined") return;
 
-    const checkExpiration = () => {
+    const checkExpiration = async () => {
       if (this.isTokenExpired()) {
-        this.clearSession();
-        callback();
+        // Try to refresh the token first
+        const refreshSuccess = await this.refreshAccessToken();
+        if (!refreshSuccess) {
+          this.clearSession();
+          callback();
+        }
       }
     };
 

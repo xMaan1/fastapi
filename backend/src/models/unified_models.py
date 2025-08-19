@@ -220,6 +220,16 @@ class AuthResponse(BaseModel):
     success: bool
     user: User
     token: str
+    refresh_token: str
+    expires_in: int
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
 
 # Project Models
 class ProjectBase(BaseModel):

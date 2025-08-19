@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -89,11 +89,7 @@ export default function SalesPage() {
     notes: "",
   });
 
-  useEffect(() => {
-    loadSalesData();
-  }, []);
-
-  const loadSalesData = async () => {
+  const loadSalesData = useCallback(async () => {
     try {
       setLoading(true);
       const [dashboardData, leadsData, opportunitiesData] = await Promise.all([
@@ -110,7 +106,11 @@ export default function SalesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadSalesData();
+  }, [loadSalesData]);
 
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();

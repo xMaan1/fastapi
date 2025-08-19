@@ -151,11 +151,21 @@ export class ApiService {
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
         if (error.response?.status === 401) {
-          this.sessionManager.clearSession();
-          // Don't redirect immediately, let the component handle it
-          // The AuthGuard will detect the cleared session and redirect
+          // Try to refresh the token first
+          const refreshSuccess = await this.sessionManager.refreshAccessToken();
+          if (refreshSuccess) {
+            // Retry the original request with new token
+            const originalRequest = error.config;
+            originalRequest.headers.Authorization = `Bearer ${this.sessionManager.getToken()}`;
+            return this.client(originalRequest);
+          } else {
+            // Refresh failed, clear session
+            this.sessionManager.clearSession();
+            // Don't redirect immediately, let the component handle it
+            // The AuthGuard will detect the cleared session and redirect
+          }
         }
         return Promise.reject(error);
       },
@@ -207,7 +217,12 @@ export class ApiService {
 
       // Store session after successful login
       if (response.success && response.token && response.user) {
-        this.sessionManager.setSession(response.token, response.user);
+        this.sessionManager.setSession(
+          response.token,
+          response.user,
+          response.expires_in,
+          response.refresh_token,
+        );
 
         // Fetch user's tenants ONCE during login and store in localStorage
         try {

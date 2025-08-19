@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -57,9 +57,12 @@ export default function CRMOpportunitiesPage() {
   const [filters, setFilters] = useState<CRMOpportunityFilters>({});
   const [search, setSearch] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
-  const [viewingOpportunity, setViewingOpportunity] = useState<Opportunity | null>(null);
-  const [deletingOpportunity, setDeletingOpportunity] = useState<Opportunity | null>(null);
+  const [editingOpportunity, setEditingOpportunity] =
+    useState<Opportunity | null>(null);
+  const [viewingOpportunity, setViewingOpportunity] =
+    useState<Opportunity | null>(null);
+  const [deletingOpportunity, setDeletingOpportunity] =
+    useState<Opportunity | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -83,7 +86,7 @@ export default function CRMOpportunitiesPage() {
     loadOpportunities();
   }, [filters]);
 
-  const loadOpportunities = async () => {
+  const loadOpportunities = useCallback(async () => {
     try {
       setLoading(true);
       const response = await CRMService.getOpportunities(filters, 1, 100);
@@ -94,7 +97,7 @@ export default function CRMOpportunitiesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   const handleSearch = () => {
     setFilters((prev: CRMOpportunityFilters) => ({ ...prev, search }));
@@ -233,10 +236,12 @@ export default function CRMOpportunitiesPage() {
               Manage your sales opportunities and pipeline
             </p>
           </div>
-          <Button onClick={() => {
-            setShowCreateDialog(true);
-            resetForm();
-          }}>
+          <Button
+            onClick={() => {
+              setShowCreateDialog(true);
+              resetForm();
+            }}
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Opportunity
           </Button>
@@ -282,7 +287,10 @@ export default function CRMOpportunitiesPage() {
                   onValueChange={(value) =>
                     setFilters((prev: CRMOpportunityFilters) => ({
                       ...prev,
-                      stage: value === "all" ? undefined : value as OpportunityStage,
+                      stage:
+                        value === "all"
+                          ? undefined
+                          : (value as OpportunityStage),
                     }))
                   }
                 >
@@ -368,7 +376,9 @@ export default function CRMOpportunitiesPage() {
                           <Calendar className="w-4 h-4" />
                           <span>
                             Closes:{" "}
-                            {CRMService.formatDate(opportunity.expectedCloseDate)}
+                            {CRMService.formatDate(
+                              opportunity.expectedCloseDate,
+                            )}
                           </span>
                         </div>
                       )}
@@ -389,13 +399,25 @@ export default function CRMOpportunitiesPage() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handleView(opportunity)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleView(opportunity)}
+                    >
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(opportunity)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(opportunity)}
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(opportunity)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(opportunity)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -409,7 +431,9 @@ export default function CRMOpportunitiesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pipeline Summary</CardTitle>
-            <CardDescription>Overview of opportunities by stage</CardDescription>
+            <CardDescription>
+              Overview of opportunities by stage
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -423,7 +447,10 @@ export default function CRMOpportunitiesPage() {
                 );
 
                 return (
-                  <div key={stage} className="text-center p-3 border rounded-lg">
+                  <div
+                    key={stage}
+                    className="text-center p-3 border rounded-lg"
+                  >
                     <div className="text-sm font-medium text-gray-600 capitalize">
                       {stage.replace("_", " ")}
                     </div>
@@ -448,13 +475,12 @@ export default function CRMOpportunitiesPage() {
                 {editingOpportunity ? "Edit Opportunity" : "New Opportunity"}
               </DialogTitle>
               <DialogDescription>
-                {editingOpportunity 
-                  ? "Update opportunity information" 
-                  : "Create a new sales opportunity"
-                }
+                {editingOpportunity
+                  ? "Update opportunity information"
+                  : "Create a new sales opportunity"}
               </DialogDescription>
             </DialogHeader>
-            
+
             {errorMessage && (
               <Alert variant="destructive">
                 <AlertDescription>{errorMessage}</AlertDescription>
@@ -479,7 +505,10 @@ export default function CRMOpportunitiesPage() {
                   id="description"
                   value={formData.description}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
                   }
                   placeholder="Opportunity description"
                 />
@@ -517,7 +546,9 @@ export default function CRMOpportunitiesPage() {
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      amount: e.target.value ? parseFloat(e.target.value) : undefined,
+                      amount: e.target.value
+                        ? parseFloat(e.target.value)
+                        : undefined,
                     }))
                   }
                   placeholder="0.00"
@@ -570,7 +601,10 @@ export default function CRMOpportunitiesPage() {
                   id="contactId"
                   value={formData.contactId}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, contactId: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      contactId: e.target.value,
+                    }))
                   }
                   placeholder="Optional"
                 />
@@ -581,7 +615,10 @@ export default function CRMOpportunitiesPage() {
                   id="companyId"
                   value={formData.companyId}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, companyId: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      companyId: e.target.value,
+                    }))
                   }
                   placeholder="Optional"
                 />
@@ -592,7 +629,10 @@ export default function CRMOpportunitiesPage() {
                   id="assignedTo"
                   value={formData.assignedTo}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, assignedTo: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      assignedTo: e.target.value,
+                    }))
                   }
                   placeholder="Optional"
                 />
@@ -618,47 +658,77 @@ export default function CRMOpportunitiesPage() {
                 Cancel
               </Button>
               <Button onClick={handleSubmit} disabled={submitting}>
-                {submitting ? "Saving..." : editingOpportunity ? "Update Opportunity" : "Create Opportunity"}
+                {submitting
+                  ? "Saving..."
+                  : editingOpportunity
+                    ? "Update Opportunity"
+                    : "Create Opportunity"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* View Opportunity Dialog */}
-        <Dialog open={!!viewingOpportunity} onOpenChange={() => setViewingOpportunity(null)}>
+        <Dialog
+          open={!!viewingOpportunity}
+          onOpenChange={() => setViewingOpportunity(null)}
+        >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>View Opportunity</DialogTitle>
               <DialogDescription>Opportunity details</DialogDescription>
             </DialogHeader>
-            
+
             {viewingOpportunity && (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Title</Label>
-                  <p className="text-lg font-medium">{viewingOpportunity.title}</p>
+                  <Label className="text-sm font-medium text-gray-600">
+                    Title
+                  </Label>
+                  <p className="text-lg font-medium">
+                    {viewingOpportunity.title}
+                  </p>
                 </div>
                 {viewingOpportunity.description && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Description</Label>
-                    <p className="text-gray-900">{viewingOpportunity.description}</p>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Description
+                    </Label>
+                    <p className="text-gray-900">
+                      {viewingOpportunity.description}
+                    </p>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Stage</Label>
-                    <Badge className={CRMService.getOpportunityStageColor(viewingOpportunity.stage)}>
-                      {viewingOpportunity.stage.replace("_", " ").charAt(0).toUpperCase() +
+                    <Label className="text-sm font-medium text-gray-600">
+                      Stage
+                    </Label>
+                    <Badge
+                      className={CRMService.getOpportunityStageColor(
+                        viewingOpportunity.stage,
+                      )}
+                    >
+                      {viewingOpportunity.stage
+                        .replace("_", " ")
+                        .charAt(0)
+                        .toUpperCase() +
                         viewingOpportunity.stage.replace("_", " ").slice(1)}
                     </Badge>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Probability</Label>
-                    <p className="text-gray-900">{viewingOpportunity.probability}%</p>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Probability
+                    </Label>
+                    <p className="text-gray-900">
+                      {viewingOpportunity.probability}%
+                    </p>
                   </div>
                   {viewingOpportunity.amount && (
                     <div>
-                      <Label className="text-sm font-medium text-gray-600">Amount</Label>
+                      <Label className="text-sm font-medium text-gray-600">
+                        Amount
+                      </Label>
                       <p className="text-gray-900 font-medium">
                         {CRMService.formatCurrency(viewingOpportunity.amount)}
                       </p>
@@ -666,26 +736,36 @@ export default function CRMOpportunitiesPage() {
                   )}
                   {viewingOpportunity.expectedCloseDate && (
                     <div>
-                      <Label className="text-sm font-medium text-gray-600">Expected Close Date</Label>
+                      <Label className="text-sm font-medium text-gray-600">
+                        Expected Close Date
+                      </Label>
                       <p className="text-gray-900">
-                        {CRMService.formatDate(viewingOpportunity.expectedCloseDate)}
+                        {CRMService.formatDate(
+                          viewingOpportunity.expectedCloseDate,
+                        )}
                       </p>
                     </div>
                   )}
                 </div>
                 {viewingOpportunity.notes && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Notes</Label>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Notes
+                    </Label>
                     <p className="text-gray-900">{viewingOpportunity.notes}</p>
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Created</Label>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Created
+                    </Label>
                     <p>{CRMService.formatDate(viewingOpportunity.createdAt)}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Updated</Label>
+                    <Label className="text-sm font-medium text-gray-600">
+                      Updated
+                    </Label>
                     <p>{CRMService.formatDate(viewingOpportunity.updatedAt)}</p>
                   </div>
                 </div>
@@ -693,14 +773,19 @@ export default function CRMOpportunitiesPage() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setViewingOpportunity(null)}>
+              <Button
+                variant="outline"
+                onClick={() => setViewingOpportunity(null)}
+              >
                 Close
               </Button>
               {viewingOpportunity && (
-                <Button onClick={() => {
-                  setViewingOpportunity(null);
-                  handleEdit(viewingOpportunity);
-                }}>
+                <Button
+                  onClick={() => {
+                    setViewingOpportunity(null);
+                    handleEdit(viewingOpportunity);
+                  }}
+                >
                   Edit Opportunity
                 </Button>
               )}
@@ -709,15 +794,20 @@ export default function CRMOpportunitiesPage() {
         </Dialog>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog open={!!deletingOpportunity} onOpenChange={() => setDeletingOpportunity(null)}>
+        <Dialog
+          open={!!deletingOpportunity}
+          onOpenChange={() => setDeletingOpportunity(null)}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Delete Opportunity</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete "{deletingOpportunity?.title}"? This action cannot be undone.
+                Are you sure you want to delete &quot;
+                {deletingOpportunity?.title}&quot;? This action cannot be
+                undone.
               </DialogDescription>
             </DialogHeader>
-            
+
             <DialogFooter>
               <Button
                 variant="outline"

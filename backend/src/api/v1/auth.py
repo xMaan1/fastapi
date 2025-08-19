@@ -2,10 +2,10 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
-from ...models.unified_models import LoginCredentials, AuthResponse, User, UserCreate
+from ...models.unified_models import LoginCredentials, AuthResponse, User, UserCreate, RefreshTokenRequest, RefreshTokenResponse
 from ...config.unified_database import get_db, get_user_by_email, get_user_by_username, create_user
 from ...core.auth import (
-    verify_password, get_password_hash, create_access_token, 
+    verify_password, get_password_hash, create_access_token, create_refresh_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
 from ...api.dependencies import get_current_user
@@ -28,10 +28,14 @@ async def login(credentials: LoginCredentials, db: Session = Depends(get_db)):
             detail="Account is inactive"
         )
     
-    # Create access token
+    # Create access token and refresh token
     access_token = create_access_token(
         data={"sub": user.email},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    refresh_token = create_refresh_token(
+        data={"sub": user.email}
     )
     
     return AuthResponse(
@@ -46,8 +50,35 @@ async def login(credentials: LoginCredentials, db: Session = Depends(get_db)):
             avatar=user.avatar,
             permissions=[]
         ),
-        token=access_token
+        token=access_token,
+        refresh_token=refresh_token,
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
+
+@router.post("/refresh", response_model=RefreshTokenResponse)
+async def refresh_access_token(refresh_request: RefreshTokenRequest):
+    """Refresh access token using refresh token"""
+    try:
+        from ...core.auth import verify_token
+        
+        # Verify refresh token
+        payload = verify_token(refresh_request.refresh_token, "refresh")
+        
+        # Create new access token
+        new_access_token = create_access_token(
+            data={"sub": payload.get("sub")}
+        )
+        
+        return RefreshTokenResponse(
+            access_token=new_access_token,
+            token_type="bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
 
 @router.get("/me", response_model=User)
 async def get_current_user_info(current_user = Depends(get_current_user)):

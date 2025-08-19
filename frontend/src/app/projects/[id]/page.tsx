@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -79,17 +79,7 @@ export default function ProjectDetailsPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  useEffect(() => {
-    loadProjectDetails();
-  }, [projectId]);
-
-  useEffect(() => {
-    if (activeTab === "tasks") {
-      loadTasks();
-    }
-  }, [activeTab, projectId]);
-
-  const loadProjectDetails = async () => {
+  const loadProjectDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -101,9 +91,9 @@ export default function ProjectDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       setTasksLoading(true);
       const response = await apiService.getTasks({
@@ -117,7 +107,17 @@ export default function ProjectDetailsPage() {
     } finally {
       setTasksLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    loadProjectDetails();
+  }, [loadProjectDetails]);
+
+  useEffect(() => {
+    if (activeTab === "tasks") {
+      loadTasks();
+    }
+  }, [activeTab, loadTasks]);
 
   const handleEditProject = () => {
     setEditDialogOpen(true);

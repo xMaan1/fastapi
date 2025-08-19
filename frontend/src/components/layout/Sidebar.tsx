@@ -5,7 +5,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
 import {
-  LayoutDashboard, FolderOpen, CheckSquare, Users, Clock, BarChart3, UserCheck, Building, Calendar, X, Search, TrendingUp, Target, FileText, DollarSign, Briefcase, Award, GraduationCap, Clock3, ChevronDown, PieChart, FileCheck, Banknote, BookOpen,
+  LayoutDashboard,
+  FolderOpen,
+  CheckSquare,
+  Users,
+  Clock,
+  BarChart3,
+  UserCheck,
+  Building,
+  Calendar,
+  X,
+  Search,
+  TrendingUp,
+  Target,
+  FileText,
+  DollarSign,
+  Briefcase,
+  Award,
+  GraduationCap,
+  Clock3,
+  ChevronDown,
+  PieChart,
+  FileCheck,
+  Banknote,
+  BookOpen,
 } from "lucide-react";
 
 interface SubMenuItem {
@@ -121,12 +144,6 @@ const allMenuItems: MenuItem[] = [
         roles: ["*"],
       },
       {
-        text: "Time Tracking",
-        icon: Clock3,
-        path: "/time-tracking",
-        roles: ["*"],
-      },
-      {
         text: "Leave Management",
         icon: Calendar,
         path: "/hrm/leave-management",
@@ -222,7 +239,7 @@ export default function Sidebar() {
       // Check if any sub-item matches
       if (item.subItems) {
         return item.subItems.some((subItem) =>
-          subItem.text.toLowerCase().includes(query)
+          subItem.text.toLowerCase().includes(query),
         );
       }
       return false;
@@ -231,9 +248,12 @@ export default function Sidebar() {
     // Auto-expand items that have matching sub-items
     const newExpanded = new Set(expandedItems);
     filtered.forEach((item) => {
-      if (item.subItems && item.subItems.some((subItem) =>
-        subItem.text.toLowerCase().includes(query)
-      )) {
+      if (
+        item.subItems &&
+        item.subItems.some((subItem) =>
+          subItem.text.toLowerCase().includes(query),
+        )
+      ) {
         newExpanded.add(item.text);
       }
     });
@@ -261,7 +281,10 @@ export default function Sidebar() {
 
       <div className="p-4 border-b border-gray-200">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={16}
+          />
           <input
             type="text"
             placeholder="Search modules and pages..."
@@ -290,7 +313,9 @@ export default function Sidebar() {
           const isExpanded = expandedItems.has(item.text);
           const hasSubItems = item.subItems && item.subItems.length > 0;
           const isMainItemActive = item.path && isActive(item.path);
-          const hasActiveSubItem = hasSubItems && item.subItems!.some((subItem) => isActive(subItem.path));
+          const hasActiveSubItem =
+            hasSubItems &&
+            item.subItems!.some((subItem) => isActive(subItem.path));
 
           return (
             <div key={item.text} className="space-y-1">
@@ -300,8 +325,10 @@ export default function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer",
                     isMainItemActive
-                      ? "bg-gradient-to-r " + item.gradient + " text-white shadow-lg"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r " +
+                          item.gradient +
+                          " text-white shadow-lg"
+                      : "text-gray-700 hover:bg-gray-100",
                   )}
                 >
                   <div
@@ -309,20 +336,20 @@ export default function Sidebar() {
                       "p-2 rounded-lg transition-colors",
                       isMainItemActive
                         ? "bg-white/20"
-                        : "bg-gray-100 group-hover:bg-gray-200"
+                        : "bg-gray-100 group-hover:bg-gray-200",
                     )}
                   >
                     <item.icon
                       className={cn(
                         "h-5 w-5 transition-colors",
-                        isMainItemActive ? "text-white" : "text-gray-600"
+                        isMainItemActive ? "text-white" : "text-gray-600",
                       )}
                     />
                   </div>
                   <span
                     className={cn(
                       "font-medium transition-colors flex-1",
-                      isMainItemActive ? "text-white" : "text-gray-700"
+                      isMainItemActive ? "text-white" : "text-gray-700",
                     )}
                   >
                     {item.text}
@@ -337,8 +364,10 @@ export default function Sidebar() {
                   className={cn(
                     "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer",
                     hasActiveSubItem
-                      ? "bg-gradient-to-r " + item.gradient + " text-white shadow-lg"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r " +
+                          item.gradient +
+                          " text-white shadow-lg"
+                      : "text-gray-700 hover:bg-gray-100",
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -347,20 +376,20 @@ export default function Sidebar() {
                         "p-2 rounded-lg transition-colors",
                         hasActiveSubItem
                           ? "bg-white/20"
-                          : "bg-gray-100 group-hover:bg-gray-200"
+                          : "bg-gray-100 group-hover:bg-gray-200",
                       )}
                     >
                       <item.icon
                         className={cn(
                           "h-5 w-5 transition-colors",
-                          hasActiveSubItem ? "text-white" : "text-gray-600"
+                          hasActiveSubItem ? "text-white" : "text-gray-600",
                         )}
                       />
                     </div>
                     <span
                       className={cn(
                         "font-medium transition-colors flex-1",
-                        hasActiveSubItem ? "text-white" : "text-gray-700"
+                        hasActiveSubItem ? "text-white" : "text-gray-700",
                       )}
                     >
                       {item.text}
@@ -370,13 +399,13 @@ export default function Sidebar() {
                     <div
                       className={cn(
                         "p-1 rounded transition-transform duration-200",
-                        isExpanded ? "rotate-180" : "rotate-0"
+                        isExpanded ? "rotate-180" : "rotate-0",
                       )}
                     >
                       <ChevronDown
                         className={cn(
                           "h-4 w-4 transition-colors",
-                          hasActiveSubItem ? "text-white" : "text-gray-500"
+                          hasActiveSubItem ? "text-white" : "text-gray-500",
                         )}
                       />
                     </div>
@@ -396,7 +425,7 @@ export default function Sidebar() {
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-200 group",
                           isSubItemActive
                             ? "bg-blue-50 text-blue-700 border-l-2 border-blue-500"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-800",
                         )}
                       >
                         <div
@@ -404,20 +433,22 @@ export default function Sidebar() {
                             "p-1.5 rounded-md transition-colors",
                             isSubItemActive
                               ? "bg-blue-100"
-                              : "bg-gray-100 group-hover:bg-gray-200"
+                              : "bg-gray-100 group-hover:bg-gray-200",
                           )}
                         >
                           <subItem.icon
                             className={cn(
                               "h-4 w-4 transition-colors",
-                              isSubItemActive ? "text-blue-600" : "text-gray-500"
+                              isSubItemActive
+                                ? "text-blue-600"
+                                : "text-gray-500",
                             )}
                           />
                         </div>
                         <span
                           className={cn(
                             "text-sm font-medium transition-colors",
-                            isSubItemActive ? "text-blue-700" : "text-gray-600"
+                            isSubItemActive ? "text-blue-700" : "text-gray-600",
                           )}
                         >
                           {subItem.text}

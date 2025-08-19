@@ -50,8 +50,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import CRMService from "../../services/CRMService";
+import apiService from "../../services/ApiService";
 import { ContractStatus } from "../../models/sales";
-import { Contract, Opportunity, Contact, Company } from "../../models/sales";
+import { Contract } from "../../models/sales";
+import { Opportunity, Contact, Company } from "../../models/crm";
 import { DashboardLayout } from "../layout";
 
 export default function ContractsPage() {
@@ -94,9 +96,9 @@ export default function ContractsPage() {
           CRMService.getCompanies({}, 1, 100),
         ]);
       setContracts(contractsData);
-      setOpportunities(opportunitiesData);
-      setContacts(contactsData);
-      setCompanies(companiesData);
+      setOpportunities(opportunitiesData.opportunities || []);
+      setContacts(contactsData.contacts || []);
+      setCompanies(companiesData.companies || []);
     } catch (error) {
       toast.error("Failed to fetch data");
       console.error(error);
@@ -181,7 +183,7 @@ export default function ContractsPage() {
 
   const getOpportunityName = (opportunityId: string) => {
     const opportunity = opportunities.find((o) => o.id === opportunityId);
-    return opportunity?.name || "Unknown Opportunity";
+    return opportunity?.title || "Unknown Opportunity";
   };
 
   const getContactName = (contactId: string) => {
@@ -220,7 +222,10 @@ export default function ContractsPage() {
               Manage your sales contracts and agreements
             </p>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -263,7 +268,7 @@ export default function ContractsPage() {
                     <SelectContent>
                       {opportunities.map((opportunity) => (
                         <SelectItem key={opportunity.id} value={opportunity.id}>
-                          {opportunity.name}
+                          {opportunity.title}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -369,7 +374,10 @@ export default function ContractsPage() {
                         HTMLInputElement | HTMLTextAreaElement
                       >,
                     ) =>
-                      setNewContract({ ...newContract, endDate: e.target.value })
+                      setNewContract({
+                        ...newContract,
+                        endDate: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -465,7 +473,9 @@ export default function ContractsPage() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Expiring Soon</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Expiring Soon
+              </CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

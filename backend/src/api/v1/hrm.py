@@ -247,6 +247,56 @@ async def create_hrm_job(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating job posting: {str(e)}")
 
+@router.get("/jobs/{job_id}", response_model=JobPosting)
+async def get_hrm_job_by_id(
+    job_id: str,
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific job posting by ID"""
+    try:
+        job = get_job_posting_by_id(db, job_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job posting not found")
+        return job
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching job posting: {str(e)}")
+
+@router.put("/jobs/{job_id}", response_model=JobPosting)
+async def update_hrm_job(
+    job_id: str,
+    job_data: JobPostingUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update an existing job posting"""
+    try:
+        job = update_job_posting(db, job_id, job_data.dict(exclude_unset=True), tenant_context["tenant_id"] if tenant_context else None)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job posting not found")
+        return job
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating job posting: {str(e)}")
+
+@router.delete("/jobs/{job_id}")
+async def delete_hrm_job(
+    job_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a job posting"""
+    try:
+        success = delete_job_posting(db, job_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not success:
+            raise HTTPException(status_code=404, detail="Job posting not found")
+        return {"message": "Job posting deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting job posting: {str(e)}")
+
 # Application endpoints
 @router.get("/applications", response_model=HRMApplicationsResponse)
 async def get_hrm_applications(
@@ -401,6 +451,56 @@ async def create_hrm_review(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating performance review: {str(e)}")
 
+@router.get("/reviews/{review_id}", response_model=PerformanceReview)
+async def get_hrm_review_by_id(
+    review_id: str,
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific performance review by ID"""
+    try:
+        review = get_performance_review_by_id(db, review_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not review:
+            raise HTTPException(status_code=404, detail="Performance review not found")
+        return review
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching performance review: {str(e)}")
+
+@router.put("/reviews/{review_id}", response_model=PerformanceReview)
+async def update_hrm_review(
+    review_id: str,
+    review_data: PerformanceReviewUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update an existing performance review"""
+    try:
+        review = update_performance_review(db, review_id, review_data.dict(exclude_unset=True), tenant_context["tenant_id"] if tenant_context else None)
+        if not review:
+            raise HTTPException(status_code=404, detail="Performance review not found")
+        return review
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating performance review: {str(e)}")
+
+@router.delete("/reviews/{review_id}")
+async def delete_hrm_review(
+    review_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a performance review"""
+    try:
+        success = delete_performance_review(db, review_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not success:
+            raise HTTPException(status_code=404, detail="Performance review not found")
+        return {"message": "Performance review deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error deleting performance review: {str(e)}")
+
 # Time Entry endpoints
 @router.get("/time-entries", response_model=HRMTimeEntriesResponse)
 async def get_hrm_time_entries(
@@ -552,6 +652,60 @@ async def create_hrm_leave_request(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating leave request: {str(e)}")
 
+@router.get("/leave-requests/{leave_request_id}", response_model=LeaveRequest)
+async def get_hrm_leave_request(
+    leave_request_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific leave request by ID"""
+    try:
+        leave_request = get_leave_request_by_id(db, leave_request_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not leave_request:
+            raise HTTPException(status_code=404, detail="Leave request not found")
+        return leave_request
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching leave request: {str(e)}")
+
+@router.put("/leave-requests/{leave_request_id}", response_model=LeaveRequest)
+async def update_hrm_leave_request(
+    leave_request_id: str,
+    leave_request_update: LeaveRequestUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update a leave request"""
+    try:
+        updated_request = update_leave_request(
+            db, 
+            leave_request_id, 
+            leave_request_update.dict(exclude_unset=True),
+            tenant_context["tenant_id"] if tenant_context else None
+        )
+        if not updated_request:
+            raise HTTPException(status_code=404, detail="Leave request not found")
+        return updated_request
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating leave request: {str(e)}")
+
+@router.delete("/leave-requests/{leave_request_id}")
+async def delete_hrm_leave_request(
+    leave_request_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a leave request"""
+    try:
+        deleted = delete_leave_request(db, leave_request_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Leave request not found")
+        return {"message": "Leave request deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting leave request: {str(e)}")
+
 # Payroll endpoints
 @router.get("/payroll", response_model=HRMPayrollResponse)
 async def get_hrm_payroll(
@@ -628,6 +782,60 @@ async def create_hrm_payroll(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating payroll record: {str(e)}")
+
+@router.get("/payroll/{payroll_id}", response_model=Payroll)
+async def get_hrm_payroll(
+    payroll_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific payroll record by ID"""
+    try:
+        payroll = get_payroll_by_id(db, payroll_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not payroll:
+            raise HTTPException(status_code=404, detail="Payroll record not found")
+        return payroll
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching payroll record: {str(e)}")
+
+@router.put("/payroll/{payroll_id}", response_model=Payroll)
+async def update_hrm_payroll(
+    payroll_id: str,
+    payroll_update: PayrollUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update a payroll record"""
+    try:
+        updated_payroll = update_payroll(
+            db, 
+            payroll_id, 
+            payroll_update.dict(exclude_unset=True),
+            tenant_context["tenant_id"] if tenant_context else None
+        )
+        if not updated_payroll:
+            raise HTTPException(status_code=404, detail="Payroll record not found")
+        return updated_payroll
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating payroll record: {str(e)}")
+
+@router.delete("/payroll/{payroll_id}")
+async def delete_hrm_payroll(
+    payroll_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a payroll record"""
+    try:
+        deleted = delete_payroll(db, payroll_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Payroll record not found")
+        return {"message": "Payroll record deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting payroll record: {str(e)}")
 
 # Benefits endpoints
 @router.get("/benefits", response_model=HRMBenefitsResponse)
@@ -780,6 +988,60 @@ async def create_hrm_training(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating training program: {str(e)}")
 
+@router.get("/training/{training_id}", response_model=Training)
+async def get_hrm_training(
+    training_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific training program by ID"""
+    try:
+        training = get_training_by_id(db, training_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not training:
+            raise HTTPException(status_code=404, detail="Training program not found")
+        return training
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching training program: {str(e)}")
+
+@router.put("/training/{training_id}", response_model=Training)
+async def update_hrm_training(
+    training_id: str,
+    training_update: TrainingUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update a training program"""
+    try:
+        updated_training = update_training(
+            db, 
+            training_id, 
+            training_update.dict(exclude_unset=True),
+            tenant_context["tenant_id"] if tenant_context else None
+        )
+        if not updated_training:
+            raise HTTPException(status_code=404, detail="Training program not found")
+        return updated_training
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating training program: {str(e)}")
+
+@router.delete("/training/{training_id}")
+async def delete_hrm_training(
+    training_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a training program"""
+    try:
+        deleted = delete_training(db, training_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Training program not found")
+        return {"message": "Training program deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting training program: {str(e)}")
+
 # Training Enrollment endpoints
 @router.get("/training-enrollments", response_model=HRMEnrollmentsResponse)
 async def get_hrm_training_enrollments(
@@ -850,6 +1112,60 @@ async def create_hrm_training_enrollment(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error creating training enrollment: {str(e)}")
+
+@router.get("/training-enrollments/{enrollment_id}", response_model=TrainingEnrollment)
+async def get_hrm_training_enrollment(
+    enrollment_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Get a specific training enrollment by ID"""
+    try:
+        enrollment = get_training_enrollment_by_id(db, enrollment_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not enrollment:
+            raise HTTPException(status_code=404, detail="Training enrollment not found")
+        return enrollment
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching training enrollment: {str(e)}")
+
+@router.put("/training-enrollments/{enrollment_id}", response_model=TrainingEnrollment)
+async def update_hrm_training_enrollment(
+    enrollment_id: str,
+    enrollment_update: TrainingEnrollmentUpdate,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Update a training enrollment"""
+    try:
+        updated_enrollment = update_training_enrollment(
+            db, 
+            enrollment_id, 
+            enrollment_update.dict(exclude_unset=True),
+            tenant_context["tenant_id"] if tenant_context else None
+        )
+        if not updated_enrollment:
+            raise HTTPException(status_code=404, detail="Training enrollment not found")
+        return updated_enrollment
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating training enrollment: {str(e)}")
+
+@router.delete("/training-enrollments/{enrollment_id}")
+async def delete_hrm_training_enrollment(
+    enrollment_id: str,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    tenant_context: Optional[dict] = Depends(get_tenant_context)
+):
+    """Delete a training enrollment"""
+    try:
+        deleted = delete_training_enrollment(db, enrollment_id, tenant_context["tenant_id"] if tenant_context else None)
+        if not deleted:
+            raise HTTPException(status_code=500, detail="Training enrollment not found")
+        return {"message": "Training enrollment deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting training enrollment: {str(e)}")
 
 # HRM Dashboard endpoint
 @router.get("/dashboard", response_model=HRMDashboard)

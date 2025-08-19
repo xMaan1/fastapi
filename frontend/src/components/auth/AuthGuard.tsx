@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -38,7 +38,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">Initializing...</p>
-          <p className="text-sm text-gray-500">Please wait while we verify your session</p>
+          <p className="text-sm text-gray-500">
+            Please wait while we verify your session
+          </p>
         </div>
       </div>
     );

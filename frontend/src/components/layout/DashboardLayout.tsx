@@ -21,11 +21,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
       <div className="md:hidden">
         {sidebarOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
-        <div className={`fixed left-0 top-0 z-50 h-full transform transition-transform duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}>
+        <div
+          className={`fixed left-0 top-0 z-50 h-full transform transition-transform duration-300 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <Sidebar />
         </div>
       </div>

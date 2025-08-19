@@ -36,11 +36,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const sessionManager = new SessionManager();
-        
+
         // Check if session exists and is valid
-        if (sessionManager.isSessionValid() && !sessionManager.isTokenExpired()) {
+        if (sessionManager.isSessionValid()) {
+          // If token is expired, try to refresh it
+          if (sessionManager.isTokenExpired()) {
+            const refreshSuccess = await sessionManager.refreshAccessToken();
+            if (!refreshSuccess) {
+              sessionManager.clearSession();
+              setUser(null);
+              setLoading(false);
+              return;
+            }
+          }
+
           const session = sessionManager.getSession();
-          
+
           if (session && session.token && session.user) {
             setUser(session.user);
 

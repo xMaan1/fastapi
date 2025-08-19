@@ -50,8 +50,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import CRMService from "../../services/CRMService";
+import apiService from "../../services/ApiService";
 import { QuoteStatus } from "../../models/sales";
-import { Quote, Opportunity, Contact } from "../../models/sales";
+import { Quote } from "../../models/sales";
+import { Opportunity, Contact } from "../../models/crm";
 import { DashboardLayout } from "../layout";
 
 export default function QuotesPage() {
@@ -87,8 +89,8 @@ export default function QuotesPage() {
         CRMService.getContacts({}, 1, 100),
       ]);
       setQuotes(quotesData);
-      setOpportunities(opportunitiesData);
-      setContacts(contactsData);
+      setOpportunities(opportunitiesData.opportunities || []);
+      setContacts(contactsData.contacts || []);
     } catch (error) {
       toast.error("Failed to fetch data");
       console.error(error);
@@ -170,7 +172,7 @@ export default function QuotesPage() {
 
   const getOpportunityName = (opportunityId: string) => {
     const opportunity = opportunities.find((o) => o.id === opportunityId);
-    return opportunity?.name || "Unknown Opportunity";
+    return opportunity?.title || "Unknown Opportunity";
   };
 
   const getContactName = (contactId: string) => {
@@ -204,7 +206,10 @@ export default function QuotesPage() {
               Manage your sales quotes and proposals
             </p>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -327,7 +332,9 @@ export default function QuotesPage() {
                       e: React.ChangeEvent<
                         HTMLInputElement | HTMLTextAreaElement
                       >,
-                    ) => setNewQuote({ ...newQuote, validUntil: e.target.value })}
+                    ) =>
+                      setNewQuote({ ...newQuote, validUntil: e.target.value })
+                    }
                   />
                 </div>
                 <div className="col-span-2 space-y-2">
@@ -362,7 +369,9 @@ export default function QuotesPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Quotes</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Quotes
+              </CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -439,8 +448,12 @@ export default function QuotesPage() {
                     <TableCell>
                       {getOpportunityName(quote.opportunityId)}
                     </TableCell>
-                    <TableCell>{getContactName(quote.contactId || "")}</TableCell>
-                    <TableCell>${(quote.amount || 0).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {getContactName(quote.contactId || "")}
+                    </TableCell>
+                    <TableCell>
+                      ${(quote.amount || 0).toLocaleString()}
+                    </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(quote.status)}>
                         {quote.status}
