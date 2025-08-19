@@ -5,17 +5,17 @@ export interface TaskUser {
 }
 
 export enum TaskStatus {
-  TODO = 'todo',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  TODO = "todo",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }
 
 export enum TaskPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export interface SubTask {

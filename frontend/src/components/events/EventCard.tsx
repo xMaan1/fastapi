@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Calendar, Clock, MapPin, Users, Video, ExternalLink } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Video,
+  ExternalLink,
+} from "lucide-react";
+import { cn } from "../../lib/utils";
 
 interface EventCardProps {
   event: {
@@ -28,12 +35,12 @@ interface EventCardProps {
   onLeave?: (id: string) => void;
 }
 
-export default function EventCard({ 
-  event, 
-  onEdit, 
-  onDelete, 
-  onJoin, 
-  onLeave 
+export default function EventCard({
+  event,
+  onEdit,
+  onDelete,
+  onJoin,
+  onLeave,
 }: EventCardProps) {
   const startDate = new Date(event.startDate);
   const endDate = new Date(event.endDate);
@@ -42,36 +49,45 @@ export default function EventCard({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'meeting': return 'bg-purple-100 text-purple-800';
-      case 'workshop': return 'bg-orange-100 text-orange-800';
-      case 'deadline': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "meeting":
+        return "bg-purple-100 text-purple-800";
+      case "workshop":
+        return "bg-orange-100 text-orange-800";
+      case "deadline":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -85,16 +101,16 @@ export default function EventCard({
             </CardTitle>
             <div className="flex items-center gap-2 mt-2">
               <Badge className={getEventTypeColor(event.eventType)}>
-                {event.eventType.replace('_', ' ')}
+                {event.eventType.replace("_", " ")}
               </Badge>
               <Badge className={getStatusColor(event.status)}>
-                {event.status.replace('_', ' ')}
+                {event.status.replace("_", " ")}
               </Badge>
             </div>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-3">
         {event.description && (
           <p className="text-gray-600 text-sm line-clamp-2">
@@ -107,7 +123,7 @@ export default function EventCard({
             <Calendar className="h-4 w-4" />
             <span>{formatDate(startDate)}</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Clock className="h-4 w-4" />
             <span>
@@ -136,14 +152,14 @@ export default function EventCard({
               size="sm"
               variant="outline"
               className="flex items-center gap-2"
-              onClick={() => window.open(event.googleMeetLink, '_blank')}
+              onClick={() => window.open(event.googleMeetLink, "_blank")}
             >
               <Video className="h-4 w-4" />
               Join Meeting
             </Button>
           )}
 
-          {isUpcoming && event.status === 'scheduled' && (
+          {isUpcoming && event.status === "scheduled" && (
             <>
               {onJoin && (
                 <Button
@@ -158,11 +174,7 @@ export default function EventCard({
           )}
 
           {onEdit && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onEdit(event)}
-            >
+            <Button size="sm" variant="ghost" onClick={() => onEdit(event)}>
               Edit
             </Button>
           )}

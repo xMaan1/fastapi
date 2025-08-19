@@ -1,35 +1,42 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { TaskCard } from './TaskCard';
-import { TaskDialog } from './TaskDialog';
-import { 
-  Plus, 
-  Search, 
-  RefreshCw, 
+} from "../ui/select";
+import { TaskCard } from "./TaskCard";
+import { TaskDialog } from "./TaskDialog";
+import {
+  Plus,
+  Search,
+  RefreshCw,
   Filter,
   Loader2,
   CheckCircle2,
   Clock,
   PlayCircle,
-  XCircle
-} from 'lucide-react';
-import { Task, TaskCreate, TaskUpdate, TaskStatus, TaskPriority, SubTask } from '../../models/task';
-import { Project } from '../../models/project/Project';
-import { User } from '../../models/auth';
-import { apiService } from '../../services/ApiService';
-import { cn } from '../../lib/utils';
+  XCircle,
+} from "lucide-react";
+import {
+  Task,
+  TaskCreate,
+  TaskUpdate,
+  TaskStatus,
+  TaskPriority,
+  SubTask,
+} from "../../models/task";
+import { Project } from "../../models/project/Project";
+import { User } from "../../models/auth";
+import { apiService } from "../../services/ApiService";
+import { cn } from "../../lib/utils";
 
 interface TaskListProps {
   projectId?: string;
@@ -38,14 +45,14 @@ interface TaskListProps {
 
 export const TaskList: React.FC<TaskListProps> = ({
   projectId,
-  showProjectFilter = true
+  showProjectFilter = true,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Dialog states
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -55,11 +62,11 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   // Filter states
   const [filters, setFilters] = useState({
-    project: projectId || '',
-    status: '',
-    assignedTo: '',
-    search: '',
-    mainTasksOnly: false
+    project: projectId || "",
+    status: "",
+    assignedTo: "",
+    search: "",
+    mainTasksOnly: false,
   });
 
   // Pagination
@@ -80,14 +87,14 @@ export const TaskList: React.FC<TaskListProps> = ({
     try {
       const [projectsRes, usersRes] = await Promise.all([
         apiService.getProjects(),
-        apiService.getUsers()
+        apiService.getUsers(),
       ]);
-      
+
       setProjects(projectsRes.projects || []);
       setUsers(usersRes.users || []);
     } catch (err) {
-      console.error('Failed to load initial data:', err);
-      setError('Failed to load projects and users');
+      console.error("Failed to load initial data:", err);
+      setError("Failed to load projects and users");
     }
   };
 
@@ -103,11 +110,11 @@ export const TaskList: React.FC<TaskListProps> = ({
         mainTasksOnly: filters.mainTasksOnly,
         ...(filters.project && { project: filters.project }),
         ...(filters.status && { status: filters.status }),
-        ...(filters.assignedTo && { assignedTo: filters.assignedTo })
+        ...(filters.assignedTo && { assignedTo: filters.assignedTo }),
       };
 
       const response = await apiService.getTasks(params);
-      
+
       // Handle different response structures
       let filteredTasks = [];
       if (Array.isArray(response)) {
@@ -120,17 +127,22 @@ export const TaskList: React.FC<TaskListProps> = ({
         // If response has data property
         filteredTasks = response.data;
       } else {
-        console.warn('Unexpected response structure:', response);
+        console.warn("Unexpected response structure:", response);
         filteredTasks = [];
       }
-      
+
       // Apply search filter on frontend
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        filteredTasks = filteredTasks.filter((task: Task) =>
-          (task.title && task.title.toLowerCase().includes(searchLower)) ||
-          (task.description && task.description.toLowerCase().includes(searchLower)) ||
-          (Array.isArray(task.tags) && task.tags.some((tag: string) => tag && tag.toLowerCase().includes(searchLower)))
+        filteredTasks = filteredTasks.filter(
+          (task: Task) =>
+            (task.title && task.title.toLowerCase().includes(searchLower)) ||
+            (task.description &&
+              task.description.toLowerCase().includes(searchLower)) ||
+            (Array.isArray(task.tags) &&
+              task.tags.some(
+                (tag: string) => tag && tag.toLowerCase().includes(searchLower),
+              )),
         );
       }
 
@@ -138,8 +150,8 @@ export const TaskList: React.FC<TaskListProps> = ({
       setTotalPages(response.pagination?.pages || 1);
       setTotalTasks(response.pagination?.total || filteredTasks.length);
     } catch (err) {
-      console.error('Failed to load tasks:', err);
-      setError('Failed to load tasks');
+      console.error("Failed to load tasks:", err);
+      setError("Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -160,7 +172,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   };
 
   const handleAddSubtask = (parentTaskId: string) => {
-    const parent = tasks.find(t => t.id === parentTaskId);
+    const parent = tasks.find((t) => t.id === parentTaskId);
     if (parent) {
       setEditingTask(null);
       setParentTask(parent);
@@ -173,10 +185,12 @@ export const TaskList: React.FC<TaskListProps> = ({
     // Convert subtask to task format for editing
     const taskForEdit: Task = {
       ...subtask,
-      project: tasks.find(t => t.subtasks.some(s => s.id === subtask.id))?.project || '',
+      project:
+        tasks.find((t) => t.subtasks.some((s) => s.id === subtask.id))
+          ?.project || "",
       subtasks: [],
       subtaskCount: 0,
-      completedSubtaskCount: 0
+      completedSubtaskCount: 0,
     };
     setEditingTask(taskForEdit);
     setParentTask(null);
@@ -205,34 +219,34 @@ export const TaskList: React.FC<TaskListProps> = ({
       setParentTask(null);
       await loadTasks();
     } catch (err: any) {
-      console.error('Failed to save task:', err);
-      setDialogError(err.response?.data?.detail || 'Failed to save task');
+      console.error("Failed to save task:", err);
+      setDialogError(err.response?.data?.detail || "Failed to save task");
     } finally {
       setDialogLoading(false);
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!confirm("Are you sure you want to delete this task?")) return;
 
     try {
       await apiService.deleteTask(taskId);
       await loadTasks();
     } catch (err) {
-      console.error('Failed to delete task:', err);
-      setError('Failed to delete task');
+      console.error("Failed to delete task:", err);
+      setError("Failed to delete task");
     }
   };
 
   const handleDeleteSubtask = async (subtaskId: string) => {
-    if (!confirm('Are you sure you want to delete this subtask?')) return;
+    if (!confirm("Are you sure you want to delete this subtask?")) return;
 
     try {
       await apiService.deleteTask(subtaskId);
       await loadTasks();
     } catch (err) {
-      console.error('Failed to delete subtask:', err);
-      setError('Failed to delete subtask');
+      console.error("Failed to delete subtask:", err);
+      setError("Failed to delete subtask");
     }
   };
 
@@ -241,35 +255,39 @@ export const TaskList: React.FC<TaskListProps> = ({
       await apiService.updateTask(taskId, { status });
       await loadTasks();
     } catch (err) {
-      console.error('Failed to update task status:', err);
-      setError('Failed to update task status');
+      console.error("Failed to update task status:", err);
+      setError("Failed to update task status");
     }
   };
 
   const handleFilterChange = (field: string, value: string | boolean) => {
     // Convert "all" values to empty strings for filtering
-    const filterValue = value === 'all' ? '' : value;
-    setFilters(prev => ({ ...prev, [field]: filterValue }));
+    const filterValue = value === "all" ? "" : value;
+    setFilters((prev) => ({ ...prev, [field]: filterValue }));
     setPage(1); // Reset to first page when filters change
   };
 
   const clearFilters = () => {
     setFilters({
-      project: projectId || '',
-      status: '',
-      assignedTo: '',
-      search: '',
-      mainTasksOnly: false
+      project: projectId || "",
+      status: "",
+      assignedTo: "",
+      search: "",
+      mainTasksOnly: false,
     });
     setPage(1);
   };
 
   const getTaskStats = () => {
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.status === TaskStatus.COMPLETED).length;
-    const inProgressTasks = tasks.filter(t => t.status === TaskStatus.IN_PROGRESS).length;
-    const todoTasks = tasks.filter(t => t.status === TaskStatus.TODO).length;
-    
+    const completedTasks = tasks.filter(
+      (t) => t.status === TaskStatus.COMPLETED,
+    ).length;
+    const inProgressTasks = tasks.filter(
+      (t) => t.status === TaskStatus.IN_PROGRESS,
+    ).length;
+    const todoTasks = tasks.filter((t) => t.status === TaskStatus.TODO).length;
+
     return { totalTasks, completedTasks, inProgressTasks, todoTasks };
   };
 
@@ -284,9 +302,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             Tasks
           </h1>
           {totalTasks > 0 && (
-            <p className="text-gray-600 mt-1">
-              {totalTasks} tasks total
-            </p>
+            <p className="text-gray-600 mt-1">{totalTasks} tasks total</p>
           )}
         </div>
         <div className="flex gap-3">
@@ -298,10 +314,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           >
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
           </Button>
-          <Button
-            onClick={handleCreateTask}
-            className="modern-button"
-          >
+          <Button onClick={handleCreateTask} className="modern-button">
             <Plus className="h-4 w-4 mr-2" />
             Add Task
           </Button>
@@ -317,7 +330,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <CheckCircle2 className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{taskStats.totalTasks}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {taskStats.totalTasks}
+                </p>
                 <p className="text-sm text-gray-600">Total Tasks</p>
               </div>
             </div>
@@ -331,7 +346,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{taskStats.completedTasks}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {taskStats.completedTasks}
+                </p>
                 <p className="text-sm text-gray-600">Completed</p>
               </div>
             </div>
@@ -345,7 +362,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <PlayCircle className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{taskStats.inProgressTasks}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {taskStats.inProgressTasks}
+                </p>
                 <p className="text-sm text-gray-600">In Progress</p>
               </div>
             </div>
@@ -359,7 +378,9 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <Clock className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{taskStats.todoTasks}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {taskStats.todoTasks}
+                </p>
                 <p className="text-sm text-gray-600">To Do</p>
               </div>
             </div>
@@ -377,7 +398,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <Input
                   placeholder="Search tasks..."
                   value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  onChange={(e) => handleFilterChange("search", e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -386,15 +407,17 @@ export const TaskList: React.FC<TaskListProps> = ({
             {showProjectFilter && (
               <div>
                 <Select
-                  value={filters.project || 'all'}
-                  onValueChange={(value) => handleFilterChange('project', value)}
+                  value={filters.project || "all"}
+                  onValueChange={(value) =>
+                    handleFilterChange("project", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All Projects" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Projects</SelectItem>
-                    {projects.map(project => (
+                    {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
                       </SelectItem>
@@ -406,8 +429,8 @@ export const TaskList: React.FC<TaskListProps> = ({
 
             <div>
               <Select
-                value={filters.status || 'all'}
-                onValueChange={(value) => handleFilterChange('status', value)}
+                value={filters.status || "all"}
+                onValueChange={(value) => handleFilterChange("status", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Status" />
@@ -415,26 +438,38 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value={TaskStatus.TODO}>To Do</SelectItem>
-                  <SelectItem value={TaskStatus.IN_PROGRESS}>In Progress</SelectItem>
-                  <SelectItem value={TaskStatus.COMPLETED}>Completed</SelectItem>
-                  <SelectItem value={TaskStatus.CANCELLED}>Cancelled</SelectItem>
+                  <SelectItem value={TaskStatus.IN_PROGRESS}>
+                    In Progress
+                  </SelectItem>
+                  <SelectItem value={TaskStatus.COMPLETED}>
+                    Completed
+                  </SelectItem>
+                  <SelectItem value={TaskStatus.CANCELLED}>
+                    Cancelled
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <Select
-                value={filters.assignedTo || 'all'}
-                onValueChange={(value) => handleFilterChange('assignedTo', value)}
+                value={filters.assignedTo || "all"}
+                onValueChange={(value) =>
+                  handleFilterChange("assignedTo", value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Users" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Users</SelectItem>
-                  {users.map(user => (
-                    <SelectItem key={user.id || user.userId || ''} value={user.id || user.userId || ''}>
-                      {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.userName}
+                  {users.map((user) => (
+                    <SelectItem
+                      key={user.id || user.userId || ""}
+                      value={user.id || user.userId || ""}
+                    >
+                      {`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
+                        user.userName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -443,8 +478,10 @@ export const TaskList: React.FC<TaskListProps> = ({
 
             <div>
               <Select
-                value={filters.mainTasksOnly ? 'main' : 'all'}
-                onValueChange={(value) => handleFilterChange('mainTasksOnly', value === 'main')}
+                value={filters.mainTasksOnly ? "main" : "all"}
+                onValueChange={(value) =>
+                  handleFilterChange("mainTasksOnly", value === "main")
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="View" />
@@ -508,15 +545,11 @@ export const TaskList: React.FC<TaskListProps> = ({
                   No tasks found
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  {Object.values(filters).some(v => v) 
-                    ? 'Try adjusting your filters or create a new task.'
-                    : 'Get started by creating your first task.'
-                  }
+                  {Object.values(filters).some((v) => v)
+                    ? "Try adjusting your filters or create a new task."
+                    : "Get started by creating your first task."}
                 </p>
-                <Button
-                  onClick={handleCreateTask}
-                  className="modern-button"
-                >
+                <Button onClick={handleCreateTask} className="modern-button">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Task
                 </Button>
@@ -524,7 +557,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             </Card>
           ) : (
             <div className="space-y-4">
-              {tasks.map(task => (
+              {tasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}
@@ -585,10 +618,10 @@ export const TaskList: React.FC<TaskListProps> = ({
         task={editingTask ?? undefined}
         parentTask={parentTask ?? undefined}
         projects={projects}
-        users={users.map(u => ({
-          id: u.id || u.userId || '',
-          name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.userName,
-          email: u.email
+        users={users.map((u) => ({
+          id: u.id || u.userId || "",
+          name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.userName,
+          email: u.email,
         }))}
         loading={dialogLoading}
         error={dialogError ?? undefined}

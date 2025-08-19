@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,39 +8,45 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { 
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2, Calendar, DollarSign, Users, X } from 'lucide-react';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Project, TeamMember } from '../../models/project/Project';
-import { User } from '../../models/auth';
-import { apiService } from '../../services/ApiService';
+} from "../ui/select";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Loader2, Calendar, DollarSign, Users, X } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { Project, TeamMember } from "../../models/project/Project";
+import { User } from "../../models/auth";
+import { apiService } from "../../services/ApiService";
 
 const schema = yup.object({
-  name: yup.string().required('Project name is required'),
-  description: yup.string().required('Description is required'),
-  status: yup.string().required('Status is required'),
-  priority: yup.string().required('Priority is required'),
-  startDate: yup.date().required('Start date is required'),
-  endDate: yup.date().required('End date is required').min(yup.ref('startDate'), 'End date must be after start date'),
-  budget: yup.number().positive('Budget must be positive').nullable(),
-  projectManagerId: yup.string().required('Project manager is required'),
-  teamMemberIds: yup.array().of(yup.string()).min(1, 'At least one team member is required'),
-  clientEmail: yup.string().email('Invalid email format').nullable(),
+  name: yup.string().required("Project name is required"),
+  description: yup.string().required("Description is required"),
+  status: yup.string().required("Status is required"),
+  priority: yup.string().required("Priority is required"),
+  startDate: yup.date().required("Start date is required"),
+  endDate: yup
+    .date()
+    .required("End date is required")
+    .min(yup.ref("startDate"), "End date must be after start date"),
+  budget: yup.number().positive("Budget must be positive").nullable(),
+  projectManagerId: yup.string().required("Project manager is required"),
+  teamMemberIds: yup
+    .array()
+    .of(yup.string())
+    .min(1, "At least one team member is required"),
+  clientEmail: yup.string().email("Invalid email format").nullable(),
   notes: yup.string().nullable(),
 });
 
@@ -49,10 +55,16 @@ interface ProjectDialogProps {
   onClose: () => void;
   onSave: (project: Project) => void;
   project?: Project | null;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
 }
 
-export default function ProjectDialog({ open, onClose, onSave, project, mode }: ProjectDialogProps) {
+export default function ProjectDialog({
+  open,
+  onClose,
+  onSave,
+  project,
+  mode,
+}: ProjectDialogProps) {
   const [loading, setLoading] = useState(false);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [projectManagers, setProjectManagers] = useState<User[]>([]);
@@ -70,21 +82,21 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      name: '',
-      description: '',
-      status: 'planning',
-      priority: 'medium',
+      name: "",
+      description: "",
+      status: "planning",
+      priority: "medium",
       startDate: new Date(),
       endDate: new Date(),
       budget: null,
-      projectManagerId: '',
+      projectManagerId: "",
       teamMemberIds: [],
-      clientEmail: '',
-      notes: '',
+      clientEmail: "",
+      notes: "",
     },
   });
 
-  const watchedTeamMemberIds = watch('teamMemberIds');
+  const watchedTeamMemberIds = watch("teamMemberIds");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -96,10 +108,22 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
         let users = result?.users || result || [];
         users = users.map((u: any) => ({ ...u, id: u.id || u.userId }));
         setAllUsers(users);
-        setProjectManagers(users.filter((u: User) => u.userRole === 'project_manager' || u.userRole === 'admin'));
-        setTeamMembers(users.filter((u: User) => u.userRole === 'team_member' || u.userRole === 'project_manager' || u.userRole === 'admin'));
+        setProjectManagers(
+          users.filter(
+            (u: User) =>
+              u.userRole === "project_manager" || u.userRole === "admin",
+          ),
+        );
+        setTeamMembers(
+          users.filter(
+            (u: User) =>
+              u.userRole === "team_member" ||
+              u.userRole === "project_manager" ||
+              u.userRole === "admin",
+          ),
+        );
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
       } finally {
         setLoadingUsers(false);
       }
@@ -110,7 +134,7 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
   }, [open]);
 
   useEffect(() => {
-    if (project && mode === 'edit') {
+    if (project && mode === "edit") {
       reset({
         name: project.name,
         description: project.description,
@@ -120,60 +144,62 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
         endDate: new Date(project.endDate),
         budget: project.budget,
         projectManagerId: project.projectManager.id,
-        teamMemberIds: project.teamMembers?.map(member => member.id) || [],
-        clientEmail: project.clientEmail || '',
-        notes: project.notes || '',
+        teamMemberIds: project.teamMembers?.map((member) => member.id) || [],
+        clientEmail: project.clientEmail || "",
+        notes: project.notes || "",
       });
       setSelectedTeamMembers(
-        (project.teamMembers || []).map(member => ({
+        (project.teamMembers || []).map((member) => ({
           id: member.id,
           userName: member.name,
-          userRole: 'team_member', // default role
+          userRole: "team_member", // default role
           email: member.email,
-          firstName: member.name.split(' ')[0] || '',
-          lastName: member.name.split(' ').slice(1).join(' ') || '',
+          firstName: member.name.split(" ")[0] || "",
+          lastName: member.name.split(" ").slice(1).join(" ") || "",
           avatar: member.avatar,
-        }))
+        })),
       );
-    } else if (mode === 'create') {
+    } else if (mode === "create") {
       reset({
-        name: '',
-        description: '',
-        status: 'planning',
-        priority: 'medium',
+        name: "",
+        description: "",
+        status: "planning",
+        priority: "medium",
         startDate: new Date(),
         endDate: new Date(),
         budget: null,
-        projectManagerId: '',
+        projectManagerId: "",
         teamMemberIds: [],
-        clientEmail: '',
-        notes: '',
+        clientEmail: "",
+        notes: "",
       });
       setSelectedTeamMembers([]);
     }
   }, [project, mode, reset]);
 
   useEffect(() => {
-    const selected = teamMembers.filter(member => watchedTeamMemberIds?.includes(member.id));
+    const selected = teamMembers.filter((member) =>
+      watchedTeamMemberIds?.includes(member.id),
+    );
     setSelectedTeamMembers(selected);
   }, [watchedTeamMemberIds, teamMembers]);
 
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
-      
+
       const projectData = {
         ...data,
-        startDate: data.startDate.toISOString().split('T')[0],
-        endDate: data.endDate.toISOString().split('T')[0],
+        startDate: data.startDate.toISOString().split("T")[0],
+        endDate: data.endDate.toISOString().split("T")[0],
         budget: data.budget || undefined,
         clientEmail: data.clientEmail || undefined,
         notes: data.notes || undefined,
       };
 
       let savedProject;
-      
-      if (mode === 'create') {
+
+      if (mode === "create") {
         savedProject = await apiService.createProject(projectData);
       } else {
         savedProject = await apiService.updateProject(project!.id, projectData);
@@ -182,7 +208,7 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
       onSave(savedProject);
       onClose();
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error("Error saving project:", error);
     } finally {
       setLoading(false);
     }
@@ -191,9 +217,9 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
   const handleTeamMemberToggle = (userId: string) => {
     const currentIds = watchedTeamMemberIds || [];
     const newIds = currentIds.includes(userId)
-      ? currentIds.filter(id => id !== userId)
+      ? currentIds.filter((id) => id !== userId)
       : [...currentIds, userId];
-    setValue('teamMemberIds', newIds);
+    setValue("teamMemberIds", newIds);
   };
 
   const handleClose = () => {
@@ -207,16 +233,15 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create New Project' : 'Edit Project'}
+            {mode === "create" ? "Create New Project" : "Edit Project"}
           </DialogTitle>
           <DialogDescription>
-            {mode === 'create' 
-              ? 'Fill in the details to create a new project'
-              : 'Update the project information'
-            }
+            {mode === "create"
+              ? "Fill in the details to create a new project"
+              : "Update the project information"}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2 space-y-2">
@@ -229,7 +254,7 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                     {...field}
                     id="name"
                     placeholder="Enter project name"
-                    className={errors.name ? 'border-red-500' : ''}
+                    className={errors.name ? "border-red-500" : ""}
                   />
                 )}
               />
@@ -249,12 +274,14 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                     id="description"
                     placeholder="Enter project description"
                     rows={3}
-                    className={errors.description ? 'border-red-500' : ''}
+                    className={errors.description ? "border-red-500" : ""}
                   />
                 )}
               />
               {errors.description && (
-                <p className="text-sm text-red-600">{errors.description.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.description.message}
+                </p>
               )}
             </div>
 
@@ -309,14 +336,18 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                 render={({ field }) => (
                   <Input
                     type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                    value={
+                      field.value ? field.value.toISOString().split("T")[0] : ""
+                    }
                     onChange={(e) => field.onChange(new Date(e.target.value))}
-                    className={errors.startDate ? 'border-red-500' : ''}
+                    className={errors.startDate ? "border-red-500" : ""}
                   />
                 )}
               />
               {errors.startDate && (
-                <p className="text-sm text-red-600">{errors.startDate.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.startDate.message}
+                </p>
               )}
             </div>
 
@@ -328,9 +359,11 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                 render={({ field }) => (
                   <Input
                     type="date"
-                    value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                    value={
+                      field.value ? field.value.toISOString().split("T")[0] : ""
+                    }
                     onChange={(e) => field.onChange(new Date(e.target.value))}
-                    className={errors.endDate ? 'border-red-500' : ''}
+                    className={errors.endDate ? "border-red-500" : ""}
                   />
                 )}
               />
@@ -352,8 +385,12 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                       type="number"
                       placeholder="0.00"
                       className="pl-10"
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                      value={field.value || ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : null,
+                        )
+                      }
                     />
                   )}
                 />
@@ -370,7 +407,7 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                     {...field}
                     type="email"
                     placeholder="client@example.com"
-                    value={field.value || ''}
+                    value={field.value || ""}
                   />
                 )}
               />
@@ -397,7 +434,9 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                 )}
               />
               {errors.projectManagerId && (
-                <p className="text-sm text-red-600">{errors.projectManagerId.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.projectManagerId.message}
+                </p>
               )}
             </div>
 
@@ -407,7 +446,9 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                 {loadingUsers ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="ml-2 text-sm text-gray-600">Loading users...</span>
+                    <span className="ml-2 text-sm text-gray-600">
+                      Loading users...
+                    </span>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -418,12 +459,16 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                         onClick={() => handleTeamMemberToggle(user.id)}
                       >
                         <div>
-                          <p className="font-medium">{user.firstName || user.userName}</p>
+                          <p className="font-medium">
+                            {user.firstName || user.userName}
+                          </p>
                           <p className="text-sm text-gray-500">{user.email}</p>
                         </div>
                         <input
                           type="checkbox"
-                          checked={watchedTeamMemberIds?.includes(user.id) || false}
+                          checked={
+                            watchedTeamMemberIds?.includes(user.id) || false
+                          }
                           onChange={() => handleTeamMemberToggle(user.id)}
                           className="rounded"
                         />
@@ -435,7 +480,11 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
               {selectedTeamMembers.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {selectedTeamMembers.map((member) => (
-                    <Badge key={member.id} variant="secondary" className="text-xs">
+                    <Badge
+                      key={member.id}
+                      variant="secondary"
+                      className="text-xs"
+                    >
                       {member.firstName || member.userName}
                       <button
                         type="button"
@@ -449,7 +498,9 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                 </div>
               )}
               {errors.teamMemberIds && (
-                <p className="text-sm text-red-600">{errors.teamMemberIds.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.teamMemberIds.message}
+                </p>
               )}
             </div>
 
@@ -464,7 +515,7 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                     id="notes"
                     placeholder="Additional project notes..."
                     rows={3}
-                    value={field.value || ''}
+                    value={field.value || ""}
                   />
                 )}
               />
@@ -472,7 +523,12 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading} className="modern-button">
@@ -481,8 +537,10 @@ export default function ProjectDialog({ open, onClose, onSave, project, mode }: 
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
+              ) : mode === "create" ? (
+                "Create Project"
               ) : (
-                mode === 'create' ? 'Create Project' : 'Update Project'
+                "Update Project"
               )}
             </Button>
           </DialogFooter>

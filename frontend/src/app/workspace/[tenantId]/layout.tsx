@@ -1,16 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import axios from 'axios';
-import { Button } from '../../../components/ui/button';
-import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
-import { Badge } from '../../../components/ui/badge';
-import { Sheet, SheetContent, SheetTrigger } from '../../../components/ui/sheet';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../components/ui/dropdown-menu';
-import { Separator } from '../../../components/ui/separator';
-import { useAuth } from '../../../contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
+import { Button } from "../../../components/ui/button";
+import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
+import { Badge } from "../../../components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "../../../components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
+import { Separator } from "../../../components/ui/separator";
+import { useAuth } from "../../../contexts/AuthContext";
 import {
   Menu as MenuIcon,
   Building2,
@@ -18,8 +27,8 @@ import {
   LayoutDashboard,
   FolderOpen,
   Users,
-  Settings
-} from 'lucide-react';
+  Settings,
+} from "lucide-react";
 
 interface TenantLayoutProps {
   children: React.ReactNode;
@@ -38,7 +47,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const tenantId = params?.tenantId ? (params.tenantId as string) : '';
+  const tenantId = params?.tenantId ? (params.tenantId as string) : "";
 
   useEffect(() => {
     fetchTenantInfo();
@@ -46,16 +55,19 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
 
   const fetchTenantInfo = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/tenants/${tenantId}`, {
-        headers: { 
-          Authorization: `Bearer ${localStorage.getItem('token')}` 
-        }
-      });
+      const response = await axios.get(
+        `http://localhost:8000/api/tenants/${tenantId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
       setTenantInfo(response.data);
     } catch (error) {
-      console.error('Error fetching tenant info:', error);
-      router.push('/');
+      console.error("Error fetching tenant info:", error);
+      router.push("/");
     }
   };
 
@@ -64,7 +76,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
   };
 
   const handleSwitchWorkspace = () => {
-    router.push('/');
+    router.push("/");
   };
 
   const sidebarContent = (
@@ -73,43 +85,58 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10 bg-gradient-primary">
             <AvatarFallback className="bg-gradient-primary text-white font-semibold">
-              {tenantInfo?.name?.charAt(0).toUpperCase() || 'W'}
+              {tenantInfo?.name?.charAt(0).toUpperCase() || "W"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-gray-900 truncate">
-              {tenantInfo?.name || 'Workspace'}
+              {tenantInfo?.name || "Workspace"}
             </h3>
             <Badge variant="secondary" className="mt-1 text-xs">
-              {tenantInfo?.user_role || 'member'}
+              {tenantInfo?.user_role || "member"}
             </Badge>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
-        <Link href={`/workspace/${tenantId}`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+        <Link
+          href={`/workspace/${tenantId}`}
+          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        >
           <LayoutDashboard className="h-5 w-5" />
           <span className="text-sm font-medium">Dashboard</span>
         </Link>
-        <Link href={`/projects`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+        <Link
+          href={`/projects`}
+          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        >
           <FolderOpen className="h-5 w-5" />
           <span className="text-sm font-medium">Projects</span>
         </Link>
-        <Link href={`/team`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+        <Link
+          href={`/team`}
+          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        >
           <Users className="h-5 w-5" />
           <span className="text-sm font-medium">Team</span>
         </Link>
 
         {/* Only show these for super_admin */}
-        {user?.userRole === 'super_admin' && (
+        {user?.userRole === "super_admin" && (
           <>
             <Separator className="my-4" />
-            <Link href={`/users`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            <Link
+              href={`/users`}
+              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            >
               <Users className="h-5 w-5" />
               <span className="text-sm font-medium">Users</span>
             </Link>
-            <Link href={`/pages/tenants`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            <Link
+              href={`/pages/tenants`}
+              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            >
               <Building2 className="h-5 w-5" />
               <span className="text-sm font-medium">Tenants</span>
             </Link>
@@ -117,7 +144,10 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
         )}
 
         <Separator className="my-4" />
-        <Link href={`/workspace/${tenantId}/settings`} className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+        <Link
+          href={`/workspace/${tenantId}/settings`}
+          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        >
           <Settings className="h-5 w-5" />
           <span className="text-sm font-medium">Settings</span>
         </Link>
@@ -128,9 +158,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
   return (
     <div className="h-screen flex bg-gray-50">
       {/* Desktop Sidebar - Static part of layout, not fixed */}
-      <div className="hidden lg:block w-64 flex-shrink-0">
-        {sidebarContent}
-      </div>
+      <div className="hidden lg:block w-64 flex-shrink-0">{sidebarContent}</div>
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -155,7 +183,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
               </Button>
 
               <h1 className="text-xl font-semibold text-gray-900">
-                {tenantInfo?.name || 'Workspace'}
+                {tenantInfo?.name || "Workspace"}
               </h1>
             </div>
 
@@ -171,19 +199,25 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 px-3">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center space-x-2 px-3"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-gradient-primary text-white text-sm">
-                        {user?.userName?.charAt(0).toUpperCase() || 'U'}
+                        {user?.userName?.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <span className="hidden sm:block text-sm font-medium text-gray-700">
-                      {user?.userName || 'User'}
+                      {user?.userName || "User"}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>
@@ -194,9 +228,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page Content - Scrollable */}
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>
   );

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '../ui/dropdown-menu';
-import { Alert, AlertDescription } from '../ui/alert';
+  DropdownMenuSeparator,
+} from "../ui/dropdown-menu";
+import { Alert, AlertDescription } from "../ui/alert";
 import {
   Search,
   MoreVertical,
@@ -23,17 +23,17 @@ import {
   RefreshCw,
   Mail,
   Shield,
-  Loader2
-} from 'lucide-react';
-import { User } from '../../models/auth';
-import { apiService } from '../../services/ApiService';
-import { cn, getInitials } from '../../lib/utils';
+  Loader2,
+} from "lucide-react";
+import { User } from "../../models/auth";
+import { apiService } from "../../services/ApiService";
+import { cn, getInitials } from "../../lib/utils";
 
 export default function UsersList() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,10 +42,13 @@ export default function UsersList() {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = users.filter(user =>
-        user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = users.filter(
+        (user) =>
+          user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          `${user.firstName} ${user.lastName}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()),
       );
       setFilteredUsers(filtered);
     } else {
@@ -60,38 +63,44 @@ export default function UsersList() {
       const response = await apiService.getUsers();
       setUsers(response.users || []);
     } catch (err) {
-      console.error('Failed to fetch users:', err);
-      setError('Failed to load users');
+      console.error("Failed to fetch users:", err);
+      setError("Failed to load users");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm("Are you sure you want to delete this user?")) return;
 
     try {
       await apiService.deleteUser(userId);
-      setUsers(users.filter(u => u.userId !== userId));
+      setUsers(users.filter((u) => u.userId !== userId));
     } catch (err) {
-      console.error('Failed to delete user:', err);
-      setError('Failed to delete user');
+      console.error("Failed to delete user:", err);
+      setError("Failed to delete user");
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'super_admin': return 'bg-red-100 text-red-800 border-red-200';
-      case 'admin': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'project_manager': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'team_member': return 'bg-green-100 text-green-800 border-green-200';
-      case 'client': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "super_admin":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "admin":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "project_manager":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "team_member":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "client":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const formatRole = (role: string) => {
-    return role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return role.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   return (
@@ -140,9 +149,7 @@ export default function UsersList() {
       {/* Error Alert */}
       {error && (
         <Alert className="border-red-200 bg-red-50">
-          <AlertDescription className="text-red-800">
-            {error}
-          </AlertDescription>
+          <AlertDescription className="text-red-800">{error}</AlertDescription>
         </Alert>
       )}
 
@@ -164,23 +171,28 @@ export default function UsersList() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={user.avatar} />
                       <AvatarFallback className="bg-gradient-primary text-white font-semibold">
-                        {getInitials(`${user.firstName} ${user.lastName}` || user.userName)}
+                        {getInitials(
+                          `${user.firstName} ${user.lastName}` || user.userName,
+                        )}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg font-semibold text-gray-900">
-                        {user.firstName && user.lastName 
+                        {user.firstName && user.lastName
                           ? `${user.firstName} ${user.lastName}`
-                          : user.userName
-                        }
+                          : user.userName}
                       </CardTitle>
                       <p className="text-sm text-gray-600">@{user.userName}</p>
                     </div>
                   </div>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -190,7 +202,7 @@ export default function UsersList() {
                         Edit User
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => {
                           if (user.userId) handleDeleteUser(user.userId);
                         }}
@@ -210,22 +222,27 @@ export default function UsersList() {
                     <Mail className="h-4 w-4 text-gray-400" />
                     <span className="text-sm text-gray-600">{user.email}</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-gray-400" />
-                    <Badge variant="outline" className={cn("text-xs", getRoleColor(user.userRole))}>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs", getRoleColor(user.userRole))}
+                    >
                       {formatRole(user.userRole)}
                     </Badge>
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        user.isActive ? "bg-green-500" : "bg-gray-400"
-                      )} />
+                      <div
+                        className={cn(
+                          "w-2 h-2 rounded-full",
+                          user.isActive ? "bg-green-500" : "bg-gray-400",
+                        )}
+                      />
                       <span className="text-xs text-gray-500">
-                        {user.isActive ? 'Active' : 'Inactive'}
+                        {user.isActive ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </div>
@@ -245,7 +262,9 @@ export default function UsersList() {
               No users found
             </h3>
             <p className="text-gray-600 mb-4">
-              {searchTerm ? 'Try adjusting your search terms' : 'Get started by adding your first user'}
+              {searchTerm
+                ? "Try adjusting your search terms"
+                : "Get started by adding your first user"}
             </p>
             <Button className="modern-button">
               <UserPlus className="h-4 w-4 mr-2" />

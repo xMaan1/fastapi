@@ -1,22 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+import React, { useState } from "react";
 import {
-  Clock,
-  Play,
-  Square,
-  Timer,
-  Calendar,
-  BarChart3
-} from 'lucide-react';
-import { DashboardLayout } from '../../components/layout';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Clock, Play, Square, Timer, Calendar, BarChart3 } from "lucide-react";
+import { DashboardLayout } from "../../components/layout";
 
 export default function TimeTrackingPage() {
   const [isTracking, setIsTracking] = useState(false);
-  const [currentTime, setCurrentTime] = useState('00:00:00');
+  const [currentTime, setCurrentTime] = useState("00:00:00");
 
   const toggleTracking = () => {
     setIsTracking(!isTracking);
@@ -51,7 +49,9 @@ export default function TimeTrackingPage() {
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={toggleTracking}
-                  className={isTracking ? "bg-red-600 hover:bg-red-700" : "modern-button"}
+                  className={
+                    isTracking ? "bg-red-600 hover:bg-red-700" : "modern-button"
+                  }
                 >
                   {isTracking ? (
                     <>
@@ -67,7 +67,10 @@ export default function TimeTrackingPage() {
                 </Button>
               </div>
               {isTracking && (
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800"
+                >
                   Currently tracking
                 </Badge>
               )}
@@ -128,7 +131,10 @@ export default function TimeTrackingPage() {
           <CardContent>
             <div className="space-y-4">
               {[1, 2, 3].map((session) => (
-                <div key={session} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div
+                  key={session}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
                   <div>
                     <h4 className="font-medium text-gray-900">Project Work</h4>
                     <p className="text-sm text-gray-600">Website Redesign</p>

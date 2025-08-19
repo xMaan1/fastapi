@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Card, CardContent } from "./ui/card";
+import { Button } from "./ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
@@ -50,13 +50,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 Something went wrong
               </h2>
             </div>
-            
+
             <div className="space-y-3">
               <p className="text-red-700">
-                {this.state.error?.message || 'An unexpected error occurred'}
+                {this.state.error?.message || "An unexpected error occurred"}
               </p>
-              
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+
+              {process.env.NODE_ENV === "development" && this.state.error && (
                 <details className="mt-4">
                   <summary className="cursor-pointer text-sm text-red-600 font-medium">
                     Error Details
@@ -66,14 +66,17 @@ export class ErrorBoundary extends Component<Props, State> {
                   </pre>
                 </details>
               )}
-              
+
               <div className="flex gap-3 mt-4">
-                <Button onClick={this.handleRetry} className="flex items-center gap-2">
+                <Button
+                  onClick={this.handleRetry}
+                  className="flex items-center gap-2"
+                >
                   <RefreshCw className="h-4 w-4" />
                   Try Again
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => window.location.reload()}
                 >
                   Reload Page
@@ -87,4 +90,4 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return this.props.children;
   }
-} 
+}

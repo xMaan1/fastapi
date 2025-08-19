@@ -1,1 +1,1 @@
-export { default as TasksWidget } from './TasksWidget';
+export { default as TasksWidget } from "./TasksWidget";

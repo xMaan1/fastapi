@@ -1,49 +1,49 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/src/contexts/AuthContext';
-import { LoginCredentials, RegisterData } from '@/src/models/auth';
-import { apiService } from '@/src/services/ApiService';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/src/contexts/AuthContext";
+import { LoginCredentials, RegisterData } from "@/src/models/auth";
+import { apiService } from "@/src/services/ApiService";
 
 interface AuthFormProps {
-  mode: 'login' | 'signup';
+  mode: "login" | "signup";
   onSuccess: () => void;
 }
 
 export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    userName: '',
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
+    userName: "",
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      if (mode === 'login') {
+      if (mode === "login") {
         const success = await login({
           email: formData.email,
           password: formData.password,
         } as LoginCredentials);
-        
+
         if (success) {
           onSuccess();
         } else {
-          setError('Invalid email or password');
+          setError("Invalid email or password");
         }
       } else {
         const user = await apiService.register({
@@ -53,23 +53,23 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
           firstName: formData.firstName,
           lastName: formData.lastName,
         } as RegisterData);
-        
+
         if (user) {
           onSuccess();
         }
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
+      console.error("Auth error:", err);
       if (err.response) {
         setError(
           err.response.data?.detail ||
-          err.response.data?.message ||
-          'An error occurred'
+            err.response.data?.message ||
+            "An error occurred",
         );
       } else if (err.request) {
-        setError('No response from server. Please check your connection.');
+        setError("No response from server. Please check your connection.");
       } else {
-        setError(err.message || 'An error occurred');
+        setError(err.message || "An error occurred");
       }
     } finally {
       setLoading(false);
@@ -81,13 +81,15 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
       <Card className="w-full max-w-md modern-card">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+            {mode === "login" ? "Welcome Back" : "Create Account"}
           </CardTitle>
           <p className="text-gray-600 mt-2">
-            {mode === 'login' ? 'Sign in to your account' : 'Sign up to get started'}
+            {mode === "login"
+              ? "Sign in to your account"
+              : "Sign up to get started"}
           </p>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -97,12 +99,14 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="w-full"
               />
             </div>
 
-            {mode === 'signup' && (
+            {mode === "signup" && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="userName">Username</Label>
@@ -110,18 +114,22 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                     id="userName"
                     required
                     value={formData.userName}
-                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, userName: e.target.value })
+                    }
                     className="w-full"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
                       id="firstName"
                       value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
                       className="w-full"
                     />
                   </div>
@@ -130,7 +138,9 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                     <Input
                       id="lastName"
                       value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
                       className="w-full"
                     />
                   </div>
@@ -145,7 +155,9 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 type="password"
                 required
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="w-full"
               />
             </div>
@@ -168,8 +180,10 @@ export default function AuthForm({ mode, onSuccess }: AuthFormProps) {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Please wait
                 </>
+              ) : mode === "login" ? (
+                "Sign In"
               ) : (
-                mode === 'login' ? 'Sign In' : 'Create Account'
+                "Create Account"
               )}
             </Button>
           </form>

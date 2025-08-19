@@ -7,7 +7,7 @@ export enum LeadStatus {
   PROPOSAL = "proposal",
   NEGOTIATION = "negotiation",
   WON = "won",
-  LOST = "lost"
+  LOST = "lost",
 }
 
 export enum LeadSource {
@@ -17,7 +17,7 @@ export enum LeadSource {
   EMAIL_CAMPAIGN = "email_campaign",
   COLD_OUTREACH = "cold_outreach",
   TRADE_SHOW = "trade_show",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 export enum OpportunityStage {
@@ -27,7 +27,7 @@ export enum OpportunityStage {
   PROPOSAL = "proposal",
   NEGOTIATION = "negotiation",
   CLOSED_WON = "closed_won",
-  CLOSED_LOST = "closed_lost"
+  CLOSED_LOST = "closed_lost",
 }
 
 export enum QuoteStatus {
@@ -36,7 +36,7 @@ export enum QuoteStatus {
   VIEWED = "viewed",
   ACCEPTED = "accepted",
   REJECTED = "rejected",
-  EXPIRED = "expired"
+  EXPIRED = "expired",
 }
 
 export enum ContractStatus {
@@ -44,14 +44,14 @@ export enum ContractStatus {
   PENDING_SIGNATURE = "pending_signature",
   ACTIVE = "active",
   EXPIRED = "expired",
-  TERMINATED = "terminated"
+  TERMINATED = "terminated",
 }
 
 export enum ContactType {
   LEAD = "lead",
   CUSTOMER = "customer",
   PARTNER = "partner",
-  VENDOR = "vendor"
+  VENDOR = "vendor",
 }
 
 export enum ContactStatus {
@@ -59,7 +59,7 @@ export enum ContactStatus {
   INACTIVE = "inactive",
   LEAD = "lead",
   PROSPECT = "prospect",
-  CUSTOMER = "customer"
+  CUSTOMER = "customer",
 }
 
 export enum ContactSource {
@@ -70,7 +70,7 @@ export enum ContactSource {
   COLD_OUTREACH = "cold_outreach",
   TRADE_SHOW = "trade_show",
   EVENT = "event",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 export enum CompanyType {
@@ -78,7 +78,7 @@ export enum CompanyType {
   PROSPECT = "prospect",
   PARTNER = "partner",
   VENDOR = "vendor",
-  COMPETITOR = "competitor"
+  COMPETITOR = "competitor",
 }
 
 export enum CompanyIndustry {
@@ -90,14 +90,14 @@ export enum CompanyIndustry {
   EDUCATION = "education",
   REAL_ESTATE = "real_estate",
   CONSULTING = "consulting",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 export enum OpportunityPriority {
   LOW = "low",
   MEDIUM = "medium",
   HIGH = "high",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export enum ActivityType {
@@ -108,7 +108,7 @@ export enum ActivityType {
   TASK = "task",
   PROPOSAL_SENT = "proposal_sent",
   QUOTE_SENT = "quote_sent",
-  CONTRACT_SIGNED = "contract_signed"
+  CONTRACT_SIGNED = "contract_signed",
 }
 
 // Lead Types
@@ -522,9 +522,3 @@ export interface SalesActivitiesResponse {
     pages: number;
   };
 }
-
-
-
-
-
-

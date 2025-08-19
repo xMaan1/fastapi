@@ -1,27 +1,34 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { TaskList } from '../../../../components/tasks';
-import { Project } from '../../../../models/project/Project';
-import { Task, TaskStatus } from '../../../../models/task';
-import { apiService } from '../../../../services/ApiService';
-import { DashboardLayout } from '../../../../components/layout';
-import { Button } from '../../../../components/ui/button';
-import { Card, CardContent } from '../../../../components/ui/card';
-import { Alert, AlertDescription } from '../../../../components/ui/alert';
-import { Progress } from '../../../../components/ui/progress';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../../components/ui/breadcrumb';
-import { ErrorBoundary } from '../../../../components/ErrorBoundary';
-import { 
-  ArrowLeft, 
-  CheckSquare, 
-  CheckCircle, 
-  Clock, 
-  Play, 
-  Loader2
-} from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { TaskList } from "../../../../components/tasks";
+import { Project } from "../../../../models/project/Project";
+import { Task, TaskStatus } from "../../../../models/task";
+import { apiService } from "../../../../services/ApiService";
+import { DashboardLayout } from "../../../../components/layout";
+import { Button } from "../../../../components/ui/button";
+import { Card, CardContent } from "../../../../components/ui/card";
+import { Alert, AlertDescription } from "../../../../components/ui/alert";
+import { Progress } from "../../../../components/ui/progress";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../../../components/ui/breadcrumb";
+import { ErrorBoundary } from "../../../../components/ErrorBoundary";
+import {
+  ArrowLeft,
+  CheckSquare,
+  CheckCircle,
+  Clock,
+  Play,
+  Loader2,
+} from "lucide-react";
 
 export default function ProjectTasksPage() {
   const params = useParams();
@@ -44,8 +51,8 @@ export default function ProjectTasksPage() {
       const response = await apiService.getProject(projectId);
       setProject(response);
     } catch (err) {
-      console.error('Failed to load project:', err);
-      setError('Failed to load project details');
+      console.error("Failed to load project:", err);
+      setError("Failed to load project details");
     } finally {
       setLoading(false);
     }
@@ -57,9 +64,9 @@ export default function ProjectTasksPage() {
       const response = await apiService.getTasks({
         project: projectId,
         includeSubtasks: true,
-        mainTasksOnly: false
+        mainTasksOnly: false,
       });
-      
+
       // Handle different response structures
       let taskList = [];
       if (Array.isArray(response)) {
@@ -69,13 +76,13 @@ export default function ProjectTasksPage() {
       } else if (response.data && Array.isArray(response.data)) {
         taskList = response.data;
       } else {
-        console.warn('Unexpected tasks response structure:', response);
+        console.warn("Unexpected tasks response structure:", response);
         taskList = [];
       }
-      
+
       setTasks(taskList);
     } catch (err) {
-      console.error('Failed to load tasks:', err);
+      console.error("Failed to load tasks:", err);
     } finally {
       setTasksLoading(false);
     }
@@ -83,22 +90,34 @@ export default function ProjectTasksPage() {
 
   const getTaskStats = () => {
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.status === TaskStatus.COMPLETED).length;
-    const inProgressTasks = tasks.filter(t => t.status === TaskStatus.IN_PROGRESS).length;
-    const todoTasks = tasks.filter(t => t.status === TaskStatus.TODO).length;
-    const cancelledTasks = tasks.filter(t => t.status === TaskStatus.CANCELLED).length;
-    
-    const totalSubtasks = tasks.reduce((sum, task) => sum + task.subtaskCount, 0);
-    const completedSubtasks = tasks.reduce((sum, task) => sum + task.completedSubtaskCount, 0);
-    
-    return { 
-      totalTasks, 
-      completedTasks, 
-      inProgressTasks, 
-      todoTasks, 
+    const completedTasks = tasks.filter(
+      (t) => t.status === TaskStatus.COMPLETED,
+    ).length;
+    const inProgressTasks = tasks.filter(
+      (t) => t.status === TaskStatus.IN_PROGRESS,
+    ).length;
+    const todoTasks = tasks.filter((t) => t.status === TaskStatus.TODO).length;
+    const cancelledTasks = tasks.filter(
+      (t) => t.status === TaskStatus.CANCELLED,
+    ).length;
+
+    const totalSubtasks = tasks.reduce(
+      (sum, task) => sum + task.subtaskCount,
+      0,
+    );
+    const completedSubtasks = tasks.reduce(
+      (sum, task) => sum + task.completedSubtaskCount,
+      0,
+    );
+
+    return {
+      totalTasks,
+      completedTasks,
+      inProgressTasks,
+      todoTasks,
       cancelledTasks,
       totalSubtasks,
-      completedSubtasks
+      completedSubtasks,
     };
   };
 
@@ -120,11 +139,11 @@ export default function ProjectTasksPage() {
         <div className="container mx-auto px-6 py-8">
           <Alert className="mb-4 border-red-200 bg-red-50">
             <AlertDescription className="text-red-800">
-              {error || 'Project not found'}
+              {error || "Project not found"}
             </AlertDescription>
           </Alert>
-          <Button 
-            onClick={() => router.push('/projects')}
+          <Button
+            onClick={() => router.push("/projects")}
             className="flex items-center space-x-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -152,7 +171,7 @@ export default function ProjectTasksPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Project</span>
             </Button>
-            
+
             <div className="flex-1">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -164,7 +183,9 @@ export default function ProjectTasksPage() {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link href={`/projects/${projectId}`}>{project.name}</Link>
+                      <Link href={`/projects/${projectId}`}>
+                        {project.name}
+                      </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
@@ -173,15 +194,13 @@ export default function ProjectTasksPage() {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mt-2">
                 {project.name} - Task Management
               </h1>
-              
+
               {project.description && (
-                <p className="text-gray-600 mt-1">
-                  {project.description}
-                </p>
+                <p className="text-gray-600 mt-1">{project.description}</p>
               )}
             </div>
           </div>
@@ -190,8 +209,10 @@ export default function ProjectTasksPage() {
         {/* Task Statistics */}
         <Card className="modern-card mb-8">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Task Overview</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              Task Overview
+            </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
                 <CheckSquare className="h-10 w-10 text-blue-600 mx-auto mb-2" />
@@ -244,19 +265,26 @@ export default function ProjectTasksPage() {
                     Project Task Progress
                   </span>
                   <span className="text-sm font-bold text-gray-900">
-                    {Math.round((taskStats.completedTasks / taskStats.totalTasks) * 100)}%
+                    {Math.round(
+                      (taskStats.completedTasks / taskStats.totalTasks) * 100,
+                    )}
+                    %
                   </span>
                 </div>
-                <Progress 
-                  value={(taskStats.completedTasks / taskStats.totalTasks) * 100} 
+                <Progress
+                  value={
+                    (taskStats.completedTasks / taskStats.totalTasks) * 100
+                  }
                   className="h-3"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-2">
                   <span>
-                    {taskStats.completedTasks} of {taskStats.totalTasks} tasks completed
+                    {taskStats.completedTasks} of {taskStats.totalTasks} tasks
+                    completed
                   </span>
                   <span>
-                    {taskStats.inProgressTasks} in progress, {taskStats.todoTasks} pending
+                    {taskStats.inProgressTasks} in progress,{" "}
+                    {taskStats.todoTasks} pending
                   </span>
                 </div>
               </div>

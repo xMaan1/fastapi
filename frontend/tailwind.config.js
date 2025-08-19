@@ -2,10 +2,10 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -82,20 +82,23 @@ module.exports = {
         "slide-in": "slide-in 0.3s ease-out",
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'gradient-primary': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-secondary': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'gradient-success': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'gradient-warning': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'gradient-danger': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'gradient-dark': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "gradient-primary": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "gradient-secondary":
+          "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+        "gradient-success": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+        "gradient-warning": "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+        "gradient-danger": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+        "gradient-dark": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "gradient-glass":
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
       },
       backdropBlur: {
-        xs: '2px',
+        xs: "2px",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};

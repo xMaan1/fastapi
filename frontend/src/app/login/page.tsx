@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '../../components/ui/button';
-import { UserPlus } from 'lucide-react';
-import { AuthForm } from '../../components/auth';
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "../../components/ui/button";
+import { UserPlus } from "lucide-react";
+import { AuthForm } from "../../components/auth";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const handleLoginSuccess = () => {
     // Use router.push for smoother navigation
-    router.push('/');
+    router.push("/");
   };
 
   return (
@@ -24,7 +24,7 @@ export default function LoginPage() {
           </Button>
         </Link>
       </div>
-      
+
       <AuthForm mode="login" onSuccess={handleLoginSuccess} />
     </div>
   );

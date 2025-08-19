@@ -1,18 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
 import {
   User,
   MessageSquare,
   Download,
   FileText,
   Calendar,
-  Clock
-} from 'lucide-react';
-import { DashboardLayout } from '../../components/layout';
+  Clock,
+} from "lucide-react";
+import { DashboardLayout } from "../../components/layout";
 
 export default function ClientPortalPage() {
   return (
@@ -95,7 +100,9 @@ export default function ClientPortalPage() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">Project Update</h4>
-                  <p className="text-sm text-gray-600">New milestone completed in Website Redesign</p>
+                  <p className="text-sm text-gray-600">
+                    New milestone completed in Website Redesign
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="h-4 w-4" />
@@ -109,7 +116,9 @@ export default function ClientPortalPage() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">New Message</h4>
-                  <p className="text-sm text-gray-600">Team lead sent you a message about the project timeline</p>
+                  <p className="text-sm text-gray-600">
+                    Team lead sent you a message about the project timeline
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="h-4 w-4" />
@@ -122,8 +131,12 @@ export default function ClientPortalPage() {
                   <Calendar className="h-4 w-4 text-purple-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">Meeting Scheduled</h4>
-                  <p className="text-sm text-gray-600">Project review meeting scheduled for next week</p>
+                  <h4 className="font-medium text-gray-900">
+                    Meeting Scheduled
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Project review meeting scheduled for next week
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="h-4 w-4" />

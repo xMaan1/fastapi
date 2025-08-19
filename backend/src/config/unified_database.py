@@ -576,3 +576,1101 @@ def get_upcoming_events(db: Session, tenant_id: str = None, days: int = 7) -> Li
     if tenant_id:
         query = query.filter(Event.tenant_id == tenant_id)
     return query.order_by(Event.startDate).all()
+
+# CRM Database Models
+class Lead(Base):
+    __tablename__ = "leads"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
+    email = Column(String, nullable=False, index=True)
+    phone = Column(String)
+    company = Column(String)
+    jobTitle = Column(String)
+    status = Column(String, default="new")
+    source = Column(String, default="website")
+    assignedTo = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    notes = Column(Text)
+    tags = Column(JSON, default=[])
+    score = Column(Integer, default=0)
+    budget = Column(Float)
+    timeline = Column(String)
+    convertedToContact = Column(UUID(as_uuid=True), ForeignKey("contacts.id"))
+    convertedToOpportunity = Column(UUID(as_uuid=True), ForeignKey("opportunities.id"))
+    lastContactDate = Column(DateTime)
+    nextFollowUpDate = Column(DateTime)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    assignedUser = relationship("User", foreign_keys=[assignedTo])
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+    contact = relationship("Contact", foreign_keys=[convertedToContact])
+    opportunity = relationship("Opportunity", foreign_keys=[convertedToOpportunity])
+
+class Contact(Base):
+    __tablename__ = "contacts"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
+    email = Column(String, nullable=False, index=True)
+    phone = Column(String)
+    mobile = Column(String)
+    jobTitle = Column(String)
+    department = Column(String)
+    companyId = Column(UUID(as_uuid=True), ForeignKey("companies.id"))
+    type = Column(String, default="customer")
+    notes = Column(Text)
+    tags = Column(JSON, default=[])
+    isActive = Column(Boolean, default=True)
+    lastContactDate = Column(DateTime)
+    nextFollowUpDate = Column(DateTime)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    company = relationship("Company")
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+
+class Company(Base):
+    __tablename__ = "companies"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    name = Column(String, nullable=False, index=True)
+    industry = Column(String)
+    size = Column(String)
+    website = Column(String)
+    phone = Column(String)
+    address = Column(String)
+    city = Column(String)
+    state = Column(String)
+    country = Column(String)
+    postalCode = Column(String)
+    description = Column(Text)
+    notes = Column(Text)
+    tags = Column(JSON, default=[])
+    isActive = Column(Boolean, default=True)
+    annualRevenue = Column(Float)
+    employeeCount = Column(Integer)
+    foundedYear = Column(Integer)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+
+class Opportunity(Base):
+    __tablename__ = "opportunities"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    stage = Column(String, default="prospecting")
+    amount = Column(Float)
+    probability = Column(Integer, default=50)
+    expectedCloseDate = Column(DateTime)
+    leadId = Column(UUID(as_uuid=True), ForeignKey("leads.id"))
+    contactId = Column(UUID(as_uuid=True), ForeignKey("contacts.id"))
+    companyId = Column(UUID(as_uuid=True), ForeignKey("companies.id"))
+    assignedTo = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    notes = Column(Text)
+    tags = Column(JSON, default=[])
+    closedDate = Column(DateTime)
+    wonAmount = Column(Float)
+    lostReason = Column(String)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    lead = relationship("Lead", foreign_keys=[leadId])
+    contact = relationship("Contact", foreign_keys=[contactId])
+    company = relationship("Company", foreign_keys=[companyId])
+    assignedUser = relationship("User", foreign_keys=[assignedTo])
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+
+class SalesActivity(Base):
+    __tablename__ = "sales_activities"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    type = Column(String, nullable=False)
+    subject = Column(String, nullable=False)
+    description = Column(Text)
+    dueDate = Column(DateTime)
+    completed = Column(Boolean, default=False)
+    notes = Column(Text)
+    leadId = Column(UUID(as_uuid=True), ForeignKey("leads.id"))
+    opportunityId = Column(UUID(as_uuid=True), ForeignKey("opportunities.id"))
+    contactId = Column(UUID(as_uuid=True), ForeignKey("contacts.id"))
+    companyId = Column(UUID(as_uuid=True), ForeignKey("companies.id"))
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    assignedTo = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    completedAt = Column(DateTime)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    lead = relationship("Lead", foreign_keys=[leadId])
+    opportunity = relationship("Opportunity", foreign_keys=[opportunityId])
+    contact = relationship("Contact", foreign_keys=[contactId])
+    company = relationship("Company", foreign_keys=[companyId])
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+    assignedUser = relationship("User", foreign_keys=[assignedTo])
+
+# CRM Database Functions
+def get_leads(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[Lead]:
+    query = db.query(Lead)
+    if tenant_id:
+        query = query.filter(Lead.tenantId == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_lead_by_id(lead_id: str, db: Session, tenant_id: str = None) -> Optional[Lead]:
+    query = db.query(Lead).filter(Lead.id == lead_id)
+    if tenant_id:
+        query = query.filter(Lead.tenantId == tenant_id)
+    return query.first()
+
+def create_lead(lead_data: dict, db: Session) -> Lead:
+    db_lead = Lead(**lead_data)
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+def update_lead(lead_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[Lead]:
+    query = db.query(Lead).filter(Lead.id == lead_id)
+    if tenant_id:
+        query = query.filter(Lead.tenantId == tenant_id)
+    
+    lead = query.first()
+    if lead:
+        for key, value in update_data.items():
+            if hasattr(lead, key) and value is not None:
+                setattr(lead, key, value)
+        lead.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(lead)
+    return lead
+
+def delete_lead(lead_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(Lead).filter(Lead.id == lead_id)
+    if tenant_id:
+        query = query.filter(Lead.tenantId == tenant_id)
+    
+    lead = query.first()
+    if lead:
+        db.delete(lead)
+        db.commit()
+        return True
+    return False
+
+def get_contacts(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[Contact]:
+    query = db.query(Contact)
+    if tenant_id:
+        query = query.filter(Contact.tenantId == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_contact_by_id(contact_id: str, db: Session, tenant_id: str = None) -> Optional[Contact]:
+    query = db.query(Contact).filter(Contact.id == contact_id)
+    if tenant_id:
+        query = query.filter(Contact.tenantId == tenant_id)
+    return query.first()
+
+def create_contact(contact_data: dict, db: Session) -> Contact:
+    db_contact = Contact(**contact_data)
+    db.add(db_contact)
+    db.commit()
+    db.refresh(db_contact)
+    return db_contact
+
+def update_contact(contact_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[Contact]:
+    query = db.query(Contact).filter(Contact.id == contact_id)
+    if tenant_id:
+        query = query.filter(Contact.tenantId == tenant_id)
+    
+    contact = query.first()
+    if contact:
+        for key, value in update_data.items():
+            if hasattr(contact, key) and value is not None:
+                setattr(contact, key, value)
+        contact.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(contact)
+    return contact
+
+def delete_contact(contact_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(Contact).filter(Contact.id == contact_id)
+    if tenant_id:
+        query = query.filter(Contact.tenantId == tenant_id)
+    
+    contact = query.first()
+    if contact:
+        db.delete(contact)
+        db.commit()
+        return True
+    return False
+
+def get_companies(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[Company]:
+    query = db.query(Company)
+    if tenant_id:
+        query = query.filter(Company.tenantId == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_company_by_id(company_id: str, db: Session, tenant_id: str = None) -> Optional[Company]:
+    query = db.query(Company).filter(Company.id == company_id)
+    if tenant_id:
+        query = query.filter(Company.tenantId == tenant_id)
+    return query.first()
+
+def create_company(company_data: dict, db: Session) -> Company:
+    db_company = Company(**company_data)
+    db.add(db_company)
+    db.commit()
+    db.refresh(db_company)
+    return db_company
+
+def update_company(company_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[Company]:
+    query = db.query(Company).filter(Company.id == company_id)
+    if tenant_id:
+        query = query.filter(Company.tenantId == tenant_id)
+    
+    company = query.first()
+    if company:
+        for key, value in update_data.items():
+            if hasattr(company, key) and value is not None:
+                setattr(company, key, value)
+        company.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(company)
+    return company
+
+def delete_company(company_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(Company).filter(Company.id == company_id)
+    if tenant_id:
+        query = query.filter(Company.tenantId == tenant_id)
+    
+    company = query.first()
+    if company:
+        db.delete(company)
+        db.commit()
+        return True
+    return False
+
+def get_opportunities(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[Opportunity]:
+    query = db.query(Opportunity)
+    if tenant_id:
+        query = query.filter(Opportunity.tenantId == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_opportunity_by_id(opportunity_id: str, db: Session, tenant_id: str = None) -> Optional[Opportunity]:
+    query = db.query(Opportunity).filter(Opportunity.id == opportunity_id)
+    if tenant_id:
+        query = query.filter(Opportunity.tenantId == tenant_id)
+    return query.first()
+
+def create_opportunity(opportunity_data: dict, db: Session) -> Opportunity:
+    db_opportunity = Opportunity(**opportunity_data)
+    db.add(db_opportunity)
+    db.commit()
+    db.refresh(db_opportunity)
+    return db_opportunity
+
+def update_opportunity(opportunity_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[Opportunity]:
+    query = db.query(Opportunity).filter(Opportunity.id == opportunity_id)
+    if tenant_id:
+        query = query.filter(Opportunity.tenantId == tenant_id)
+    
+    opportunity = query.first()
+    if opportunity:
+        for key, value in update_data.items():
+            if hasattr(opportunity, key) and value is not None:
+                setattr(opportunity, key, value)
+        opportunity.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(opportunity)
+    return opportunity
+
+def delete_opportunity(opportunity_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(Opportunity).filter(Opportunity.id == opportunity_id)
+    if tenant_id:
+        query = query.filter(Opportunity.tenantId == tenant_id)
+    
+    opportunity = query.first()
+    if opportunity:
+        db.delete(opportunity)
+        db.commit()
+        return True
+    return False
+
+def get_sales_activities(db: Session, tenant_id: str = None, skip: int = 0, limit: int = 100) -> List[SalesActivity]:
+    query = db.query(SalesActivity)
+    if tenant_id:
+        query = query.filter(SalesActivity.tenantId == tenant_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_sales_activity_by_id(activity_id: str, db: Session, tenant_id: str = None) -> Optional[SalesActivity]:
+    query = db.query(SalesActivity).filter(SalesActivity.id == activity_id)
+    if tenant_id:
+        query = query.filter(SalesActivity.tenantId == tenant_id)
+    return query.first()
+
+def create_sales_activity(activity_data: dict, db: Session) -> SalesActivity:
+    db_activity = SalesActivity(**activity_data)
+    db.add(db_activity)
+    db.commit()
+    db.refresh(db_activity)
+    return db_activity
+
+def update_sales_activity(activity_id: str, update_data: dict, db: Session, tenant_id: str = None) -> Optional[SalesActivity]:
+    query = db.query(SalesActivity).filter(SalesActivity.id == activity_id)
+    if tenant_id:
+        query = query.filter(SalesActivity.tenantId == tenant_id)
+    
+    activity = query.first()
+    if activity:
+        for key, value in update_data.items():
+            if hasattr(activity, key) and value is not None:
+                setattr(activity, key, value)
+        activity.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(activity)
+    return activity
+
+def delete_sales_activity(activity_id: str, db: Session, tenant_id: str = None) -> bool:
+    query = db.query(SalesActivity).filter(SalesActivity.id == activity_id)
+    if tenant_id:
+        query = query.filter(SalesActivity.tenantId == tenant_id)
+    
+    activity = query.first()
+    if activity:
+        db.delete(activity)
+        db.commit()
+        return True
+    return False
+
+def get_crm_dashboard_data(db: Session, tenant_id: str) -> dict:
+    """Get CRM dashboard metrics and data"""
+    from sqlalchemy import func
+    
+    # Get counts
+    total_leads = db.query(func.count(Lead.id)).filter(Lead.tenantId == tenant_id).scalar() or 0
+    active_leads = db.query(func.count(Lead.id)).filter(
+        Lead.tenantId == tenant_id,
+        Lead.status.in_(["new", "contacted", "qualified", "proposal_sent", "negotiation"])
+    ).scalar() or 0
+    
+    total_contacts = db.query(func.count(Contact.id)).filter(Contact.tenantId == tenant_id).scalar() or 0
+    total_companies = db.query(func.count(Company.id)).filter(Company.tenantId == tenant_id).scalar() or 0
+    
+    total_opportunities = db.query(func.count(Opportunity.id)).filter(Opportunity.tenantId == tenant_id).scalar() or 0
+    open_opportunities = db.query(func.count(Opportunity.id)).filter(
+        Opportunity.tenantId == tenant_id,
+        Opportunity.stage.in_(["prospecting", "qualification", "proposal", "negotiation"])
+    ).scalar() or 0
+    
+    # Get revenue data
+    total_revenue = db.query(func.coalesce(func.sum(Opportunity.wonAmount), 0)).filter(
+        Opportunity.tenantId == tenant_id,
+        Opportunity.stage == "closed_won"
+    ).scalar() or 0
+    
+    projected_revenue = db.query(func.coalesce(func.sum(Opportunity.amount), 0)).filter(
+        Opportunity.tenantId == tenant_id,
+        Opportunity.stage.in_(["prospecting", "qualification", "proposal", "negotiation"])
+    ).scalar() or 0
+    
+    # Calculate conversion rate
+    conversion_rate = 0
+    if total_leads > 0:
+        converted_leads = db.query(func.count(Lead.id)).filter(
+            Lead.tenantId == tenant_id,
+            Lead.status.in_(["won", "lost"])
+        ).scalar() or 0
+        conversion_rate = (converted_leads / total_leads) * 100
+    
+    # Calculate average deal size
+    avg_deal_size = 0
+    if total_opportunities > 0:
+        avg_deal_size = projected_revenue / total_opportunities
+    
+    return {
+        "totalLeads": total_leads,
+        "activeLeads": active_leads,
+        "totalContacts": total_contacts,
+        "totalCompanies": total_companies,
+        "totalOpportunities": total_opportunities,
+        "openOpportunities": open_opportunities,
+        "totalRevenue": total_revenue,
+        "projectedRevenue": projected_revenue,
+        "conversionRate": round(conversion_rate, 2),
+        "averageDealSize": round(avg_deal_size, 2)
+    }
+
+# HRM Models
+class Employee(Base):
+    __tablename__ = "employees"
+    
+    id = Column(String, primary_key=True, index=True)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False, index=True)
+    phone = Column(String)
+    dateOfBirth = Column(String)
+    hireDate = Column(String, nullable=False)
+    employeeId = Column(String, unique=True, nullable=False, index=True)
+    department = Column(String, nullable=False)
+    position = Column(String, nullable=False)
+    employeeType = Column(String, nullable=False)
+    employmentStatus = Column(String, nullable=False)
+    managerId = Column(String)
+    salary = Column(Float)
+    address = Column(String)
+    emergencyContact = Column(String)
+    emergencyPhone = Column(String)
+    skills = Column(JSON, default=list)
+    certifications = Column(JSON, default=list)
+    notes = Column(String)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class JobPosting(Base):
+    __tablename__ = "job_postings"
+    
+    id = Column(String, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    department = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    requirements = Column(JSON, default=list)
+    responsibilities = Column(JSON, default=list)
+    location = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+    salaryRange = Column(String)
+    benefits = Column(JSON, default=list)
+    status = Column(String, nullable=False)
+    openDate = Column(String, nullable=False)
+    closeDate = Column(String)
+    hiringManagerId = Column(String)
+    tags = Column(JSON, default=list)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Application(Base):
+    __tablename__ = "applications"
+    
+    id = Column(String, primary_key=True, index=True)
+    jobPostingId = Column(String, nullable=False, index=True)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String)
+    resume = Column(String)
+    coverLetter = Column(String)
+    experience = Column(Text)
+    education = Column(Text)
+    skills = Column(JSON, default=list)
+    status = Column(String, nullable=False)
+    assignedTo = Column(String)
+    notes = Column(Text)
+    interviewDate = Column(String)
+    interviewNotes = Column(Text)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class PerformanceReview(Base):
+    __tablename__ = "performance_reviews"
+    
+    id = Column(String, primary_key=True, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    reviewerId = Column(String, nullable=False)
+    reviewType = Column(String, nullable=False)
+    reviewPeriod = Column(String, nullable=False)
+    reviewDate = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    goals = Column(JSON, default=list)
+    achievements = Column(JSON, default=list)
+    areasOfImprovement = Column(JSON, default=list)
+    overallRating = Column(Integer)
+    technicalRating = Column(Integer)
+    communicationRating = Column(Integer)
+    teamworkRating = Column(Integer)
+    leadershipRating = Column(Integer)
+    comments = Column(Text)
+    nextReviewDate = Column(String)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class TimeEntry(Base):
+    __tablename__ = "time_entries"
+    
+    id = Column(String, primary_key=True, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    date = Column(String, nullable=False)
+    clockIn = Column(String, nullable=False)
+    clockOut = Column(String)
+    totalHours = Column(Float)
+    overtimeHours = Column(Float)
+    projectId = Column(String)
+    taskId = Column(String)
+    notes = Column(Text)
+    status = Column(String, default="active")
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class LeaveRequest(Base):
+    __tablename__ = "leave_requests"
+    
+    id = Column(String, primary_key=True, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    leaveType = Column(String, nullable=False)
+    startDate = Column(String, nullable=False)
+    endDate = Column(String, nullable=False)
+    totalDays = Column(Float, nullable=False)
+    reason = Column(Text, nullable=False)
+    status = Column(String, nullable=False)
+    approvedBy = Column(String)
+    approvedAt = Column(String)
+    rejectionReason = Column(Text)
+    notes = Column(Text)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Payroll(Base):
+    __tablename__ = "payroll"
+    
+    id = Column(String, primary_key=True, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    payPeriod = Column(String, nullable=False)
+    startDate = Column(String, nullable=False)
+    endDate = Column(String, nullable=False)
+    basicSalary = Column(Float, nullable=False)
+    allowances = Column(Float, default=0)
+    deductions = Column(Float, default=0)
+    overtimePay = Column(Float, default=0)
+    bonus = Column(Float, default=0)
+    netPay = Column(Float, nullable=False)
+    status = Column(String, nullable=False)
+    paymentDate = Column(String)
+    notes = Column(Text)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Benefits(Base):
+    __tablename__ = "benefits"
+    
+    id = Column(String, primary_key=True, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    benefitType = Column(String, nullable=False)
+    provider = Column(String, nullable=False)
+    policyNumber = Column(String)
+    startDate = Column(String, nullable=False)
+    endDate = Column(String)
+    monthlyCost = Column(Float, nullable=False)
+    employeeContribution = Column(Float, nullable=False)
+    employerContribution = Column(Float, nullable=False)
+    status = Column(String, default="active")
+    notes = Column(Text)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Training(Base):
+    __tablename__ = "training"
+    
+    id = Column(String, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    trainingType = Column(String, nullable=False)
+    duration = Column(String, nullable=False)
+    cost = Column(Float, nullable=False)
+    provider = Column(String, nullable=False)
+    startDate = Column(String, nullable=False)
+    endDate = Column(String, nullable=False)
+    maxParticipants = Column(Integer)
+    status = Column(String, nullable=False)
+    materials = Column(JSON, default=list)
+    objectives = Column(JSON, default=list)
+    prerequisites = Column(JSON, default=list)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class TrainingEnrollment(Base):
+    __tablename__ = "training_enrollments"
+    
+    id = Column(String, primary_key=True, index=True)
+    trainingId = Column(String, nullable=False, index=True)
+    employeeId = Column(String, nullable=False, index=True)
+    enrollmentDate = Column(String, nullable=False)
+    completionDate = Column(String)
+    status = Column(String, nullable=False)
+    score = Column(Integer)
+    certificate = Column(String)
+    feedback = Column(Text)
+    tenantId = Column(String, nullable=False, index=True)
+    createdBy = Column(String, nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# HRM CRUD Functions
+def get_employees(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Employee).filter(Employee.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_employee_by_id(db: Session, employee_id: str, tenant_id: str):
+    return db.query(Employee).filter(Employee.id == employee_id, Employee.tenantId == tenant_id).first()
+
+def create_employee(db: Session, employee: Employee):
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+    return employee
+
+def update_employee(db: Session, employee_id: str, employee_update: dict, tenant_id: str):
+    employee = get_employee_by_id(db, employee_id, tenant_id)
+    if employee:
+        for key, value in employee_update.items():
+            setattr(employee, key, value)
+        employee.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(employee)
+    return employee
+
+def delete_employee(db: Session, employee_id: str, tenant_id: str):
+    employee = get_employee_by_id(db, employee_id, tenant_id)
+    if employee:
+        db.delete(employee)
+        db.commit()
+        return True
+    return False
+
+def get_job_postings(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(JobPosting).filter(JobPosting.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_job_posting_by_id(db: Session, job_id: str, tenant_id: str):
+    return db.query(JobPosting).filter(JobPosting.id == job_id, JobPosting.tenantId == tenant_id).first()
+
+def create_job_posting(db: Session, job_posting: JobPosting):
+    db.add(job_posting)
+    db.commit()
+    db.refresh(job_posting)
+    return job_posting
+
+def update_job_posting(db: Session, job_id: str, job_update: dict, tenant_id: str):
+    job = get_job_posting_by_id(db, job_id, tenant_id)
+    if job:
+        for key, value in job_update.items():
+            setattr(job, key, value)
+        job.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(job)
+    return job
+
+def delete_job_posting(db: Session, job_id: str, tenant_id: str):
+    job = get_job_posting_by_id(db, job_id, tenant_id)
+    if job:
+        db.delete(job)
+        db.commit()
+        return True
+    return False
+
+def get_applications(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Application).filter(Application.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_application_by_id(db: Session, application_id: str, tenant_id: str):
+    return db.query(Application).filter(Application.id == application_id, Application.tenantId == tenant_id).first()
+
+def create_application(db: Session, application: Application):
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+    return application
+
+def update_application(db: Session, application_id: str, application_update: dict, tenant_id: str):
+    application = get_application_by_id(db, application_id, tenant_id)
+    if application:
+        for key, value in application_update.items():
+            setattr(application, key, value)
+        application.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(application)
+    return application
+
+def delete_application(db: Session, application_id: str, tenant_id: str):
+    application = get_application_by_id(db, application_id, tenant_id)
+    if application:
+        db.delete(application)
+        db.commit()
+        return True
+    return False
+
+def get_performance_reviews(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(PerformanceReview).filter(PerformanceReview.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_performance_review_by_id(db: Session, review_id: str, tenant_id: str):
+    return db.query(PerformanceReview).filter(PerformanceReview.id == review_id, PerformanceReview.tenantId == tenant_id).first()
+
+def create_performance_review(db: Session, review: PerformanceReview):
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
+
+def update_performance_review(db: Session, review_id: str, review_update: dict, tenant_id: str):
+    review = get_performance_review_by_id(db, review_id, tenant_id)
+    if review:
+        for key, value in review_update.items():
+            setattr(review, key, value)
+        review.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(review)
+    return review
+
+def delete_performance_review(db: Session, review_id: str, tenant_id: str):
+    review = get_performance_review_by_id(db, review_id, tenant_id)
+    if review:
+        db.delete(review)
+        db.commit()
+        return True
+    return False
+
+def get_time_entries(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(TimeEntry).filter(TimeEntry.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_time_entry_by_id(db: Session, time_entry_id: str, tenant_id: str):
+    return db.query(TimeEntry).filter(TimeEntry.id == time_entry_id, TimeEntry.tenantId == tenant_id).first()
+
+def create_time_entry(db: Session, time_entry: TimeEntry):
+    db.add(time_entry)
+    db.commit()
+    db.refresh(time_entry)
+    return time_entry
+
+def update_time_entry(db: Session, time_entry_id: str, time_entry_update: dict, tenant_id: str):
+    time_entry = get_time_entry_by_id(db, time_entry_id, tenant_id)
+    if time_entry:
+        for key, value in time_entry_update.items():
+            setattr(time_entry, key, value)
+        time_entry.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(time_entry)
+    return time_entry
+
+def delete_time_entry(db: Session, time_entry_id: str, tenant_id: str):
+    time_entry = get_time_entry_by_id(db, time_entry_id, tenant_id)
+    if time_entry:
+        db.delete(time_entry)
+        db.commit()
+        return True
+    return False
+
+def get_leave_requests(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(LeaveRequest).filter(LeaveRequest.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_leave_request_by_id(db: Session, leave_request_id: str, tenant_id: str):
+    return db.query(LeaveRequest).filter(LeaveRequest.id == leave_request_id, LeaveRequest.tenantId == tenant_id).first()
+
+def create_leave_request(db: Session, leave_request: LeaveRequest):
+    db.add(leave_request)
+    db.commit()
+    db.refresh(leave_request)
+    return leave_request
+
+def update_leave_request(db: Session, leave_request_id: str, leave_request_update: dict, tenant_id: str):
+    leave_request = get_leave_request_by_id(db, leave_request_id, tenant_id)
+    if leave_request:
+        for key, value in leave_request_update.items():
+            setattr(leave_request, key, value)
+        leave_request.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(leave_request)
+        return leave_request
+    return None
+
+def delete_leave_request(db: Session, leave_request_id: str, tenant_id: str):
+    leave_request = get_leave_request_by_id(db, leave_request_id, tenant_id)
+    if leave_request:
+        db.delete(leave_request)
+        db.commit()
+        return True
+    return False
+
+def get_payroll(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Payroll).filter(Payroll.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_payroll_by_id(db: Session, payroll_id: str, tenant_id: str):
+    return db.query(Payroll).filter(Payroll.id == payroll_id, Payroll.tenantId == tenant_id).first()
+
+def create_payroll(db: Session, payroll: Payroll):
+    db.add(payroll)
+    db.commit()
+    db.refresh(payroll)
+    return payroll
+
+def update_payroll(db: Session, payroll_id: str, payroll_update: dict, tenant_id: str):
+    payroll = get_payroll_by_id(db, payroll_id, tenant_id)
+    if payroll:
+        for key, value in payroll_update.items():
+            setattr(payroll, key, value)
+        payroll.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(payroll)
+    return payroll
+
+def delete_payroll(db: Session, payroll_id: str, tenant_id: str):
+    payroll = get_payroll_by_id(db, payroll_id, tenant_id)
+    if payroll:
+        db.delete(payroll)
+        db.commit()
+        return True
+    return False
+
+def get_benefits(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Benefits).filter(Benefits.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_benefit_by_id(db: Session, benefit_id: str, tenant_id: str):
+    return db.query(Benefits).filter(Benefits.id == benefit_id, Benefits.tenantId == tenant_id).first()
+
+def create_benefit(db: Session, benefit: Benefits):
+    db.add(benefit)
+    db.commit()
+    db.refresh(benefit)
+    return benefit
+
+def update_benefit(db: Session, benefit_id: str, benefit_update: dict, tenant_id: str):
+    benefit = get_benefit_by_id(db, benefit_id, tenant_id)
+    if benefit:
+        for key, value in benefit_update.items():
+            setattr(benefit, key, value)
+        benefit.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(benefit)
+    return benefit
+
+def delete_benefit(db: Session, benefit_id: str, tenant_id: str):
+    benefit = get_benefit_by_id(db, benefit_id, tenant_id)
+    if benefit:
+        db.delete(benefit)
+        db.commit()
+        return True
+    return False
+
+def get_training(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Training).filter(Training.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_training_by_id(db: Session, training_id: str, tenant_id: str):
+    return db.query(Training).filter(Training.id == training_id, Training.tenantId == tenant_id).first()
+
+def create_training(db: Session, training: Training):
+    db.add(training)
+    db.commit()
+    db.refresh(training)
+    return training
+
+def update_training(db: Session, training_id: str, training_update: dict, tenant_id: str):
+    training = get_training_by_id(db, training_id, tenant_id)
+    if training:
+        for key, value in training_update.items():
+            setattr(training, key, value)
+        training.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(training)
+    return training
+
+def delete_training(db: Session, training_id: str, tenant_id: str):
+    training = get_training_by_id(db, training_id, tenant_id)
+    if training:
+        db.delete(training)
+        db.commit()
+        return True
+    return False
+
+def get_training_enrollments(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(TrainingEnrollment).filter(TrainingEnrollment.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_training_enrollment_by_id(db: Session, enrollment_id: str, tenant_id: str):
+    return db.query(TrainingEnrollment).filter(TrainingEnrollment.id == enrollment_id, TrainingEnrollment.tenantId == tenant_id).first()
+
+def create_training_enrollment(db: Session, enrollment: TrainingEnrollment):
+    db.add(enrollment)
+    db.commit()
+    db.refresh(enrollment)
+    return enrollment
+
+def update_training_enrollment(db: Session, enrollment_id: str, enrollment_update: dict, tenant_id: str):
+    enrollment = get_training_enrollment_by_id(db, enrollment_id, tenant_id)
+    if enrollment:
+        for key, value in enrollment_update.items():
+            setattr(enrollment, key, value)
+        enrollment.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(enrollment)
+    return enrollment
+
+def delete_training_enrollment(db: Session, enrollment_id: str, tenant_id: str):
+    enrollment = get_training_enrollment_by_id(db, enrollment_id, tenant_id)
+    if enrollment:
+        db.delete(enrollment)
+        db.commit()
+        return True
+    return False
+
+def get_hrm_dashboard_data(db: Session, tenant_id: str):
+    """Get HRM dashboard data with aggregated metrics"""
+    try:
+        # Get basic counts
+        total_employees = db.query(Employee).filter(Employee.tenantId == tenant_id).count()
+        active_employees = db.query(Employee).filter(
+            Employee.tenantId == tenant_id,
+            Employee.employmentStatus == "active"
+        ).count()
+        
+        # Get recent hires (last 30 days)
+        thirty_days_ago = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
+        new_hires = db.query(Employee).filter(
+            Employee.tenantId == tenant_id,
+            Employee.hireDate >= thirty_days_ago
+        ).count()
+        
+        # Get open positions
+        open_positions = db.query(JobPosting).filter(
+            JobPosting.tenantId == tenant_id,
+            JobPosting.status == "published"
+        ).count()
+        
+        # Get pending applications
+        pending_applications = db.query(Application).filter(
+            Application.tenantId == tenant_id,
+            Application.status.in_(["applied", "screening", "interview"])
+        ).count()
+        
+        # Get upcoming reviews (next 30 days)
+        upcoming_reviews = db.query(PerformanceReview).filter(
+            PerformanceReview.tenantId == tenant_id,
+            PerformanceReview.reviewDate >= thirty_days_ago,
+            PerformanceReview.status.in_(["draft", "in_progress"])
+        ).count()
+        
+        # Get pending leave requests
+        pending_leave_requests = db.query(LeaveRequest).filter(
+            LeaveRequest.tenantId == tenant_id,
+            LeaveRequest.status == "pending"
+        ).count()
+        
+        # Get average salary
+        salary_result = db.query(func.avg(Employee.salary)).filter(
+            Employee.tenantId == tenant_id,
+            Employee.salary.isnot(None)
+        ).scalar()
+        average_salary = float(salary_result) if salary_result else 0.0
+        
+        # Get department distribution
+        dept_distribution = db.query(
+            Employee.department,
+            func.count(Employee.id)
+        ).filter(Employee.tenantId == tenant_id).group_by(Employee.department).all()
+        
+        department_distribution = {dept: count for dept, count in dept_distribution}
+        
+        # Get recent data for dashboard
+        recent_hires = db.query(Employee).filter(
+            Employee.tenantId == tenant_id
+        ).order_by(Employee.hireDate.desc()).limit(5).all()
+        
+        upcoming_reviews_list = db.query(PerformanceReview).filter(
+            PerformanceReview.tenantId == tenant_id,
+            PerformanceReview.reviewDate >= thirty_days_ago
+        ).order_by(PerformanceReview.reviewDate).limit(5).all()
+        
+        pending_leave_list = db.query(LeaveRequest).filter(
+            LeaveRequest.tenantId == tenant_id,
+            LeaveRequest.status == "pending"
+        ).order_by(LeaveRequest.startDate).limit(5).all()
+        
+        open_jobs = db.query(JobPosting).filter(
+            JobPosting.tenantId == tenant_id,
+            JobPosting.status == "published"
+        ).order_by(JobPosting.openDate.desc()).limit(5).all()
+        
+        recent_applications = db.query(Application).filter(
+            Application.tenantId == tenant_id
+        ).order_by(Application.createdAt.desc()).limit(5).all()
+        
+        training_programs = db.query(Training).filter(
+            Training.tenantId == tenant_id,
+            Training.status == "active"
+        ).order_by(Training.startDate).limit(5).all()
+        
+        # Calculate turnover rate (simplified)
+        terminated_employees = db.query(Employee).filter(
+            Employee.tenantId == tenant_id,
+            Employee.employmentStatus.in_(["terminated", "resigned"])
+        ).count()
+        
+        turnover_rate = (terminated_employees / max(total_employees, 1)) * 100 if total_employees > 0 else 0.0
+        
+        # Calculate training completion rate
+        total_enrollments = db.query(TrainingEnrollment).filter(
+            TrainingEnrollment.tenantId == tenant_id
+        ).count()
+        
+        completed_enrollments = db.query(TrainingEnrollment).filter(
+            TrainingEnrollment.tenantId == tenant_id,
+            TrainingEnrollment.status == "completed"
+        ).count()
+        
+        training_completion_rate = (completed_enrollments / max(total_enrollments, 1)) * 100 if total_enrollments > 0 else 0.0
+        
+        return {
+            "metrics": {
+                "totalEmployees": total_employees,
+                "activeEmployees": active_employees,
+                "newHires": new_hires,
+                "turnoverRate": round(turnover_rate, 2),
+                "averageSalary": round(average_salary, 2),
+                "openPositions": open_positions,
+                "pendingApplications": pending_applications,
+                "upcomingReviews": upcoming_reviews,
+                "pendingLeaveRequests": pending_leave_requests,
+                "trainingCompletionRate": round(training_completion_rate, 2)
+            },
+            "recentHires": recent_hires,
+            "upcomingReviews": upcoming_reviews_list,
+            "pendingLeaveRequests": pending_leave_list,
+            "openJobPostings": open_jobs,
+            "recentApplications": recent_applications,
+            "departmentDistribution": department_distribution,
+            "trainingPrograms": training_programs
+        }
+    except Exception as e:
+        print(f"Error getting HRM dashboard data: {e}")
+        return None

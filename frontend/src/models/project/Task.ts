@@ -17,8 +17,8 @@ export interface LegacyTask {
   id: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in_progress' | 'review' | 'completed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "todo" | "in_progress" | "review" | "completed";
+  priority: "low" | "medium" | "high" | "critical";
   project: string;
   assignedTo?: TaskAssignee;
   createdBy: TaskCreator;
@@ -34,8 +34,8 @@ export interface LegacyTask {
 export interface LegacyTaskCreate {
   title: string;
   description?: string;
-  status?: 'todo' | 'in_progress' | 'review' | 'completed';
-  priority?: 'low' | 'medium' | 'high' | 'critical';
+  status?: "todo" | "in_progress" | "review" | "completed";
+  priority?: "low" | "medium" | "high" | "critical";
   project: string;
   assignedTo?: string;
   dueDate?: string;
@@ -46,8 +46,8 @@ export interface LegacyTaskCreate {
 export interface LegacyTaskUpdate {
   title?: string;
   description?: string;
-  status?: 'todo' | 'in_progress' | 'review' | 'completed';
-  priority?: 'low' | 'medium' | 'high' | 'critical';
+  status?: "todo" | "in_progress" | "review" | "completed";
+  priority?: "low" | "medium" | "high" | "critical";
   assignedTo?: string;
   dueDate?: string;
   estimatedHours?: number;

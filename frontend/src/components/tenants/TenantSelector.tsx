@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
+import React, { useState, useEffect } from "react";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Label } from '../ui/label';
-import { Loader2, Building } from 'lucide-react';
-import { apiService } from '../../services/ApiService';
+} from "../ui/select";
+import { Label } from "../ui/label";
+import { Loader2, Building } from "lucide-react";
+import { apiService } from "../../services/ApiService";
 
 interface Tenant {
   id: string;
@@ -24,7 +24,11 @@ interface TenantSelectorProps {
   className?: string;
 }
 
-export default function TenantSelector({ value, onChange, className }: TenantSelectorProps) {
+export default function TenantSelector({
+  value,
+  onChange,
+  className,
+}: TenantSelectorProps) {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +42,7 @@ export default function TenantSelector({ value, onChange, className }: TenantSel
       const response = await apiService.getMyTenants();
       setTenants(response || []);
     } catch (error) {
-      console.error('Failed to fetch tenants:', error);
+      console.error("Failed to fetch tenants:", error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +54,9 @@ export default function TenantSelector({ value, onChange, className }: TenantSel
         <Label>Organization</Label>
         <div className="flex items-center gap-2 p-3 border rounded-md bg-gray-50">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm text-gray-600">Loading organizations...</span>
+          <span className="text-sm text-gray-600">
+            Loading organizations...
+          </span>
         </div>
       </div>
     );

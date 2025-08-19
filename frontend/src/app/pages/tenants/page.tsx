@@ -1,12 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Building, Users, Loader2 } from 'lucide-react';
-import { apiService } from '../../../services/ApiService';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Building, Users, Loader2 } from "lucide-react";
+import { apiService } from "../../../services/ApiService";
 
 interface Tenant {
   id: string;
@@ -32,7 +37,7 @@ export default function TenantsPage() {
       const response = await apiService.getMyTenants();
       setTenants(response || []);
     } catch (error) {
-      console.error('Failed to fetch tenants:', error);
+      console.error("Failed to fetch tenants:", error);
     } finally {
       setLoading(false);
     }
@@ -75,8 +80,8 @@ export default function TenantsPage() {
         {/* Tenants Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {tenants.map((tenant) => (
-            <Card 
-              key={tenant.id} 
+            <Card
+              key={tenant.id}
               className="modern-card card-hover cursor-pointer"
               onClick={() => handleSelectTenant(tenant.id)}
             >
@@ -88,29 +93,27 @@ export default function TenantsPage() {
                   {tenant.name}
                 </CardTitle>
                 {tenant.domain && (
-                  <p className="text-sm text-gray-600">
-                    {tenant.domain}
-                  </p>
+                  <p className="text-sm text-gray-600">{tenant.domain}</p>
                 )}
               </CardHeader>
 
               <CardContent className="text-center space-y-4">
                 {tenant.description && (
-                  <p className="text-gray-600 text-sm">
-                    {tenant.description}
-                  </p>
+                  <p className="text-gray-600 text-sm">{tenant.description}</p>
                 )}
 
                 <div className="flex justify-center">
-                  <Badge 
+                  <Badge
                     variant={tenant.isActive ? "default" : "secondary"}
-                    className={tenant.isActive ? "bg-green-100 text-green-800" : ""}
+                    className={
+                      tenant.isActive ? "bg-green-100 text-green-800" : ""
+                    }
                   >
-                    {tenant.isActive ? 'Active' : 'Inactive'}
+                    {tenant.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
 
-                <Button 
+                <Button
                   className="w-full modern-button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -136,7 +139,7 @@ export default function TenantsPage() {
               <p className="text-gray-600 mb-4">
                 You don&apos;t have access to any organizations yet.
               </p>
-              <Button variant="outline" onClick={() => router.push('/plans')}>
+              <Button variant="outline" onClick={() => router.push("/plans")}>
                 Create Organization
               </Button>
             </CardContent>

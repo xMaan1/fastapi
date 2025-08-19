@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { User, LoginCredentials } from '@/src/models/auth';
-import { apiService } from '@/src/services/ApiService';
-import { SessionManager } from '@/src/services/SessionManager';
+import { useState, useEffect } from "react";
+import { User, LoginCredentials } from "@/src/models/auth";
+import { apiService } from "@/src/services/ApiService";
+import { SessionManager } from "@/src/services/SessionManager";
 
 interface Tenant {
   id: string;
@@ -31,15 +31,15 @@ export function useAuth() {
       try {
         const sessionManager = new SessionManager();
         const session = sessionManager.getSession();
-        
+
         if (session && session.token && session.user) {
           setUser(session.user);
-          
+
           // Load tenants from localStorage (no API call)
           const storedTenants = apiService.getUserTenants();
           if (storedTenants.length > 0) {
             setTenants(storedTenants);
-            
+
             // Get current tenant from localStorage
             const currentTenant = apiService.getCurrentTenant();
             if (currentTenant) {
@@ -54,7 +54,7 @@ export function useAuth() {
           setUser(null);
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error("Auth initialization error:", error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -68,28 +68,28 @@ export function useAuth() {
     try {
       setLoading(true);
       const response = await apiService.login(credentials);
-      
+
       if (response.success && response.user) {
         setUser(response.user);
-        
+
         // Tenants are already fetched and stored during apiService.login()
         // Just load them from localStorage
         const storedTenants = apiService.getUserTenants();
         if (storedTenants.length > 0) {
           setTenants(storedTenants);
-          
+
           // Current tenant is already set during login, just get it
           const currentTenant = apiService.getCurrentTenant();
           if (currentTenant) {
             setCurrentTenant(currentTenant);
           }
         }
-        
+
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       return false;
     } finally {
       setLoading(false);
@@ -100,7 +100,7 @@ export function useAuth() {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       const sessionManager = new SessionManager();
       setUser(null);
@@ -108,8 +108,8 @@ export function useAuth() {
       setCurrentTenant(null);
       sessionManager.clearSession();
       apiService.setTenantId(null);
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
   };
@@ -121,7 +121,7 @@ export function useAuth() {
       setCurrentTenant(tenant);
       return true;
     } catch (error) {
-      console.error('Failed to switch tenant:', error);
+      console.error("Failed to switch tenant:", error);
       return false;
     }
   };

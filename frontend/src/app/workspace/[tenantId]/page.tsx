@@ -1,19 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Progress } from '../../../components/ui/progress';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
+import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import {
-  FolderOpen,
-  Users,
-  TrendingUp,
-  Loader2,
-  Building
-} from 'lucide-react';
-import { apiService } from '../../../services/ApiService';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Progress } from "../../../components/ui/progress";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { FolderOpen, Users, TrendingUp, Loader2, Building } from "lucide-react";
+import { apiService } from "../../../services/ApiService";
 
 interface WorkspaceStats {
   totalProjects: number;
@@ -42,24 +41,32 @@ export default function WorkspacePage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Set tenant context
       apiService.setTenantId(tenantId);
-      
+
       const [projectsResponse, usersResponse] = await Promise.all([
         apiService.getProjects().catch(() => ({ projects: [] })),
-        apiService.getTenantUsers(tenantId).catch(() => ({ users: [] }))
+        apiService.getTenantUsers(tenantId).catch(() => ({ users: [] })),
       ]);
 
       const projects = projectsResponse.projects || [];
       const users = usersResponse.users || [];
 
       const totalProjects = projects.length;
-      const activeProjects = projects.filter((p: any) => p.status === 'in_progress').length;
+      const activeProjects = projects.filter(
+        (p: any) => p.status === "in_progress",
+      ).length;
       const totalMembers = users.length;
-      const completionRate = totalProjects > 0 
-        ? Math.round(projects.reduce((sum: number, p: any) => sum + (p.completionPercent || 0), 0) / totalProjects)
-        : 0;
+      const completionRate =
+        totalProjects > 0
+          ? Math.round(
+              projects.reduce(
+                (sum: number, p: any) => sum + (p.completionPercent || 0),
+                0,
+              ) / totalProjects,
+            )
+          : 0;
 
       setStats({
         totalProjects,
@@ -68,8 +75,8 @@ export default function WorkspacePage() {
         completionRate,
       });
     } catch (err) {
-      console.error('Failed to fetch workspace data:', err);
-      setError('Failed to load workspace data');
+      console.error("Failed to fetch workspace data:", err);
+      setError("Failed to load workspace data");
     } finally {
       setLoading(false);
     }
@@ -122,7 +129,9 @@ export default function WorkspacePage() {
                   <FolderOpen className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalProjects}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Total Projects</p>
                 </div>
               </div>
@@ -136,7 +145,9 @@ export default function WorkspacePage() {
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.activeProjects}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.activeProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Active Projects</p>
                 </div>
               </div>
@@ -150,7 +161,9 @@ export default function WorkspacePage() {
                   <Users className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalMembers}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalMembers}
+                  </p>
                   <p className="text-sm text-gray-600">Team Members</p>
                 </div>
               </div>
@@ -164,7 +177,9 @@ export default function WorkspacePage() {
                   <TrendingUp className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.completionRate}%</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.completionRate}%
+                  </p>
                   <p className="text-sm text-gray-600">Avg Completion</p>
                 </div>
               </div>
@@ -181,23 +196,33 @@ export default function WorkspacePage() {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">Overall Completion</span>
-                  <span className="text-sm font-bold text-gray-900">{stats.completionRate}%</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Overall Completion
+                  </span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {stats.completionRate}%
+                  </span>
                 </div>
                 <Progress value={stats.completionRate} className="h-3" />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-blue-600">{stats.totalProjects}</p>
+                  <p className="text-lg font-bold text-blue-600">
+                    {stats.totalProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Total Projects</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-green-600">{stats.activeProjects}</p>
+                  <p className="text-lg font-bold text-green-600">
+                    {stats.activeProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Active Projects</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg font-bold text-purple-600">{stats.totalMembers}</p>
+                  <p className="text-lg font-bold text-purple-600">
+                    {stats.totalMembers}
+                  </p>
                   <p className="text-sm text-gray-600">Team Members</p>
                 </div>
               </div>
@@ -215,7 +240,7 @@ export default function WorkspacePage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col gap-2"
-                onClick={() => window.location.href = '/projects'}
+                onClick={() => (window.location.href = "/projects")}
               >
                 <FolderOpen className="h-6 w-6" />
                 <span>View Projects</span>
@@ -223,7 +248,7 @@ export default function WorkspacePage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col gap-2"
-                onClick={() => window.location.href = '/team'}
+                onClick={() => (window.location.href = "/team")}
               >
                 <Users className="h-6 w-6" />
                 <span>Manage Team</span>
@@ -231,7 +256,7 @@ export default function WorkspacePage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col gap-2"
-                onClick={() => window.location.href = '/reports'}
+                onClick={() => (window.location.href = "/reports")}
               >
                 <TrendingUp className="h-6 w-6" />
                 <span>View Reports</span>

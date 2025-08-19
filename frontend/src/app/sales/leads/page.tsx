@@ -1,52 +1,74 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Input } from '../../../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
-import { Label } from '../../../components/ui/label';
-import { Textarea } from '../../../components/ui/textarea';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreHorizontal, 
-  Phone, 
-  Mail, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Input } from "../../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import { Label } from "../../../components/ui/label";
+import { Textarea } from "../../../components/ui/textarea";
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Phone,
+  Mail,
   Calendar,
   DollarSign,
   Building,
   User,
-  Target
-} from 'lucide-react';
-import { useApiService } from '../../../hooks/useApiService';
-import { DashboardLayout } from '../../../components/layout';
-import { Lead, LeadStatus, LeadSource, LeadCreate } from '../../../models/sales';
+  Target,
+} from "lucide-react";
+import { useApiService } from "../../../hooks/useApiService";
+import { DashboardLayout } from "../../../components/layout";
+import {
+  Lead,
+  LeadStatus,
+  LeadSource,
+  LeadCreate,
+} from "../../../models/sales";
 
 export default function LeadsPage() {
   const apiService = useApiService();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sourceFilter, setSourceFilter] = useState<string>('all');
-  const [assignedFilter, setAssignedFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [assignedFilter, setAssignedFilter] = useState<string>("all");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    company: '',
-    jobTitle: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    company: "",
+    jobTitle: "",
     leadSource: LeadSource.WEBSITE,
     status: LeadStatus.NEW,
-    notes: '',
-    estimatedValue: '',
-    expectedCloseDate: ''
+    notes: "",
+    estimatedValue: "",
+    expectedCloseDate: "",
   });
 
   useEffect(() => {
@@ -59,7 +81,7 @@ export default function LeadsPage() {
       const response = await apiService.getLeads({ limit: 100 });
       setLeads(response.leads || []);
     } catch (error) {
-      console.error('Error loading leads:', error);
+      console.error("Error loading leads:", error);
     } finally {
       setLoading(false);
     }
@@ -70,73 +92,79 @@ export default function LeadsPage() {
     try {
       await apiService.createLead({
         ...formData,
-        estimatedValue: formData.estimatedValue ? parseFloat(formData.estimatedValue) : undefined,
+        estimatedValue: formData.estimatedValue
+          ? parseFloat(formData.estimatedValue)
+          : undefined,
         expectedCloseDate: formData.expectedCloseDate || undefined,
-        tags: []
+        tags: [],
       });
       setShowCreateDialog(false);
       setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        company: '',
-        jobTitle: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        company: "",
+        jobTitle: "",
         leadSource: LeadSource.WEBSITE,
         status: LeadStatus.NEW,
-        notes: '',
-        estimatedValue: '',
-        expectedCloseDate: ''
+        notes: "",
+        estimatedValue: "",
+        expectedCloseDate: "",
       });
       loadLeads();
     } catch (error) {
-      console.error('Error creating lead:', error);
+      console.error("Error creating lead:", error);
     }
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'new': 'bg-blue-100 text-blue-800',
-      'contacted': 'bg-yellow-100 text-yellow-800',
-      'qualified': 'bg-green-100 text-green-800',
-      'proposal': 'bg-purple-100 text-purple-800',
-      'negotiation': 'bg-orange-100 text-orange-800',
-      'won': 'bg-green-100 text-green-800',
-      'lost': 'bg-red-100 text-red-800'
+      new: "bg-blue-100 text-blue-800",
+      contacted: "bg-yellow-100 text-yellow-800",
+      qualified: "bg-green-100 text-green-800",
+      proposal: "bg-purple-100 text-purple-800",
+      negotiation: "bg-orange-100 text-orange-800",
+      won: "bg-green-100 text-green-800",
+      lost: "bg-red-100 text-red-800",
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   const getSourceColor = (source: string) => {
     const colors: Record<string, string> = {
-      'website': 'bg-blue-100 text-blue-800',
-      'referral': 'bg-green-100 text-green-800',
-      'social_media': 'bg-purple-100 text-purple-800',
-      'email_campaign': 'bg-yellow-100 text-yellow-800',
-      'cold_outreach': 'bg-red-100 text-red-800',
-      'trade_show': 'bg-indigo-100 text-indigo-800',
-      'other': 'bg-gray-100 text-gray-800'
+      website: "bg-blue-100 text-blue-800",
+      referral: "bg-green-100 text-green-800",
+      social_media: "bg-purple-100 text-purple-800",
+      email_campaign: "bg-yellow-100 text-yellow-800",
+      cold_outreach: "bg-red-100 text-red-800",
+      trade_show: "bg-indigo-100 text-indigo-800",
+      other: "bg-gray-100 text-gray-800",
     };
-    return colors[source] || 'bg-gray-100 text-gray-800';
+    return colors[source] || "bg-gray-100 text-gray-800";
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
-  const filteredLeads = leads.filter(lead => {
-    const matchesSearch = 
+  const filteredLeads = leads.filter((lead) => {
+    const matchesSearch =
       lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (lead.company && lead.company.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
-    const matchesSource = sourceFilter === 'all' || lead.leadSource === sourceFilter;
-    const matchesAssigned = assignedFilter === 'all' || lead.assignedTo === assignedFilter;
+      (lead.company &&
+        lead.company.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === "all" || lead.status === statusFilter;
+    const matchesSource =
+      sourceFilter === "all" || lead.leadSource === sourceFilter;
+    const matchesAssigned =
+      assignedFilter === "all" || lead.assignedTo === assignedFilter;
 
     return matchesSearch && matchesStatus && matchesSource && matchesAssigned;
   });
@@ -157,7 +185,9 @@ export default function LeadsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leads Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Leads Management
+            </h1>
             <p className="text-gray-600">Track and manage your sales leads</p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -179,11 +209,13 @@ export default function LeadsPage() {
                 <Input
                   placeholder="Search leads..."
                   value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchTerm(e.target.value)
+                  }
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
@@ -234,7 +266,9 @@ export default function LeadsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Leads ({filteredLeads.length})</CardTitle>
-            <CardDescription>Manage your sales leads and track their progress</CardDescription>
+            <CardDescription>
+              Manage your sales leads and track their progress
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -244,7 +278,10 @@ export default function LeadsPage() {
                 </div>
               ) : (
                 filteredLeads.map((lead) => (
-                  <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                         <User className="w-6 h-6 text-blue-600" />
@@ -276,7 +313,9 @@ export default function LeadsPage() {
                             </div>
                           )}
                           {lead.jobTitle && (
-                            <span className="text-gray-600">{lead.jobTitle}</span>
+                            <span className="text-gray-600">
+                              {lead.jobTitle}
+                            </span>
                           )}
                         </div>
                         {lead.notes && (
@@ -285,37 +324,50 @@ export default function LeadsPage() {
                           </div>
                         )}
                         <div className="flex items-center space-x-2 mt-2">
-                          <Badge variant="outline" className={getSourceColor(lead.leadSource)}>
-                            {lead.leadSource.replace('_', ' ')}
+                          <Badge
+                            variant="outline"
+                            className={getSourceColor(lead.leadSource)}
+                          >
+                            {lead.leadSource.replace("_", " ")}
                           </Badge>
                           {lead.tags.map((tag: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {tag}
                             </Badge>
                           ))}
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-4">
                       {lead.estimatedValue && (
                         <div className="text-right">
                           <div className="text-sm font-medium text-green-600">
                             {formatCurrency(lead.estimatedValue)}
                           </div>
-                          <div className="text-xs text-gray-500">Estimated Value</div>
+                          <div className="text-xs text-gray-500">
+                            Estimated Value
+                          </div>
                         </div>
                       )}
-                      
+
                       {lead.expectedCloseDate && (
                         <div className="text-right">
                           <div className="text-sm font-medium text-gray-900">
-                            {new Date(lead.expectedCloseDate).toLocaleDateString()}
+                            {new Date(
+                              lead.expectedCloseDate,
+                            ).toLocaleDateString()}
                           </div>
-                          <div className="text-xs text-gray-500">Expected Close</div>
+                          <div className="text-xs text-gray-500">
+                            Expected Close
+                          </div>
                         </div>
                       )}
-                      
+
                       <div className="flex items-center space-x-2">
                         <Button variant="outline" size="sm">
                           <Phone className="w-4 h-4 mr-1" />
@@ -365,7 +417,12 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">
-                    {formatCurrency(leads.reduce((sum, lead) => sum + (lead.estimatedValue || 0), 0))}
+                    {formatCurrency(
+                      leads.reduce(
+                        (sum, lead) => sum + (lead.estimatedValue || 0),
+                        0,
+                      ),
+                    )}
                   </div>
                   <div className="text-sm text-gray-500">Total Value</div>
                 </div>
@@ -381,7 +438,7 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">
-                    {leads.filter(lead => lead.status === 'new').length}
+                    {leads.filter((lead) => lead.status === "new").length}
                   </div>
                   <div className="text-sm text-gray-500">New Leads</div>
                 </div>
@@ -397,7 +454,7 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold">
-                    {leads.filter(lead => lead.status === 'qualified').length}
+                    {leads.filter((lead) => lead.status === "qualified").length}
                   </div>
                   <div className="text-sm text-gray-500">Qualified</div>
                 </div>
@@ -420,7 +477,9 @@ export default function LeadsPage() {
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -429,12 +488,14 @@ export default function LeadsPage() {
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
                   required
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="email">Email *</Label>
@@ -442,7 +503,9 @@ export default function LeadsPage() {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -451,18 +514,22 @@ export default function LeadsPage() {
                 <Input
                   id="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="company">Company</Label>
                 <Input
                   id="company"
                   value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, company: e.target.value })
+                  }
                 />
               </div>
               <div>
@@ -470,22 +537,32 @@ export default function LeadsPage() {
                 <Input
                   id="jobTitle"
                   value={formData.jobTitle}
-                  onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, jobTitle: e.target.value })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="leadSource">Lead Source</Label>
-                <Select value={formData.leadSource} onValueChange={(value) => setFormData({ ...formData, leadSource: value as LeadSource })}>
+                <Select
+                  value={formData.leadSource}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      leadSource: value as LeadSource,
+                    })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(LeadSource).map((source) => (
                       <SelectItem key={source} value={source}>
-                        {source.replace('_', ' ')}
+                        {source.replace("_", " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -493,7 +570,12 @@ export default function LeadsPage() {
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as LeadStatus })}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, status: value as LeadStatus })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -507,7 +589,7 @@ export default function LeadsPage() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="estimatedValue">Estimated Value</Label>
@@ -515,7 +597,9 @@ export default function LeadsPage() {
                   id="estimatedValue"
                   type="number"
                   value={formData.estimatedValue}
-                  onChange={(e) => setFormData({ ...formData, estimatedValue: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, estimatedValue: e.target.value })
+                  }
                   placeholder="0.00"
                 />
               </div>
@@ -525,29 +609,38 @@ export default function LeadsPage() {
                   id="expectedCloseDate"
                   type="date"
                   value={formData.expectedCloseDate}
-                  onChange={(e) => setFormData({ ...formData, expectedCloseDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      expectedCloseDate: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 rows={3}
                 placeholder="Additional notes..."
               />
             </div>
-            
+
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit">
-                Create Lead
-              </Button>
+              <Button type="submit">Create Lead</Button>
             </div>
           </form>
         </DialogContent>
@@ -555,5 +648,3 @@ export default function LeadsPage() {
     </DashboardLayout>
   );
 }
-
-

@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
-import { Calendar, Clock, MapPin, Users, Video } from 'lucide-react';
-import { useApiService } from '../../hooks/useApiService';
+import React, { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
+import { Switch } from "../ui/switch";
+import { Calendar, Clock, MapPin, Users, Video } from "lucide-react";
+import { useApiService } from "../../hooks/useApiService";
 
 interface EventFormProps {
   event?: any;
@@ -22,23 +28,28 @@ interface Project {
   name: string;
 }
 
-export default function EventForm({ event, onSubmit, onCancel, loading = false }: EventFormProps) {
+export default function EventForm({
+  event,
+  onSubmit,
+  onCancel,
+  loading = false,
+}: EventFormProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    eventType: 'meeting',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    location: '',
+    title: "",
+    description: "",
+    eventType: "meeting",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    location: "",
     isOnline: true,
-    participants: '',
-    discussionPoints: '',
+    participants: "",
+    discussionPoints: "",
     reminderMinutes: 15,
-    projectId: '',
-    recurrenceType: 'none'
+    projectId: "",
+    recurrenceType: "none",
   });
 
   const apiService = useApiService();
@@ -52,7 +63,7 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           setProjects(response.projects);
         }
       } catch (error) {
-        console.error('Failed to fetch projects:', error);
+        console.error("Failed to fetch projects:", error);
         // Set empty array to prevent errors
         setProjects([]);
       }
@@ -65,32 +76,34 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
     if (event) {
       const startDate = new Date(event.startDate);
       const endDate = new Date(event.endDate);
-      
+
       setFormData({
-        title: event.title || '',
-        description: event.description || '',
-        eventType: event.eventType || 'meeting',
-        startDate: startDate.toISOString().split('T')[0],
+        title: event.title || "",
+        description: event.description || "",
+        eventType: event.eventType || "meeting",
+        startDate: startDate.toISOString().split("T")[0],
         startTime: startDate.toTimeString().slice(0, 5),
-        endDate: endDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split("T")[0],
         endTime: endDate.toTimeString().slice(0, 5),
-        location: event.location || '',
+        location: event.location || "",
         isOnline: event.isOnline !== false,
-        participants: event.participants?.join(', ') || '',
-        discussionPoints: event.discussionPoints?.join(', ') || '',
+        participants: event.participants?.join(", ") || "",
+        discussionPoints: event.discussionPoints?.join(", ") || "",
         reminderMinutes: event.reminderMinutes || 15,
-        projectId: event.projectId || '',
-        recurrenceType: event.recurrenceType || 'none'
+        projectId: event.projectId || "",
+        recurrenceType: event.recurrenceType || "none",
       });
     }
   }, [event]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`);
+
+    const startDateTime = new Date(
+      `${formData.startDate}T${formData.startTime}`,
+    );
     const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
-    
+
     const eventData = {
       title: formData.title,
       description: formData.description,
@@ -100,18 +113,28 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       location: formData.location || undefined,
       isOnline: formData.isOnline,
-      participants: formData.participants ? formData.participants.split(',').map(p => p.trim()) : [],
-      discussionPoints: formData.discussionPoints ? formData.discussionPoints.split(',').map(p => p.trim()) : [],
+      participants: formData.participants
+        ? formData.participants.split(",").map((p) => p.trim())
+        : [],
+      discussionPoints: formData.discussionPoints
+        ? formData.discussionPoints.split(",").map((p) => p.trim())
+        : [],
       reminderMinutes: formData.reminderMinutes,
       projectId: formData.projectId || undefined,
-      recurrenceType: formData.recurrenceType === 'none' ? undefined : formData.recurrenceType
+      recurrenceType:
+        formData.recurrenceType === "none"
+          ? undefined
+          : formData.recurrenceType,
     };
 
     onSubmit(eventData);
   };
 
-  const handleInputChange = (field: string, value: string | boolean | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: string,
+    value: string | boolean | number,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -123,7 +146,7 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           <Input
             id="title"
             value={formData.title}
-            onChange={(e) => handleInputChange('title', e.target.value)}
+            onChange={(e) => handleInputChange("title", e.target.value)}
             placeholder="Enter event title"
             required
           />
@@ -135,7 +158,7 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           <Textarea
             id="description"
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={(e) => handleInputChange("description", e.target.value)}
             placeholder="Enter event description"
             rows={3}
           />
@@ -144,7 +167,10 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
         {/* Event Type */}
         <div>
           <Label htmlFor="eventType">Event Type</Label>
-          <Select value={formData.eventType} onValueChange={(value) => handleInputChange('eventType', value)}>
+          <Select
+            value={formData.eventType}
+            onValueChange={(value) => handleInputChange("eventType", value)}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -160,17 +186,24 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
         {/* Project */}
         <div>
           <Label htmlFor="projectId">Project (Optional)</Label>
-          <Select value={formData.projectId || "none"} onValueChange={(value) => handleInputChange('projectId', value === "none" ? "" : value)}>
+          <Select
+            value={formData.projectId || "none"}
+            onValueChange={(value) =>
+              handleInputChange("projectId", value === "none" ? "" : value)
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a project" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">No Project</SelectItem>
-              {projects && projects.length > 0 && projects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
+              {projects &&
+                projects.length > 0 &&
+                projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -178,7 +211,12 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
         {/* Reminder */}
         <div>
           <Label htmlFor="reminderMinutes">Reminder (minutes)</Label>
-          <Select value={formData.reminderMinutes.toString()} onValueChange={(value) => handleInputChange('reminderMinutes', parseInt(value))}>
+          <Select
+            value={formData.reminderMinutes.toString()}
+            onValueChange={(value) =>
+              handleInputChange("reminderMinutes", parseInt(value))
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -195,7 +233,12 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
         {/* Recurrence */}
         <div>
           <Label htmlFor="recurrenceType">Recurrence</Label>
-          <Select value={formData.recurrenceType || 'none'} onValueChange={(value) => handleInputChange('recurrenceType', value)}>
+          <Select
+            value={formData.recurrenceType || "none"}
+            onValueChange={(value) =>
+              handleInputChange("recurrenceType", value)
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -217,13 +260,13 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
               id="startDate"
               type="date"
               value={formData.startDate}
-              onChange={(e) => handleInputChange('startDate', e.target.value)}
+              onChange={(e) => handleInputChange("startDate", e.target.value)}
               required
             />
             <Input
               type="time"
               value={formData.startTime}
-              onChange={(e) => handleInputChange('startTime', e.target.value)}
+              onChange={(e) => handleInputChange("startTime", e.target.value)}
               required
             />
           </div>
@@ -237,13 +280,13 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
               id="endDate"
               type="date"
               value={formData.endDate}
-              onChange={(e) => handleInputChange('endDate', e.target.value)}
+              onChange={(e) => handleInputChange("endDate", e.target.value)}
               required
             />
             <Input
               type="time"
               value={formData.endTime}
-              onChange={(e) => handleInputChange('endTime', e.target.value)}
+              onChange={(e) => handleInputChange("endTime", e.target.value)}
               required
             />
           </div>
@@ -255,7 +298,7 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           <Input
             id="location"
             value={formData.location}
-            onChange={(e) => handleInputChange('location', e.target.value)}
+            onChange={(e) => handleInputChange("location", e.target.value)}
             placeholder="Enter location"
           />
         </div>
@@ -265,29 +308,37 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           <Switch
             id="isOnline"
             checked={formData.isOnline}
-            onCheckedChange={(checked: boolean) => handleInputChange('isOnline', checked)}
+            onCheckedChange={(checked: boolean) =>
+              handleInputChange("isOnline", checked)
+            }
           />
           <Label htmlFor="isOnline">Online meeting</Label>
         </div>
 
         {/* Participants */}
         <div className="md:col-span-2">
-          <Label htmlFor="participants">Participants (comma-separated emails)</Label>
+          <Label htmlFor="participants">
+            Participants (comma-separated emails)
+          </Label>
           <Input
             id="participants"
             value={formData.participants}
-            onChange={(e) => handleInputChange('participants', e.target.value)}
+            onChange={(e) => handleInputChange("participants", e.target.value)}
             placeholder="email1@example.com, email2@example.com"
           />
         </div>
 
         {/* Discussion Points */}
         <div className="md:col-span-2">
-          <Label htmlFor="discussionPoints">Discussion Points (comma-separated)</Label>
+          <Label htmlFor="discussionPoints">
+            Discussion Points (comma-separated)
+          </Label>
           <Input
             id="discussionPoints"
             value={formData.discussionPoints}
-            onChange={(e) => handleInputChange('discussionPoints', e.target.value)}
+            onChange={(e) =>
+              handleInputChange("discussionPoints", e.target.value)
+            }
             placeholder="Point 1, Point 2, Point 3"
           />
         </div>
@@ -299,7 +350,7 @@ export default function EventForm({ event, onSubmit, onCancel, loading = false }
           Cancel
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : (event ? 'Update Event' : 'Create Event')}
+          {loading ? "Saving..." : event ? "Update Event" : "Create Event"}
         </Button>
       </div>
     </form>

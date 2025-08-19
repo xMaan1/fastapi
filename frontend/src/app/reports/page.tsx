@@ -1,17 +1,22 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 import {
   BarChart3,
   PieChart,
   TrendingUp,
   Download,
   Calendar,
-  Users
-} from 'lucide-react';
-import { DashboardLayout } from '../../components/layout';
+  Users,
+} from "lucide-react";
+import { DashboardLayout } from "../../components/layout";
 
 export default function ReportsPage() {
   return (
@@ -144,11 +149,10 @@ export default function ReportsPage() {
                 Advanced Analytics Coming Soon
               </h3>
               <p className="text-gray-600 mb-4">
-                We&apos;re working on bringing you detailed analytics and reporting features.
+                We&apos;re working on bringing you detailed analytics and
+                reporting features.
               </p>
-              <Button variant="outline">
-                Request Early Access
-              </Button>
+              <Button variant="outline">Request Early Access</Button>
             </div>
           </CardContent>
         </Card>

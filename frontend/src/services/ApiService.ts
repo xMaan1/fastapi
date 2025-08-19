@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { SessionManager } from './SessionManager';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { SessionManager } from "./SessionManager";
 
 export interface ApiResponse<T = any> {
   data: T;
@@ -20,23 +20,23 @@ export interface PaginatedResponse<T> {
 export class ApiService {
   private client: AxiosInstance;
   private sessionManager: SessionManager;
-  private publicEndpoints = ['/auth/login', '/auth/register'];
+  private publicEndpoints = ["/auth/login", "/auth/register"];
   private currentTenantId: string | null = null;
 
   constructor() {
     this.sessionManager = new SessionManager();
 
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       timeout: 10000,
     });
 
     // Initialize tenant ID from localStorage if available
-    if (typeof window !== 'undefined') {
-      this.currentTenantId = localStorage.getItem('currentTenantId');
+    if (typeof window !== "undefined") {
+      this.currentTenantId = localStorage.getItem("currentTenantId");
     }
 
     this.setupInterceptors();
@@ -45,12 +45,12 @@ export class ApiService {
   // Tenant management
   setTenantId(tenantId: string | null) {
     this.currentTenantId = tenantId;
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (tenantId) {
-        localStorage.setItem('currentTenantId', tenantId);
+        localStorage.setItem("currentTenantId", tenantId);
       } else {
-        localStorage.removeItem('currentTenantId');
-        localStorage.removeItem('userTenants');
+        localStorage.removeItem("currentTenantId");
+        localStorage.removeItem("userTenants");
       }
     }
   }
@@ -59,29 +59,29 @@ export class ApiService {
     if (this.currentTenantId) {
       return this.currentTenantId;
     }
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('currentTenantId');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("currentTenantId");
     }
     return null;
   }
 
   // Store user tenants in localStorage
   setUserTenants(tenants: any[]) {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userTenants', JSON.stringify(tenants));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userTenants", JSON.stringify(tenants));
     }
   }
 
   // Get user tenants from localStorage
   getUserTenants(): any[] {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('userTenants');
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("userTenants");
       if (stored) {
         try {
           return JSON.parse(stored);
         } catch (error) {
-          console.error('Error parsing stored tenants:', error);
-          localStorage.removeItem('userTenants');
+          console.error("Error parsing stored tenants:", error);
+          localStorage.removeItem("userTenants");
         }
       }
     }
@@ -94,7 +94,7 @@ export class ApiService {
     if (!tenantId) return null;
 
     const tenants = this.getUserTenants();
-    return tenants.find(t => t.id === tenantId) || null;
+    return tenants.find((t) => t.id === tenantId) || null;
   }
 
   // Force refresh tenants from API (for admin operations)
@@ -107,7 +107,7 @@ export class ApiService {
       }
       return [];
     } catch (error) {
-      console.error('Failed to refresh tenants:', error);
+      console.error("Failed to refresh tenants:", error);
       throw error;
     }
   }
@@ -117,17 +117,17 @@ export class ApiService {
     this.client.interceptors.request.use(
       (config) => {
         // Only check auth on client side
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           // Check if this is a public endpoint
-          const isPublicEndpoint = this.publicEndpoints.some(endpoint =>
-            config.url?.includes(endpoint)
+          const isPublicEndpoint = this.publicEndpoints.some((endpoint) =>
+            config.url?.includes(endpoint),
           );
 
           if (!isPublicEndpoint) {
             // Check if user is authenticated for protected endpoints
             if (!this.sessionManager.isSessionValid()) {
-              window.location.href = '/login';
-              return Promise.reject(new Error('Not authenticated'));
+              // Don't redirect immediately, let the component handle it
+              return Promise.reject(new Error("Not authenticated"));
             }
           }
         }
@@ -140,12 +140,12 @@ export class ApiService {
         // Add tenant header if available
         const tenantId = this.getTenantId();
         if (tenantId) {
-          config.headers['X-Tenant-ID'] = tenantId;
+          config.headers["X-Tenant-ID"] = tenantId;
         }
 
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Response interceptor
@@ -154,12 +154,11 @@ export class ApiService {
       (error) => {
         if (error.response?.status === 401) {
           this.sessionManager.clearSession();
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
-          }
+          // Don't redirect immediately, let the component handle it
+          // The AuthGuard will detect the cleared session and redirect
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -169,17 +168,29 @@ export class ApiService {
     return response.data;
   }
 
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.client.post<T>(url, data, config);
     return response.data;
   }
 
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.client.put<T>(url, data, config);
     return response.data;
   }
 
-  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async patch<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
     const response = await this.client.patch<T>(url, data, config);
     return response.data;
   }
@@ -192,7 +203,7 @@ export class ApiService {
   // Auth endpoints
   async login(credentials: { email: string; password: string }) {
     try {
-      const response = await this.post('/auth/login', credentials);
+      const response = await this.post("/auth/login", credentials);
 
       // Store session after successful login
       if (response.success && response.token && response.user) {
@@ -209,14 +220,14 @@ export class ApiService {
             this.setTenantId(tenantsResponse.tenants[0].id);
           }
         } catch (tenantError) {
-          console.warn('Could not fetch tenants:', tenantError);
+          console.warn("Could not fetch tenants:", tenantError);
           // Continue without tenant - some endpoints might still work
         }
       }
 
       return response;
     } catch (error) {
-      console.error('Login API error:', error);
+      console.error("Login API error:", error);
       throw error;
     }
   }
@@ -228,16 +239,16 @@ export class ApiService {
     firstName?: string;
     lastName?: string;
   }) {
-    return this.post('/auth/register', userData);
+    return this.post("/auth/register", userData);
   }
 
   async getCurrentUser() {
-    return this.get('/auth/me');
+    return this.get("/auth/me");
   }
 
   async logout() {
     try {
-      const response = await this.post('/auth/logout');
+      const response = await this.post("/auth/logout");
       // Clear all tenant information on logout
       this.setTenantId(null);
       return response;
@@ -255,7 +266,7 @@ export class ApiService {
     if (tenantId) {
       return this.getTenantUsers(tenantId);
     }
-    return this.get('/users');
+    return this.get("/users");
   }
 
   async getTenantUsers(tenantId: string) {
@@ -266,7 +277,7 @@ export class ApiService {
   async getCurrentTenantUsers() {
     const tenantId = this.getTenantId();
     if (!tenantId) {
-      throw new Error('No tenant selected');
+      throw new Error("No tenant selected");
     }
     return this.getTenantUsers(tenantId);
   }
@@ -284,16 +295,20 @@ export class ApiService {
   }
   // SaaS Plans and Subscription
   async getPlans() {
-    return this.get('/plans');
+    return this.get("/plans");
   }
 
-  async subscribeToPlan(data: { planId: string; tenantName: string; domain?: string }) {
-    return this.post('/tenants/subscribe', data);
+  async subscribeToPlan(data: {
+    planId: string;
+    tenantName: string;
+    domain?: string;
+  }) {
+    return this.post("/tenants/subscribe", data);
   }
 
   // Tenant endpoints
   async getMyTenants() {
-    return this.get('/tenants/my-tenants');
+    return this.get("/tenants/my-tenants");
   }
 
   async getTenant(tenantId: string) {
@@ -306,7 +321,7 @@ export class ApiService {
     const tenant = storedTenants.find((t: any) => t.id === tenantId);
 
     if (!tenant) {
-      throw new Error('Access denied to this tenant');
+      throw new Error("Access denied to this tenant");
     }
 
     this.setTenantId(tenantId);
@@ -315,7 +330,7 @@ export class ApiService {
 
   // Project endpoints
   async getProjects() {
-    return this.get('/projects');
+    return this.get("/projects");
   }
 
   async getProject(id: string) {
@@ -323,7 +338,7 @@ export class ApiService {
   }
 
   async createProject(data: any) {
-    return this.post('/projects', data);
+    return this.post("/projects", data);
   }
 
   async updateProject(id: string, data: any) {
@@ -335,7 +350,7 @@ export class ApiService {
   }
 
   async getProjectTeamMembers() {
-    return this.get('/projects/team-members');
+    return this.get("/projects/team-members");
   }
 
   // Task endpoints
@@ -349,25 +364,29 @@ export class ApiService {
     limit?: number;
   }) {
     const queryParams = new URLSearchParams();
-    if (params?.project) queryParams.append('project', params.project);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.assignedTo) queryParams.append('assignedTo', params.assignedTo);
-    if (params?.includeSubtasks !== undefined) queryParams.append('include_subtasks', params.includeSubtasks.toString());
-    if (params?.mainTasksOnly !== undefined) queryParams.append('main_tasks_only', params.mainTasksOnly.toString());
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.project) queryParams.append("project", params.project);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.assignedTo) queryParams.append("assignedTo", params.assignedTo);
+    if (params?.includeSubtasks !== undefined)
+      queryParams.append("include_subtasks", params.includeSubtasks.toString());
+    if (params?.mainTasksOnly !== undefined)
+      queryParams.append("main_tasks_only", params.mainTasksOnly.toString());
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-    const url = `/tasks${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const url = `/tasks${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
     return this.get(url);
   }
 
   async getTask(id: string, includeSubtasks: boolean = true) {
-    const params = includeSubtasks ? '?include_subtasks=true' : '?include_subtasks=false';
+    const params = includeSubtasks
+      ? "?include_subtasks=true"
+      : "?include_subtasks=false";
     return this.get(`/tasks/${id}${params}`);
   }
 
   async createTask(data: any) {
-    return this.post('/tasks', data);
+    return this.post("/tasks", data);
   }
 
   async updateTask(id: string, data: any) {
@@ -379,7 +398,7 @@ export class ApiService {
   }
 
   async getTasksByProject(projectId: string, mainTasksOnly: boolean = false) {
-    const params = mainTasksOnly ? '?main_tasks_only=true' : '';
+    const params = mainTasksOnly ? "?main_tasks_only=true" : "";
     return this.get(`/tasks?project=${projectId}${params}`);
   }
 
@@ -394,7 +413,7 @@ export class ApiService {
 
   // Health check
   async healthCheck() {
-    return this.get('/health');
+    return this.get("/health");
   }
 
   // Custom Roles & Permissions
@@ -402,11 +421,18 @@ export class ApiService {
     return this.get(`/tenants/${tenantId}/custom-roles`);
   }
 
-  async createCustomRole(tenantId: string, data: { name: string; permissions: string[] }) {
+  async createCustomRole(
+    tenantId: string,
+    data: { name: string; permissions: string[] },
+  ) {
     return this.post(`/tenants/${tenantId}/custom-roles`, data);
   }
 
-  async updateCustomRole(tenantId: string, roleId: string, data: { name?: string; permissions?: string[] }) {
+  async updateCustomRole(
+    tenantId: string,
+    roleId: string,
+    data: { name?: string; permissions?: string[] },
+  ) {
     return this.put(`/tenants/${tenantId}/custom-roles/${roleId}`, data);
   }
 
@@ -415,12 +441,12 @@ export class ApiService {
   }
 
   async getPermissions() {
-    return this.get('/tenants/permissions');
+    return this.get("/tenants/permissions");
   }
   // Test connection
   async testConnection() {
     try {
-      const response = await this.get('/health');
+      const response = await this.get("/health");
       return response;
     } catch (error) {
       throw error;
@@ -437,11 +463,15 @@ export class ApiService {
   }) {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.project) queryParams.append('project_id', params.project);
-      if (params?.user) queryParams.append('user_id', params.user);
-      if (params?.status) queryParams.append('status_filter', params.status);
-      if (params?.page) queryParams.append('skip', ((params.page - 1) * (params.limit || 100)).toString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (params?.project) queryParams.append("project_id", params.project);
+      if (params?.user) queryParams.append("user_id", params.user);
+      if (params?.status) queryParams.append("status_filter", params.status);
+      if (params?.page)
+        queryParams.append(
+          "skip",
+          ((params.page - 1) * (params.limit || 100)).toString(),
+        );
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
 
       const url = `/events?${queryParams.toString()}`;
       const response = await this.get(url);
@@ -462,7 +492,7 @@ export class ApiService {
 
   async createEvent(data: any) {
     try {
-      const response = await this.post('/events', data);
+      const response = await this.post("/events", data);
       return response;
     } catch (error) {
       throw error;
@@ -526,40 +556,52 @@ export class ApiService {
   // Sales methods
   async getSalesDashboard(): Promise<any> {
     try {
-      const response = await this.client.get('/sales/dashboard');
+      const response = await this.client.get("/sales/dashboard");
       return response.data;
     } catch (error) {
-      console.error('Error fetching sales dashboard:', error);
+      console.error("Error fetching sales dashboard:", error);
       throw error;
     }
   }
 
-  async getLeads(params: { limit?: number; status?: string; source?: string; assignedTo?: string; search?: string; page?: number } = {}): Promise<any> {
+  async getLeads(
+    params: {
+      limit?: number;
+      status?: string;
+      source?: string;
+      assignedTo?: string;
+      search?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/leads', { params });
+      const response = await this.client.get("/sales/leads", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching leads:', error);
+      console.error("Error fetching leads:", error);
       throw error;
     }
   }
 
   async createLead(leadData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/leads', leadData);
+      const response = await this.client.post("/sales/leads", leadData);
       return response.data;
     } catch (error) {
-      console.error('Error creating lead:', error);
+      console.error("Error creating lead:", error);
       throw error;
     }
   }
 
   async updateLead(leadId: string, leadData: any): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/leads/${leadId}`, leadData);
+      const response = await this.client.put(
+        `/sales/leads/${leadId}`,
+        leadData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating lead:', error);
+      console.error("Error updating lead:", error);
       throw error;
     }
   }
@@ -569,37 +611,48 @@ export class ApiService {
       const response = await this.client.delete(`/sales/leads/${leadId}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting lead:', error);
+      console.error("Error deleting lead:", error);
       throw error;
     }
   }
 
-  async getContacts(params: { limit?: number; companyId?: string; contactType?: string; search?: string; page?: number } = {}): Promise<any> {
+  async getContacts(
+    params: {
+      limit?: number;
+      companyId?: string;
+      contactType?: string;
+      search?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/contacts', { params });
+      const response = await this.client.get("/sales/contacts", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching contacts:', error);
+      console.error("Error fetching contacts:", error);
       throw error;
     }
   }
 
   async createContact(contactData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/contacts', contactData);
+      const response = await this.client.post("/sales/contacts", contactData);
       return response.data;
     } catch (error) {
-      console.error('Error creating contact:', error);
+      console.error("Error creating contact:", error);
       throw error;
     }
   }
 
   async updateContact(contactId: string, contactData: any): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/contacts/${contactId}`, contactData);
+      const response = await this.client.put(
+        `/sales/contacts/${contactId}`,
+        contactData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating contact:', error);
+      console.error("Error updating contact:", error);
       throw error;
     }
   }
@@ -609,117 +662,160 @@ export class ApiService {
       const response = await this.client.delete(`/sales/contacts/${contactId}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting contact:', error);
+      console.error("Error deleting contact:", error);
       throw error;
     }
   }
 
-  async getCompanies(params: { limit?: number; industry?: string; search?: string; page?: number } = {}): Promise<any> {
+  async getCompanies(
+    params: {
+      limit?: number;
+      industry?: string;
+      search?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/companies', { params });
+      const response = await this.client.get("/sales/companies", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching companies:', error);
+      console.error("Error fetching companies:", error);
       throw error;
     }
   }
 
   async createCompany(companyData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/companies', companyData);
+      const response = await this.client.post("/sales/companies", companyData);
       return response.data;
     } catch (error) {
-      console.error('Error creating company:', error);
+      console.error("Error creating company:", error);
       throw error;
     }
   }
 
   async updateCompany(companyId: string, companyData: any): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/companies/${companyId}`, companyData);
+      const response = await this.client.put(
+        `/sales/companies/${companyId}`,
+        companyData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating company:', error);
+      console.error("Error updating company:", error);
       throw error;
     }
   }
 
   async deleteCompany(companyId: string): Promise<any> {
     try {
-      const response = await this.client.delete(`/sales/companies/${companyId}`);
+      const response = await this.client.delete(
+        `/sales/companies/${companyId}`,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error deleting company:', error);
+      console.error("Error deleting company:", error);
       throw error;
     }
   }
 
-  async getOpportunities(params: { limit?: number; stage?: string; assignedTo?: string; search?: string; page?: number } = {}): Promise<any> {
+  async getOpportunities(
+    params: {
+      limit?: number;
+      stage?: string;
+      assignedTo?: string;
+      search?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/opportunities', { params });
+      const response = await this.client.get("/sales/opportunities", {
+        params,
+      });
       return response.data;
     } catch (error) {
-      console.error('Error fetching opportunities:', error);
+      console.error("Error fetching opportunities:", error);
       throw error;
     }
   }
 
   async createOpportunity(opportunityData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/opportunities', opportunityData);
+      const response = await this.client.post(
+        "/sales/opportunities",
+        opportunityData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error creating opportunity:', error);
+      console.error("Error creating opportunity:", error);
       throw error;
     }
   }
 
-  async updateOpportunity(opportunityId: string, opportunityData: any): Promise<any> {
+  async updateOpportunity(
+    opportunityId: string,
+    opportunityData: any,
+  ): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/opportunities/${opportunityId}`, opportunityData);
+      const response = await this.client.put(
+        `/sales/opportunities/${opportunityId}`,
+        opportunityData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating opportunity:', error);
+      console.error("Error updating opportunity:", error);
       throw error;
     }
   }
 
   async deleteOpportunity(opportunityId: string): Promise<any> {
     try {
-      const response = await this.client.delete(`/sales/opportunities/${opportunityId}`);
+      const response = await this.client.delete(
+        `/sales/opportunities/${opportunityId}`,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error deleting opportunity:', error);
+      console.error("Error deleting opportunity:", error);
       throw error;
     }
   }
 
-  async getQuotes(params: { limit?: number; status?: string; opportunityId?: string; page?: number } = {}): Promise<any> {
+  async getQuotes(
+    params: {
+      limit?: number;
+      status?: string;
+      opportunityId?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/quotes', { params });
+      const response = await this.client.get("/sales/quotes", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching quotes:', error);
+      console.error("Error fetching quotes:", error);
       throw error;
     }
   }
 
   async createQuote(quoteData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/quotes', quoteData);
+      const response = await this.client.post("/sales/quotes", quoteData);
       return response.data;
     } catch (error) {
-      console.error('Error creating quote:', error);
+      console.error("Error creating quote:", error);
       throw error;
     }
   }
 
   async updateQuote(quoteId: string, quoteData: any): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/quotes/${quoteId}`, quoteData);
+      const response = await this.client.put(
+        `/sales/quotes/${quoteId}`,
+        quoteData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating quote:', error);
+      console.error("Error updating quote:", error);
       throw error;
     }
   }
@@ -729,91 +825,122 @@ export class ApiService {
       const response = await this.client.delete(`/sales/quotes/${quoteId}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting quote:', error);
+      console.error("Error deleting quote:", error);
       throw error;
     }
   }
 
-  async getContracts(params: { limit?: number; status?: string; opportunityId?: string; page?: number } = {}): Promise<any> {
+  async getContracts(
+    params: {
+      limit?: number;
+      status?: string;
+      opportunityId?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/contracts', { params });
+      const response = await this.client.get("/sales/contracts", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching contracts:', error);
+      console.error("Error fetching contracts:", error);
       throw error;
     }
   }
 
   async createContract(contractData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/contracts', contractData);
+      const response = await this.client.post("/sales/contracts", contractData);
       return response.data;
     } catch (error) {
-      console.error('Error creating contract:', error);
+      console.error("Error creating contract:", error);
       throw error;
     }
   }
 
   async updateContract(contractId: string, contractData: any): Promise<any> {
     try {
-      const response = await this.client.put(`/sales/contracts/${contractId}`, contractData);
+      const response = await this.client.put(
+        `/sales/contracts/${contractId}`,
+        contractData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error updating contract:', error);
+      console.error("Error updating contract:", error);
       throw error;
     }
   }
 
   async deleteContract(contractId: string): Promise<any> {
     try {
-      const response = await this.client.delete(`/sales/contracts/${contractId}`);
+      const response = await this.client.delete(
+        `/sales/contracts/${contractId}`,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error deleting contract:', error);
+      console.error("Error deleting contract:", error);
       throw error;
     }
   }
 
-  async getSalesActivities(params: { limit?: number; leadId?: string; opportunityId?: string; contactId?: string; companyId?: string; type?: string; page?: number } = {}): Promise<any> {
+  async getSalesActivities(
+    params: {
+      limit?: number;
+      leadId?: string;
+      opportunityId?: string;
+      contactId?: string;
+      companyId?: string;
+      type?: string;
+      page?: number;
+    } = {},
+  ): Promise<any> {
     try {
-      const response = await this.client.get('/sales/activities', { params });
+      const response = await this.client.get("/sales/activities", { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching sales activities:', error);
+      console.error("Error fetching sales activities:", error);
       throw error;
     }
   }
 
   async createSalesActivity(activityData: any): Promise<any> {
     try {
-      const response = await this.client.post('/sales/activities', activityData);
+      const response = await this.client.post(
+        "/sales/activities",
+        activityData,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error creating sales activity:', error);
+      console.error("Error creating sales activity:", error);
       throw error;
     }
   }
 
-  async getRevenueAnalytics(period: string = 'monthly', startDate?: string, endDate?: string): Promise<any> {
+  async getRevenueAnalytics(
+    period: string = "monthly",
+    startDate?: string,
+    endDate?: string,
+  ): Promise<any> {
     try {
       const params: any = { period };
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
-      
-      const response = await this.client.get('/sales/analytics/revenue', { params });
+
+      const response = await this.client.get("/sales/analytics/revenue", {
+        params,
+      });
       return response.data;
     } catch (error) {
-      console.error('Error fetching revenue analytics:', error);
+      console.error("Error fetching revenue analytics:", error);
       throw error;
     }
   }
 
   async getConversionAnalytics(): Promise<any> {
     try {
-      const response = await this.client.get('/sales/analytics/conversion');
+      const response = await this.client.get("/sales/analytics/conversion");
       return response.data;
     } catch (error) {
-      console.error('Error fetching conversion analytics:', error);
+      console.error("Error fetching conversion analytics:", error);
       throw error;
     }
   }

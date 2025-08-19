@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Button } from '../ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Badge } from '../ui/badge';
+import React, { useState } from "react";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,16 +11,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { 
-  Menu, 
-  Bell, 
-  Settings, 
-  LogOut, 
-  User
-} from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import { getInitials } from '../../lib/utils';
+} from "../ui/dropdown-menu";
+import { Menu, Bell, Settings, LogOut, User } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { getInitials } from "../../lib/utils";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -34,7 +28,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     try {
       await logout();
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -59,8 +53,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             {notifications > 0 && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
               >
                 {notifications}
@@ -71,11 +65,18 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full"
+              >
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={user?.avatar} alt={user?.userName} />
                   <AvatarFallback className="bg-gradient-primary text-white">
-                    {user ? getInitials(`${user.firstName} ${user.lastName}` || user.userName) : 'U'}
+                    {user
+                      ? getInitials(
+                          `${user.firstName} ${user.lastName}` || user.userName,
+                        )
+                      : "U"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -84,16 +85,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}` 
-                      : user?.userName || 'User'
-                    }
+                    {user?.firstName && user?.lastName
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.userName || "User"}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {user?.email}
                   </p>
                   <Badge variant="secondary" className="w-fit text-xs mt-1">
-                    {user?.userRole?.replace('_', ' ').toUpperCase()}
+                    {user?.userRole?.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
               </DropdownMenuLabel>
@@ -107,7 +107,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-red-600 focus:text-red-600"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

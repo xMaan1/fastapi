@@ -1,5 +1,5 @@
-import ContractsPage from '../../../components/sales/ContractsPage'
+import ContractsPage from "../../../components/sales/ContractsPage";
 
 export default function Contracts() {
-  return <ContractsPage />
+  return <ContractsPage />;
 }

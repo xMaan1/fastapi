@@ -1,29 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Label } from '../ui/label';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Calendar, X, Plus, Loader2, AlertCircle } from 'lucide-react';
-import { Task, TaskCreate, TaskUpdate, TaskStatus, TaskPriority, TaskUser } from '../../models/task';
-import { Project } from '../../models/project/Project';
+} from "../ui/select";
+import { Calendar, X, Plus, Loader2, AlertCircle } from "lucide-react";
+import {
+  Task,
+  TaskCreate,
+  TaskUpdate,
+  TaskStatus,
+  TaskPriority,
+  TaskUser,
+} from "../../models/task";
+import { Project } from "../../models/project/Project";
 
 interface TaskDialogProps {
   open: boolean;
@@ -39,17 +46,17 @@ interface TaskDialogProps {
 }
 
 const statusOptions = [
-  { value: TaskStatus.TODO, label: 'To Do' },
-  { value: TaskStatus.IN_PROGRESS, label: 'In Progress' },
-  { value: TaskStatus.COMPLETED, label: 'Completed' },
-  { value: TaskStatus.CANCELLED, label: 'Cancelled' }
+  { value: TaskStatus.TODO, label: "To Do" },
+  { value: TaskStatus.IN_PROGRESS, label: "In Progress" },
+  { value: TaskStatus.COMPLETED, label: "Completed" },
+  { value: TaskStatus.CANCELLED, label: "Cancelled" },
 ];
 
 const priorityOptions = [
-  { value: TaskPriority.LOW, label: 'Low' },
-  { value: TaskPriority.MEDIUM, label: 'Medium' },
-  { value: TaskPriority.HIGH, label: 'High' },
-  { value: TaskPriority.CRITICAL, label: 'Critical' }
+  { value: TaskPriority.LOW, label: "Low" },
+  { value: TaskPriority.MEDIUM, label: "Medium" },
+  { value: TaskPriority.HIGH, label: "High" },
+  { value: TaskPriority.CRITICAL, label: "Critical" },
 ];
 
 export const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -62,22 +69,22 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   parentTask,
   loading = false,
   error,
-  defaultProjectId
+  defaultProjectId,
 }) => {
   const [formData, setFormData] = useState<any>({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     status: TaskStatus.TODO,
     priority: TaskPriority.MEDIUM,
-    project: '',
-    assignedTo: '',
-    dueDate: '',
+    project: "",
+    assignedTo: "",
+    dueDate: "",
     estimatedHours: 0,
     actualHours: 0,
-    tags: []
+    tags: [],
   });
 
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
 
   const isEditing = Boolean(task);
   const isSubtask = Boolean(parentTask);
@@ -87,29 +94,29 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
       // Editing: do not include 'project' in formData
       setFormData({
         title: task.title,
-        description: task.description || '',
+        description: task.description || "",
         status: task.status,
         priority: task.priority,
-        assignedTo: task.assignedTo?.id || 'unassigned',
-        dueDate: task.dueDate || '',
+        assignedTo: task.assignedTo?.id || "unassigned",
+        dueDate: task.dueDate || "",
         estimatedHours: task.estimatedHours || 0,
         actualHours: task.actualHours || 0,
-        tags: task.tags || []
+        tags: task.tags || [],
       });
     } else {
       // Creating: include 'project'
       setFormData({
-        title: '',
-        description: '',
+        title: "",
+        description: "",
         status: TaskStatus.TODO,
         priority: TaskPriority.MEDIUM,
-        project: defaultProjectId || '',
+        project: defaultProjectId || "",
         parentTaskId: parentTask?.id,
-        assignedTo: 'unassigned',
-        dueDate: '',
+        assignedTo: "unassigned",
+        dueDate: "",
         estimatedHours: 0,
         actualHours: 0,
-        tags: []
+        tags: [],
       });
     }
   }, [task, parentTask, defaultProjectId]);
@@ -117,7 +124,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   const handleInputChange = (field: string, value: unknown) => {
     setFormData((prev: typeof formData) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -125,22 +132,25 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
     const tag = tagInput.trim();
     if (tag && !(formData.tags as string[] | undefined)?.includes(tag)) {
       const newTags: string[] = [...((formData.tags as string[]) || []), tag];
-      handleInputChange('tags', newTags);
-      setTagInput('');
+      handleInputChange("tags", newTags);
+      setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string): void => {
-    const newTags: string[] = (formData.tags as string[] | undefined)?.filter((tag: string) => tag !== tagToRemove) || [];
-    handleInputChange('tags', newTags);
+    const newTags: string[] =
+      (formData.tags as string[] | undefined)?.filter(
+        (tag: string) => tag !== tagToRemove,
+      ) || [];
+    handleInputChange("tags", newTags);
   };
 
   const handleSubmit = () => {
     const submitData = { ...formData };
-    
+
     // Clean up empty values
     if (!submitData.description?.trim()) delete submitData.description;
-    if (submitData.assignedTo === 'unassigned') delete submitData.assignedTo;
+    if (submitData.assignedTo === "unassigned") delete submitData.assignedTo;
     if (!submitData.dueDate) delete submitData.dueDate;
     if (!submitData.estimatedHours) delete submitData.estimatedHours;
     if (!submitData.actualHours) delete submitData.actualHours;
@@ -150,7 +160,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   };
 
   const handleClose = () => {
-    setTagInput('');
+    setTagInput("");
     onClose();
   };
 
@@ -159,10 +169,9 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold bg-gradient-primary bg-clip-text text-transparent">
-            {isEditing 
-              ? `Edit ${isSubtask ? 'Subtask' : 'Task'}` 
-              : `Create ${isSubtask ? 'Subtask' : 'Task'}`
-            }
+            {isEditing
+              ? `Edit ${isSubtask ? "Subtask" : "Task"}`
+              : `Create ${isSubtask ? "Subtask" : "Task"}`}
           </DialogTitle>
           {parentTask && (
             <p className="text-sm text-gray-600 mt-1">
@@ -185,7 +194,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                onChange={(e) => handleInputChange("title", e.target.value)}
                 placeholder="Enter task title"
                 className="mt-1"
               />
@@ -196,7 +205,9 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Enter task description"
                 rows={3}
                 className="mt-1"
@@ -207,13 +218,13 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => handleInputChange('status', value)}
+                onValueChange={(value) => handleInputChange("status", value)}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.map(option => (
+                  {statusOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -226,13 +237,13 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority}
-                onValueChange={(value) => handleInputChange('priority', value)}
+                onValueChange={(value) => handleInputChange("priority", value)}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  {priorityOptions.map(option => (
+                  {priorityOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -247,21 +258,23 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                 <Select
                   value={
                     task
-                      ? (typeof task.project === 'object' && task.project && 'id' in task.project
-                          ? (task.project as { id: string }).id
-                          : typeof task.project === 'string'
-                            ? task.project
-                            : '')
+                      ? typeof task.project === "object" &&
+                        task.project &&
+                        "id" in task.project
+                        ? (task.project as { id: string }).id
+                        : typeof task.project === "string"
+                          ? task.project
+                          : ""
                       : formData.project
                   }
-                  onValueChange={(value) => handleInputChange('project', value)}
+                  onValueChange={(value) => handleInputChange("project", value)}
                   disabled={!!task}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map(project => (
+                    {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
                       </SelectItem>
@@ -275,14 +288,16 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Label htmlFor="assignedTo">Assigned To</Label>
               <Select
                 value={formData.assignedTo}
-                onValueChange={(value) => handleInputChange('assignedTo', value)}
+                onValueChange={(value) =>
+                  handleInputChange("assignedTo", value)
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {users.map(user => (
+                  {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name} ({user.email})
                     </SelectItem>
@@ -298,7 +313,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                   id="dueDate"
                   type="date"
                   value={formData.dueDate}
-                  onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                  onChange={(e) => handleInputChange("dueDate", e.target.value)}
                   className="pl-10"
                 />
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -311,7 +326,12 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                 id="estimatedHours"
                 type="number"
                 value={formData.estimatedHours}
-                onChange={(e) => handleInputChange('estimatedHours', parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "estimatedHours",
+                    parseFloat(e.target.value) || 0,
+                  )
+                }
                 min="0"
                 step="0.5"
                 className="mt-1"
@@ -325,7 +345,12 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                   id="actualHours"
                   type="number"
                   value={formData.actualHours}
-                  onChange={(e) => handleInputChange('actualHours', parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "actualHours",
+                      parseFloat(e.target.value) || 0,
+                    )
+                  }
                   min="0"
                   step="0.5"
                   className="mt-1"
@@ -337,18 +362,24 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               <Label>Tags</Label>
               <div className="mt-1">
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {(formData.tags as string[] | undefined)?.map((tag: string, index: number) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 hover:text-red-600"
+                  {(formData.tags as string[] | undefined)?.map(
+                    (tag: string, index: number) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="flex items-center gap-1"
                       >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          className="ml-1 hover:text-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ),
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Input
@@ -356,7 +387,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddTag();
                       }
@@ -392,12 +423,12 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
             disabled={
               loading ||
               !formData.title.trim() ||
-              (!isSubtask && (!task && !formData.project))
+              (!isSubtask && !task && !formData.project)
             }
             className="modern-button"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+            {loading ? "Saving..." : isEditing ? "Update" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

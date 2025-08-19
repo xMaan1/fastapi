@@ -1,68 +1,108 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Textarea } from "../ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { Badge } from "../ui/badge"
-import { FileText, Plus, DollarSign, Calendar, User, Building, Download, Eye, Edit, Trash2 } from "lucide-react"
-import { toast } from "sonner"
-import { apiService } from '../../services/ApiService'
-import { ContractStatus } from '../../models/sales'
-import { Contract, Opportunity, Contact, Company } from '../../models/sales'
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { Badge } from "../ui/badge";
+import {
+  FileText,
+  Plus,
+  DollarSign,
+  Calendar,
+  User,
+  Building,
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { apiService } from "../../services/ApiService";
+import { ContractStatus } from "../../models/sales";
+import { Contract, Opportunity, Contact, Company } from "../../models/sales";
 
 export default function ContractsPage() {
-  const [contracts, setContracts] = useState<Contract[]>([])
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [companies, setCompanies] = useState<Company[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null,
+  );
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const [newContract, setNewContract] = useState({
-    contractNumber: '',
-    opportunityId: '',
-    contactId: '',
-    companyId: '',
-    title: '',
-    description: '',
-    value: '',
-    startDate: '',
-    endDate: '',
-    terms: '',
-    autoRenew: false
-  })
+    contractNumber: "",
+    opportunityId: "",
+    contactId: "",
+    companyId: "",
+    title: "",
+    description: "",
+    value: "",
+    startDate: "",
+    endDate: "",
+    terms: "",
+    autoRenew: false,
+  });
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     try {
-      const [contractsData, opportunitiesData, contactsData, companiesData] = await Promise.all([
-        apiService.getContracts(),
-        apiService.getOpportunities(),
-        apiService.getContacts(),
-        apiService.getCompanies()
-      ])
-      setContracts(contractsData)
-      setOpportunities(opportunitiesData)
-      setContacts(contactsData)
-      setCompanies(companiesData)
+      const [contractsData, opportunitiesData, contactsData, companiesData] =
+        await Promise.all([
+          apiService.getContracts(),
+          apiService.getOpportunities(),
+          apiService.getContacts(),
+          apiService.getCompanies(),
+        ]);
+      setContracts(contractsData);
+      setOpportunities(opportunitiesData);
+      setContacts(contactsData);
+      setCompanies(companiesData);
     } catch (error) {
-      toast.error('Failed to fetch data')
-      console.error(error)
+      toast.error("Failed to fetch data");
+      console.error(error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreateContract = async () => {
     try {
@@ -70,82 +110,90 @@ export default function ContractsPage() {
         ...newContract,
         value: parseFloat(newContract.value),
         startDate: new Date(newContract.startDate).toISOString(),
-        endDate: new Date(newContract.endDate).toISOString()
-      }
-      await apiService.createContract(contractData)
-      toast.success('Contract created successfully')
-      setIsCreateDialogOpen(false)
+        endDate: new Date(newContract.endDate).toISOString(),
+      };
+      await apiService.createContract(contractData);
+      toast.success("Contract created successfully");
+      setIsCreateDialogOpen(false);
       setNewContract({
-        contractNumber: '',
-        opportunityId: '',
-        contactId: '',
-        companyId: '',
-        title: '',
-        description: '',
-        value: '',
-        startDate: '',
-        endDate: '',
-        terms: '',
-        autoRenew: false
-      })
-      fetchData()
+        contractNumber: "",
+        opportunityId: "",
+        contactId: "",
+        companyId: "",
+        title: "",
+        description: "",
+        value: "",
+        startDate: "",
+        endDate: "",
+        terms: "",
+        autoRenew: false,
+      });
+      fetchData();
     } catch (error) {
-      toast.error('Failed to create contract')
-      console.error(error)
+      toast.error("Failed to create contract");
+      console.error(error);
     }
-  }
+  };
 
   const handleUpdateContract = async () => {
-    if (!selectedContract) return
+    if (!selectedContract) return;
     try {
-      await apiService.updateContract(selectedContract.id, selectedContract)
-      toast.success('Contract updated successfully')
-      setIsEditDialogOpen(false)
-      setSelectedContract(null)
-      fetchData()
+      await apiService.updateContract(selectedContract.id, selectedContract);
+      toast.success("Contract updated successfully");
+      setIsEditDialogOpen(false);
+      setSelectedContract(null);
+      fetchData();
     } catch (error) {
-      toast.error('Failed to update contract')
-      console.error(error)
+      toast.error("Failed to update contract");
+      console.error(error);
     }
-  }
+  };
 
   const handleDeleteContract = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this contract?')) return
+    if (!confirm("Are you sure you want to delete this contract?")) return;
     try {
-      await apiService.deleteContract(id)
-      toast.success('Contract deleted successfully')
-      fetchData()
+      await apiService.deleteContract(id);
+      toast.success("Contract deleted successfully");
+      fetchData();
     } catch (error) {
-      toast.error('Failed to delete contract')
-      console.error(error)
+      toast.error("Failed to delete contract");
+      console.error(error);
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800'
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'expired': return 'bg-red-100 text-red-800'
-      case 'terminated': return 'bg-yellow-100 text-yellow-800'
-      case 'renewed': return 'bg-blue-100 text-blue-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case "draft":
+        return "bg-gray-100 text-gray-800";
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "expired":
+        return "bg-red-100 text-red-800";
+      case "terminated":
+        return "bg-yellow-100 text-yellow-800";
+      case "renewed":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getOpportunityName = (opportunityId: string) => {
-    const opportunity = opportunities.find(o => o.id === opportunityId)
-    return opportunity?.name || 'Unknown Opportunity'
-  }
+    const opportunity = opportunities.find((o) => o.id === opportunityId);
+    return opportunity?.name || "Unknown Opportunity";
+  };
 
   const getContactName = (contactId: string) => {
-    const contact = contacts.find(c => c.id === contactId)
-    return contact ? `${contact.firstName} ${contact.lastName}` : 'Unknown Contact'
-  }
+    const contact = contacts.find((c) => c.id === contactId);
+    return contact
+      ? `${contact.firstName} ${contact.lastName}`
+      : "Unknown Contact";
+  };
 
   const getCompanyName = (companyId: string) => {
-    const company = companies.find(c => c.id === companyId)
-    return company?.name || 'Unknown Company'
-  }
+    const company = companies.find((c) => c.id === companyId);
+    return company?.name || "Unknown Company";
+  };
 
   if (loading) {
     return (
@@ -156,7 +204,7 @@ export default function ContractsPage() {
           <div className="h-32 bg-gray-200 rounded"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -188,13 +236,23 @@ export default function ContractsPage() {
                 <Input
                   id="contract_number"
                   value={newContract.contractNumber}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewContract({ ...newContract, contractNumber: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewContract({
+                      ...newContract,
+                      contractNumber: e.target.value,
+                    })
+                  }
                   placeholder="C-2024-001"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="opportunity">Opportunity</Label>
-                <Select value={newContract.opportunityId} onValueChange={(value: string) => setNewContract({ ...newContract, opportunityId: value })}>
+                <Select
+                  value={newContract.opportunityId}
+                  onValueChange={(value: string) =>
+                    setNewContract({ ...newContract, opportunityId: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select opportunity" />
                   </SelectTrigger>
@@ -209,7 +267,12 @@ export default function ContractsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="contact">Contact</Label>
-                <Select value={newContract.contactId} onValueChange={(value: string) => setNewContract({ ...newContract, contactId: value })}>
+                <Select
+                  value={newContract.contactId}
+                  onValueChange={(value: string) =>
+                    setNewContract({ ...newContract, contactId: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select contact" />
                   </SelectTrigger>
@@ -224,7 +287,12 @@ export default function ContractsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
-                <Select value={newContract.companyId} onValueChange={(value: string) => setNewContract({ ...newContract, companyId: value })}>
+                <Select
+                  value={newContract.companyId}
+                  onValueChange={(value: string) =>
+                    setNewContract({ ...newContract, companyId: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
@@ -242,7 +310,13 @@ export default function ContractsPage() {
                 <Input
                   id="title"
                   value={newContract.title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, title: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({ ...newContract, title: e.target.value })
+                  }
                   placeholder="Contract title"
                 />
               </div>
@@ -252,7 +326,13 @@ export default function ContractsPage() {
                   id="value"
                   type="number"
                   value={newContract.value}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, value: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({ ...newContract, value: e.target.value })
+                  }
                   placeholder="50000"
                 />
               </div>
@@ -262,7 +342,16 @@ export default function ContractsPage() {
                   id="start_date"
                   type="date"
                   value={newContract.startDate}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, startDate: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({
+                      ...newContract,
+                      startDate: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -271,7 +360,13 @@ export default function ContractsPage() {
                   id="end_date"
                   type="date"
                   value={newContract.endDate}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, endDate: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({ ...newContract, endDate: e.target.value })
+                  }
                 />
               </div>
               <div className="col-span-2 space-y-2">
@@ -279,7 +374,16 @@ export default function ContractsPage() {
                 <Textarea
                   id="description"
                   value={newContract.description}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, description: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({
+                      ...newContract,
+                      description: e.target.value,
+                    })
+                  }
                   placeholder="Contract description"
                   rows={3}
                 />
@@ -289,14 +393,23 @@ export default function ContractsPage() {
                 <Textarea
                   id="terms"
                   value={newContract.terms}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNewContract({ ...newContract, terms: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setNewContract({ ...newContract, terms: e.target.value })
+                  }
                   placeholder="Terms and conditions"
                   rows={4}
                 />
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={handleCreateContract}>Create Contract</Button>
@@ -309,7 +422,9 @@ export default function ContractsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Contracts
+            </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -323,7 +438,10 @@ export default function ContractsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${contracts.reduce((sum, contract) => sum + (contract.value || 0), 0).toLocaleString()}
+              $
+              {contracts
+                .reduce((sum, contract) => sum + (contract.value || 0), 0)
+                .toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -334,7 +452,10 @@ export default function ContractsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {contracts.filter(contract => contract.status === 'active').length}
+              {
+                contracts.filter((contract) => contract.status === "active")
+                  .length
+              }
             </div>
           </CardContent>
         </Card>
@@ -345,13 +466,17 @@ export default function ContractsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {contracts.filter(contract => {
-                if (!contract.endDate) return false
-                const endDate = new Date(contract.endDate)
-                const today = new Date()
-                const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
-                return endDate <= thirtyDaysFromNow && endDate >= today
-              }).length}
+              {
+                contracts.filter((contract) => {
+                  if (!contract.endDate) return false;
+                  const endDate = new Date(contract.endDate);
+                  const today = new Date();
+                  const thirtyDaysFromNow = new Date(
+                    today.getTime() + 30 * 24 * 60 * 60 * 1000,
+                  );
+                  return endDate <= thirtyDaysFromNow && endDate >= today;
+                }).length
+              }
             </div>
           </CardContent>
         </Card>
@@ -383,33 +508,45 @@ export default function ContractsPage() {
             <TableBody>
               {contracts.map((contract) => (
                 <TableRow key={contract.id}>
-                  <TableCell className="font-medium">{contract.contractNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {contract.contractNumber}
+                  </TableCell>
                   <TableCell>{contract.title}</TableCell>
-                  <TableCell>{getCompanyName(contract.companyId || '')}</TableCell>
-                  <TableCell>{getContactName(contract.contactId || '')}</TableCell>
-                  <TableCell>${(contract.value || 0).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {getCompanyName(contract.companyId || "")}
+                  </TableCell>
+                  <TableCell>
+                    {getContactName(contract.contactId || "")}
+                  </TableCell>
+                  <TableCell>
+                    ${(contract.value || 0).toLocaleString()}
+                  </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(contract.status)}>
                       {contract.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {contract.startDate ? new Date(contract.startDate).toLocaleDateString() : '-'}
+                    {contract.startDate
+                      ? new Date(contract.startDate).toLocaleDateString()
+                      : "-"}
                   </TableCell>
                   <TableCell>
-                    {contract.endDate ? new Date(contract.endDate).toLocaleDateString() : '-'}
+                    {contract.endDate
+                      ? new Date(contract.endDate).toLocaleDateString()
+                      : "-"}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setSelectedContract(contract)
-                          setIsEditDialogOpen(true)
+                          setSelectedContract(contract);
+                          setIsEditDialogOpen(true);
                         }}
                       >
                         <Edit className="h-4 w-4" />
@@ -417,8 +554,8 @@ export default function ContractsPage() {
                       <Button variant="ghost" size="sm">
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteContract(contract.id)}
                       >
@@ -431,7 +568,8 @@ export default function ContractsPage() {
               {contracts.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-4">
-                    No contracts found. Create your first contract to get started.
+                    No contracts found. Create your first contract to get
+                    started.
                   </TableCell>
                 </TableRow>
               )}
@@ -445,9 +583,7 @@ export default function ContractsPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Contract</DialogTitle>
-            <DialogDescription>
-              Update contract information
-            </DialogDescription>
+            <DialogDescription>Update contract information</DialogDescription>
           </DialogHeader>
           {selectedContract && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -456,7 +592,16 @@ export default function ContractsPage() {
                 <Input
                   id="edit_title"
                   value={selectedContract.title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSelectedContract({ ...selectedContract, title: e.target.value })}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      title: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -464,15 +609,29 @@ export default function ContractsPage() {
                 <Input
                   id="edit_value"
                   type="number"
-                  value={selectedContract.value?.toString() || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSelectedContract({ ...selectedContract, value: parseFloat(e.target.value) })}
+                  value={selectedContract.value?.toString() || ""}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      value: parseFloat(e.target.value),
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit_status">Status</Label>
-                <Select 
-                  value={selectedContract.status} 
-                  onValueChange={(value: string) => setSelectedContract({ ...selectedContract, status: value as ContractStatus })}
+                <Select
+                  value={selectedContract.status}
+                  onValueChange={(value: string) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      status: value as ContractStatus,
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -491,8 +650,23 @@ export default function ContractsPage() {
                 <Input
                   id="edit_start_date"
                   type="date"
-                  value={selectedContract.startDate ? new Date(selectedContract.startDate).toISOString().split('T')[0] : ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSelectedContract({ ...selectedContract, startDate: e.target.value })}
+                  value={
+                    selectedContract.startDate
+                      ? new Date(selectedContract.startDate)
+                          .toISOString()
+                          .split("T")[0]
+                      : ""
+                  }
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      startDate: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -500,23 +674,50 @@ export default function ContractsPage() {
                 <Input
                   id="edit_end_date"
                   type="date"
-                  value={selectedContract.endDate ? new Date(selectedContract.endDate).toISOString().split('T')[0] : ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSelectedContract({ ...selectedContract, endDate: e.target.value })}
+                  value={
+                    selectedContract.endDate
+                      ? new Date(selectedContract.endDate)
+                          .toISOString()
+                          .split("T")[0]
+                      : ""
+                  }
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      endDate: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="edit_description">Description</Label>
                 <Textarea
                   id="edit_description"
-                  value={selectedContract.description || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSelectedContract({ ...selectedContract, description: e.target.value })}
+                  value={selectedContract.description || ""}
+                  onChange={(
+                    e: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setSelectedContract({
+                      ...selectedContract,
+                      description: e.target.value,
+                    })
+                  }
                   rows={3}
                 />
               </div>
             </div>
           )}
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleUpdateContract}>Update Contract</Button>
@@ -524,5 +725,5 @@ export default function ContractsPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

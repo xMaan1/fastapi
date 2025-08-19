@@ -1,23 +1,40 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
-import { Progress } from '../../../components/ui/progress';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/badge";
+import { Avatar, AvatarFallback } from "../../../components/ui/avatar";
+import { Progress } from "../../../components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '../../../components/ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
-import { Alert, AlertDescription } from '../../../components/ui/alert';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/breadcrumb';
+  DropdownMenuSeparator,
+} from "../../../components/ui/dropdown-menu";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../components/ui/tabs";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../../components/ui/breadcrumb";
 import {
   Edit,
   Trash2,
@@ -34,17 +51,19 @@ import {
   CheckSquare,
   Loader2,
   Play,
-  AlertCircle
-} from 'lucide-react';
-import { Project, ProjectStatus, ProjectPriority } from '../../../models/project';
-import { Task } from '../../../models/task';
-import { apiService } from '../../../services/ApiService';
-import { useAuth } from '../../../hooks/useAuth';
-import { DashboardLayout } from '../../../components/layout';
-import { ProjectDialog } from '../../../components/projects';
-import { TaskCard } from '../../../components/tasks';
-
-
+  AlertCircle,
+} from "lucide-react";
+import {
+  Project,
+  ProjectStatus,
+  ProjectPriority,
+} from "../../../models/project";
+import { Task } from "../../../models/task";
+import { apiService } from "../../../services/ApiService";
+import { useAuth } from "../../../hooks/useAuth";
+import { DashboardLayout } from "../../../components/layout";
+import { ProjectDialog } from "../../../components/projects";
+import { TaskCard } from "../../../components/tasks";
 
 export default function ProjectDetailsPage() {
   const params = useParams();
@@ -57,7 +76,7 @@ export default function ProjectDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [tasksLoading, setTasksLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -65,7 +84,7 @@ export default function ProjectDetailsPage() {
   }, [projectId]);
 
   useEffect(() => {
-    if (activeTab === 'tasks') {
+    if (activeTab === "tasks") {
       loadTasks();
     }
   }, [activeTab, projectId]);
@@ -77,8 +96,8 @@ export default function ProjectDetailsPage() {
       const response = await apiService.getProject(projectId);
       setProject(response);
     } catch (err: any) {
-      console.error('Failed to load project:', err);
-      setError(err.response?.data?.detail || 'Failed to load project details');
+      console.error("Failed to load project:", err);
+      setError(err.response?.data?.detail || "Failed to load project details");
     } finally {
       setLoading(false);
     }
@@ -90,11 +109,11 @@ export default function ProjectDetailsPage() {
       const response = await apiService.getTasks({
         project: projectId,
         includeSubtasks: true,
-        mainTasksOnly: false
+        mainTasksOnly: false,
       });
       setTasks(response.tasks || []);
     } catch (err) {
-      console.error('Failed to load tasks:', err);
+      console.error("Failed to load tasks:", err);
     } finally {
       setTasksLoading(false);
     }
@@ -105,16 +124,20 @@ export default function ProjectDetailsPage() {
   };
 
   const handleDeleteProject = async () => {
-    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this project? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
     try {
       await apiService.deleteProject(projectId);
-      router.push('/projects');
+      router.push("/projects");
     } catch (err) {
-      console.error('Failed to delete project:', err);
-      setError('Failed to delete project');
+      console.error("Failed to delete project:", err);
+      setError("Failed to delete project");
     }
   };
 
@@ -125,45 +148,82 @@ export default function ProjectDetailsPage() {
 
   const getStatusBadge = (status: ProjectStatus) => {
     switch (status) {
-      case ProjectStatus.COMPLETED: 
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Completed</Badge>;
-      case ProjectStatus.IN_PROGRESS: 
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
-      case ProjectStatus.ON_HOLD: 
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">On Hold</Badge>;
-      case ProjectStatus.CANCELLED: 
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Cancelled</Badge>;
-      default: 
+      case ProjectStatus.COMPLETED:
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Completed
+          </Badge>
+        );
+      case ProjectStatus.IN_PROGRESS:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            In Progress
+          </Badge>
+        );
+      case ProjectStatus.ON_HOLD:
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            On Hold
+          </Badge>
+        );
+      case ProjectStatus.CANCELLED:
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Cancelled
+          </Badge>
+        );
+      default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: ProjectPriority) => {
     switch (priority) {
-      case ProjectPriority.CRITICAL: 
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Critical</Badge>;
-      case ProjectPriority.HIGH: 
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">High</Badge>;
-      case ProjectPriority.MEDIUM: 
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Medium</Badge>;
-      case ProjectPriority.LOW: 
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Low</Badge>;
-      default: 
+      case ProjectPriority.CRITICAL:
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Critical
+          </Badge>
+        );
+      case ProjectPriority.HIGH:
+        return (
+          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+            High
+          </Badge>
+        );
+      case ProjectPriority.MEDIUM:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            Medium
+          </Badge>
+        );
+      case ProjectPriority.LOW:
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Low
+          </Badge>
+        );
+      default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
   const canEditProject = () => {
-    return user?.userRole === 'super_admin' || 
-           (user?.userRole === 'project_manager' && project?.projectManager.id === user.userId);
+    return (
+      user?.userRole === "super_admin" ||
+      (user?.userRole === "project_manager" &&
+        project?.projectManager.id === user.userId)
+    );
   };
 
   const getTaskStats = () => {
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.status === 'completed').length;
-    const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
-    const todoTasks = tasks.filter(t => t.status === 'todo').length;
-    
+    const completedTasks = tasks.filter((t) => t.status === "completed").length;
+    const inProgressTasks = tasks.filter(
+      (t) => t.status === "in_progress",
+    ).length;
+    const todoTasks = tasks.filter((t) => t.status === "todo").length;
+
     return { totalTasks, completedTasks, inProgressTasks, todoTasks };
   };
 
@@ -186,10 +246,13 @@ export default function ProjectDetailsPage() {
           <Alert className="mb-4 border-red-200 bg-red-50">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-red-800">
-              {error || 'Project not found'}
+              {error || "Project not found"}
             </AlertDescription>
           </Alert>
-          <Button onClick={() => router.push('/projects')} className="flex items-center space-x-2">
+          <Button
+            onClick={() => router.push("/projects")}
+            className="flex items-center space-x-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Projects</span>
           </Button>
@@ -228,15 +291,13 @@ export default function ProjectDetailsPage() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   {project.name}
                 </h1>
-                <p className="text-gray-600 mb-4">
-                  {project.description}
-                </p>
+                <p className="text-gray-600 mb-4">{project.description}</p>
                 <div className="flex gap-2 flex-wrap">
                   {getStatusBadge(project.status)}
                   {getPriorityBadge(project.priority)}
                 </div>
               </div>
-              
+
               {canEditProject() && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -250,7 +311,10 @@ export default function ProjectDetailsPage() {
                       Edit Project
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleDeleteProject} className="text-red-600">
+                    <DropdownMenuItem
+                      onClick={handleDeleteProject}
+                      className="text-red-600"
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete Project
                     </DropdownMenuItem>
@@ -294,7 +358,10 @@ export default function ProjectDetailsPage() {
                     </AvatarFallback>
                   </Avatar>
                   {project.teamMembers.slice(0, 3).map((member) => (
-                    <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
+                    <Avatar
+                      key={member.id}
+                      className="h-6 w-6 border-2 border-white"
+                    >
                       <AvatarFallback className="text-xs bg-gradient-primary text-white">
                         {member.name.charAt(0)}
                       </AvatarFallback>
@@ -302,7 +369,9 @@ export default function ProjectDetailsPage() {
                   ))}
                   {project.teamMembers.length > 3 && (
                     <div className="h-6 w-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
-                      <span className="text-xs text-gray-600">+{project.teamMembers.length - 3}</span>
+                      <span className="text-xs text-gray-600">
+                        +{project.teamMembers.length - 3}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -311,11 +380,11 @@ export default function ProjectDetailsPage() {
               <Card className="text-center p-4 bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
                 <DollarSign className="h-10 w-10 text-yellow-600 mx-auto mb-2" />
                 <div className="text-3xl font-bold text-yellow-600 mb-1">
-                  ${project.budget?.toLocaleString() || '0'}
+                  ${project.budget?.toLocaleString() || "0"}
                 </div>
                 <div className="text-sm text-gray-600">Budget</div>
                 <div className="text-xs text-gray-500 mt-1">
-                  ${project.actualCost?.toLocaleString() || '0'} spent
+                  ${project.actualCost?.toLocaleString() || "0"} spent
                 </div>
               </Card>
             </div>
@@ -325,7 +394,10 @@ export default function ProjectDetailsPage() {
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center space-x-2"
+            >
               <FileText className="h-4 w-4" />
               <span>Overview</span>
             </TabsTrigger>
@@ -333,7 +405,10 @@ export default function ProjectDetailsPage() {
               <CheckSquare className="h-4 w-4" />
               <span>Tasks ({taskStats.totalTasks})</span>
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="timeline"
+              className="flex items-center space-x-2"
+            >
               <Clock className="h-4 w-4" />
               <span>Timeline</span>
             </TabsTrigger>
@@ -371,22 +446,30 @@ export default function ProjectDetailsPage() {
                       <div className="flex items-center space-x-3">
                         <Users className="h-5 w-5 text-gray-500" />
                         <div>
-                          <p className="text-sm text-gray-500">Project Manager</p>
-                          <p className="font-medium">{project.projectManager.name}</p>
+                          <p className="text-sm text-gray-500">
+                            Project Manager
+                          </p>
+                          <p className="font-medium">
+                            {project.projectManager.name}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Flag className="h-5 w-5 text-gray-500" />
                         <div>
                           <p className="text-sm text-gray-500">Priority</p>
-                          <p className="font-medium capitalize">{project.priority}</p>
+                          <p className="font-medium capitalize">
+                            {project.priority}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     {project.notes && (
                       <div className="mt-6">
-                        <h4 className="font-semibold text-gray-900 mb-2">Notes</h4>
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          Notes
+                        </h4>
                         <p className="text-gray-600">{project.notes}</p>
                       </div>
                     )}
@@ -401,7 +484,9 @@ export default function ProjectDetailsPage() {
                   <CardContent>
                     <div className="flex flex-wrap gap-3">
                       <Button
-                        onClick={() => router.push(`/projects/${projectId}/tasks`)}
+                        onClick={() =>
+                          router.push(`/projects/${projectId}/tasks`)
+                        }
                         className="modern-button flex items-center space-x-2"
                       >
                         <CheckSquare className="h-4 w-4" />
@@ -409,7 +494,7 @@ export default function ProjectDetailsPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => setActiveTab('tasks')}
+                        onClick={() => setActiveTab("tasks")}
                         className="flex items-center space-x-2"
                       >
                         <CheckSquare className="h-4 w-4" />
@@ -417,7 +502,7 @@ export default function ProjectDetailsPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => setActiveTab('timeline')}
+                        onClick={() => setActiveTab("timeline")}
                         className="flex items-center space-x-2"
                       >
                         <Clock className="h-4 w-4" />
@@ -443,12 +528,19 @@ export default function ProjectDetailsPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{project.projectManager.name}</p>
-                          <p className="text-sm text-gray-500">Project Manager</p>
+                          <p className="font-medium">
+                            {project.projectManager.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Project Manager
+                          </p>
                         </div>
                       </div>
                       {project.teamMembers.map((member) => (
-                        <div key={member.id} className="flex items-center space-x-3">
+                        <div
+                          key={member.id}
+                          className="flex items-center space-x-3"
+                        >
                           <Avatar className="h-10 w-10">
                             <AvatarFallback className="bg-gradient-primary text-white">
                               {member.name.charAt(0)}
@@ -456,7 +548,9 @@ export default function ProjectDetailsPage() {
                           </Avatar>
                           <div>
                             <p className="font-medium">{member.name}</p>
-                            <p className="text-sm text-gray-500">{member.role || 'Team Member'}</p>
+                            <p className="text-sm text-gray-500">
+                              {member.role || "Team Member"}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -470,7 +564,9 @@ export default function ProjectDetailsPage() {
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900">Project Tasks</h3>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Project Tasks
+              </h3>
               <Button
                 onClick={() => router.push(`/projects/${projectId}/tasks`)}
                 className="modern-button flex items-center space-x-2"
@@ -488,7 +584,9 @@ export default function ProjectDetailsPage() {
               <Card className="modern-card">
                 <CardContent className="p-8 text-center">
                   <CheckSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No tasks found
+                  </h3>
                   <p className="text-gray-600 mb-4">
                     Create your first task to get started with this project.
                   </p>
@@ -509,9 +607,15 @@ export default function ProjectDetailsPage() {
                       key={task.id}
                       task={task}
                       onEdit={() => router.push(`/projects/${projectId}/tasks`)}
-                      onDelete={() => router.push(`/projects/${projectId}/tasks`)}
-                      onStatusChange={() => router.push(`/projects/${projectId}/tasks`)}
-                      onAddSubtask={() => router.push(`/projects/${projectId}/tasks`)}
+                      onDelete={() =>
+                        router.push(`/projects/${projectId}/tasks`)
+                      }
+                      onStatusChange={() =>
+                        router.push(`/projects/${projectId}/tasks`)
+                      }
+                      onAddSubtask={() =>
+                        router.push(`/projects/${projectId}/tasks`)
+                      }
                     />
                   ))}
                 </div>
@@ -523,7 +627,9 @@ export default function ProjectDetailsPage() {
                       </p>
                       <Button
                         variant="outline"
-                        onClick={() => router.push(`/projects/${projectId}/tasks`)}
+                        onClick={() =>
+                          router.push(`/projects/${projectId}/tasks`)
+                        }
                       >
                         View All Tasks
                       </Button>
@@ -539,8 +645,12 @@ export default function ProjectDetailsPage() {
             <Card className="modern-card">
               <CardContent className="p-8 text-center">
                 <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Timeline View</h3>
-                <p className="text-gray-600">Timeline functionality coming soon...</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Timeline View
+                </h3>
+                <p className="text-gray-600">
+                  Timeline functionality coming soon...
+                </p>
               </CardContent>
             </Card>
           </TabsContent>

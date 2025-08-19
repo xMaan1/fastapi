@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '../../components/ui/button';
-import { LogIn } from 'lucide-react';
-import { AuthForm } from '../../components/auth';
-import { useAuth } from '../../hooks/useAuth';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "../../components/ui/button";
+import { LogIn } from "lucide-react";
+import { AuthForm } from "../../components/auth";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function SignupPage() {
   const { user } = useAuth();
@@ -14,12 +14,12 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push("/");
     }
   }, [user, router]);
 
   const handleSignupSuccess = () => {
-    router.push('/');
+    router.push("/");
   };
 
   if (user) {
@@ -36,7 +36,7 @@ export default function SignupPage() {
           </Button>
         </Link>
       </div>
-      
+
       <AuthForm mode="signup" onSuccess={handleSignupSuccess} />
     </div>
   );

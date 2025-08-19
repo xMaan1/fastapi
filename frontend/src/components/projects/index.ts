@@ -1,1 +1,1 @@
-export { default as ProjectDialog } from './ProjectDialog';
+export { default as ProjectDialog } from "./ProjectDialog";

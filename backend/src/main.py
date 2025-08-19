@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config.unified_database import create_tables
-from .api.v1 import auth, users, projects, tasks, tenants, plans, events, sales
+from .api.v1 import auth, users, projects, tasks, tenants, plans, events, sales, crm, hrm
 
 app = FastAPI(title="SparkCo ERP - Project Management & Sales API", version="1.0.0")
 
@@ -20,6 +20,8 @@ app.include_router(tenants.router)
 app.include_router(plans.router)
 app.include_router(events.router)
 app.include_router(sales.router)
+app.include_router(crm.router)
+app.include_router(hrm.router)
 
 # Add CORS middleware for frontend integration
 app.add_middleware(

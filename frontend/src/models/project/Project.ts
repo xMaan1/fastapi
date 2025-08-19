@@ -1,16 +1,16 @@
 export enum ProjectStatus {
-  PLANNING = 'planning',
-  IN_PROGRESS = 'in_progress',
-  ON_HOLD = 'on_hold',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  PLANNING = "planning",
+  IN_PROGRESS = "in_progress",
+  ON_HOLD = "on_hold",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }
 
 export enum ProjectPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export interface TeamMember {

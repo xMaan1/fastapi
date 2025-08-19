@@ -1,30 +1,44 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Badge } from '../../components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
-import { Progress } from '../../components/ui/progress';
-import { 
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../components/ui/avatar";
+import { Progress } from "../../components/ui/progress";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
+} from "../../components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '../../components/ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Separator } from '../../components/ui/separator';
+  DropdownMenuSeparator,
+} from "../../components/ui/dropdown-menu";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Separator } from "../../components/ui/separator";
 import {
   Plus,
   Search,
@@ -43,14 +57,20 @@ import {
   DollarSign,
   Loader2,
   RefreshCw,
-  CheckSquare
-} from 'lucide-react';
-import { Project } from '../../models/project/Project';
-import { apiService } from '../../services/ApiService';
-import { useAuth } from '../../hooks/useAuth';
-import { DashboardLayout } from '../../components/layout';
-import { ProjectDialog } from '../../components/projects';
-import { cn, getStatusColor, getPriorityColor, getInitials, formatDate } from '../../lib/utils';
+  CheckSquare,
+} from "lucide-react";
+import { Project } from "../../models/project/Project";
+import { apiService } from "../../services/ApiService";
+import { useAuth } from "../../hooks/useAuth";
+import { DashboardLayout } from "../../components/layout";
+import { ProjectDialog } from "../../components/projects";
+import {
+  cn,
+  getStatusColor,
+  getPriorityColor,
+  getInitials,
+  formatDate,
+} from "../../lib/utils";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -58,17 +78,17 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [starredProjects, setStarredProjects] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<string>('newest');
-  const [activeTab, setActiveTab] = useState('all');
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [activeTab, setActiveTab] = useState("all");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -84,62 +104,91 @@ export default function ProjectsPage() {
   // Filter projects based on search term, status, priority, and other filters
   useEffect(() => {
     if (!projects) return;
-    
+
     let filtered = [...projects];
-    
+
     // Apply search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(project => 
-        project.name.toLowerCase().includes(search) ||
-        project.description.toLowerCase().includes(search) ||
-        project.projectManager.name.toLowerCase().includes(search)
+      filtered = filtered.filter(
+        (project) =>
+          project.name.toLowerCase().includes(search) ||
+          project.description.toLowerCase().includes(search) ||
+          project.projectManager.name.toLowerCase().includes(search),
       );
     }
-    
+
     // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(project => project.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((project) => project.status === statusFilter);
     }
-    
+
     // Apply priority filter
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(project => project.priority === priorityFilter);
+    if (priorityFilter !== "all") {
+      filtered = filtered.filter(
+        (project) => project.priority === priorityFilter,
+      );
     }
-    
+
     // Filter by tab
-    if (activeTab === 'my') {
-      filtered = filtered.filter(project => project.projectManager.id === user?.userId);
-    } else if (activeTab === 'starred') {
-      filtered = filtered.filter(project => starredProjects.includes(project.id));
+    if (activeTab === "my") {
+      filtered = filtered.filter(
+        (project) => project.projectManager.id === user?.userId,
+      );
+    } else if (activeTab === "starred") {
+      filtered = filtered.filter((project) =>
+        starredProjects.includes(project.id),
+      );
     }
-    
+
     // Sort projects
     switch (sortBy) {
-      case 'newest':
-        filtered = [...filtered].sort((a, b) => new Date(b.createdAt || b.endDate).getTime() - new Date(a.createdAt || a.endDate).getTime());
+      case "newest":
+        filtered = [...filtered].sort(
+          (a, b) =>
+            new Date(b.createdAt || b.endDate).getTime() -
+            new Date(a.createdAt || a.endDate).getTime(),
+        );
         break;
-      case 'oldest':
-        filtered = [...filtered].sort((a, b) => new Date(a.createdAt || a.endDate).getTime() - new Date(b.createdAt || b.endDate).getTime());
+      case "oldest":
+        filtered = [...filtered].sort(
+          (a, b) =>
+            new Date(a.createdAt || a.endDate).getTime() -
+            new Date(b.createdAt || b.endDate).getTime(),
+        );
         break;
-      case 'name_asc':
+      case "name_asc":
         filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
         break;
-      case 'name_desc':
+      case "name_desc":
         filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name));
         break;
-      case 'due_soon':
-        filtered = [...filtered].sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+      case "due_soon":
+        filtered = [...filtered].sort(
+          (a, b) =>
+            new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+        );
         break;
-      case 'completion':
-        filtered = [...filtered].sort((a, b) => b.completionPercent - a.completionPercent);
+      case "completion":
+        filtered = [...filtered].sort(
+          (a, b) => b.completionPercent - a.completionPercent,
+        );
         break;
       default:
         break;
     }
-    
+
     setFilteredProjects(filtered);
-  }, [projects, searchTerm, statusFilter, priorityFilter, activeTab, starredProjects, sortBy, user]);
+  }, [
+    projects,
+    searchTerm,
+    statusFilter,
+    priorityFilter,
+    activeTab,
+    starredProjects,
+    sortBy,
+    user,
+  ]);
 
   const fetchProjects = async () => {
     try {
@@ -147,7 +196,7 @@ export default function ProjectsPage() {
       const response = await apiService.getProjects();
       setProjects(response.projects);
     } catch (error) {
-      console.error('Failed to fetch projects:', error);
+      console.error("Failed to fetch projects:", error);
     } finally {
       setLoading(false);
     }
@@ -155,13 +204,13 @@ export default function ProjectsPage() {
 
   const handleCreateProject = () => {
     setSelectedProject(null);
-    setDialogMode('create');
+    setDialogMode("create");
     setDialogOpen(true);
   };
 
   const handleEditProject = (project: Project) => {
     setSelectedProject(project);
-    setDialogMode('edit');
+    setDialogMode("edit");
     setDialogOpen(true);
   };
 
@@ -174,20 +223,22 @@ export default function ProjectsPage() {
     if (projectToDelete) {
       try {
         await apiService.deleteProject(projectToDelete.id);
-        setProjects(projects.filter(p => p.id !== projectToDelete.id));
+        setProjects(projects.filter((p) => p.id !== projectToDelete.id));
         setDeleteDialogOpen(false);
         setProjectToDelete(null);
       } catch (error) {
-        console.error('Failed to delete project:', error);
+        console.error("Failed to delete project:", error);
       }
     }
   };
 
   const handleProjectSave = (savedProject: Project) => {
-    if (dialogMode === 'create') {
+    if (dialogMode === "create") {
       setProjects([...projects, savedProject]);
     } else {
-      setProjects(projects.map(p => p.id === savedProject.id ? savedProject : p));
+      setProjects(
+        projects.map((p) => (p.id === savedProject.id ? savedProject : p)),
+      );
     }
   };
 
@@ -195,16 +246,19 @@ export default function ProjectsPage() {
     if (event) {
       event.stopPropagation();
     }
-    setStarredProjects(prev => 
-      prev.includes(projectId) 
-        ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
+    setStarredProjects((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId],
     );
   };
 
   const canEditProject = (project: Project) => {
-    return user?.userRole === 'super_admin' || 
-           (user?.userRole === 'project_manager' && project.projectManager.id === user.userId);
+    return (
+      user?.userRole === "super_admin" ||
+      (user?.userRole === "project_manager" &&
+        project.projectManager.id === user.userId)
+    );
   };
 
   // Prevent hydration mismatch
@@ -221,9 +275,7 @@ export default function ProjectsPage() {
             <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Projects
             </h1>
-            <p className="text-gray-600 mt-2">
-              Manage and track your projects
-            </p>
+            <p className="text-gray-600 mt-2">Manage and track your projects</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -234,11 +286,9 @@ export default function ProjectsPage() {
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
             </Button>
-            {(user?.userRole === 'super_admin' || user?.userRole === 'project_manager') && (
-              <Button
-                onClick={handleCreateProject}
-                className="modern-button"
-              >
+            {(user?.userRole === "super_admin" ||
+              user?.userRole === "project_manager") && (
+              <Button onClick={handleCreateProject} className="modern-button">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Project
               </Button>
@@ -287,7 +337,10 @@ export default function ProjectsPage() {
                 </div>
 
                 <div>
-                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <Select
+                    value={priorityFilter}
+                    onValueChange={setPriorityFilter}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="All Priorities" />
                     </SelectTrigger>
@@ -305,9 +358,9 @@ export default function ProjectsPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setSearchTerm('');
-                      setStatusFilter('all');
-                      setPriorityFilter('all');
+                      setSearchTerm("");
+                      setStatusFilter("all");
+                      setPriorityFilter("all");
                     }}
                     className="w-full"
                   >
@@ -331,7 +384,10 @@ export default function ProjectsPage() {
             {!loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProjects.map((project) => (
-                  <Card key={project.id} className="modern-card card-hover group">
+                  <Card
+                    key={project.id}
+                    className="modern-card card-hover group"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg font-semibold text-gray-900 flex-1 pr-2 group-hover:text-blue-600 transition-colors line-clamp-1">
@@ -344,37 +400,53 @@ export default function ProjectsPage() {
                             onClick={(e) => toggleStarred(project.id, e)}
                             className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <Star className={cn(
-                              "h-4 w-4",
-                              starredProjects.includes(project.id) 
-                                ? "fill-yellow-400 text-yellow-400" 
-                                : "text-gray-400"
-                            )} />
+                            <Star
+                              className={cn(
+                                "h-4 w-4",
+                                starredProjects.includes(project.id)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-400",
+                              )}
+                            />
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/projects/${project.id}`)
+                                }
+                              >
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}/tasks`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(`/projects/${project.id}/tasks`)
+                                }
+                              >
                                 <FolderOpen className="h-4 w-4 mr-2" />
                                 Manage Tasks
                               </DropdownMenuItem>
                               {canEditProject(project) && (
-                                <DropdownMenuItem onClick={() => handleEditProject(project)}>
+                                <DropdownMenuItem
+                                  onClick={() => handleEditProject(project)}
+                                >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit Project
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {canEditProject(project) && (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onClick={() => handleDeleteProject(project)}
                                   className="text-red-600 focus:text-red-600"
                                 >
@@ -395,10 +467,22 @@ export default function ProjectsPage() {
                     <CardContent className="pt-0">
                       {/* Status and Priority Badges */}
                       <div className="flex gap-2 mb-4 flex-wrap">
-                        <Badge variant="outline" className={cn("text-xs font-medium", getStatusColor(project.status))}>
-                          {project.status.replace('_', ' ').toUpperCase()}
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-xs font-medium",
+                            getStatusColor(project.status),
+                          )}
+                        >
+                          {project.status.replace("_", " ").toUpperCase()}
                         </Badge>
-                        <Badge variant="outline" className={cn("text-xs font-medium", getPriorityColor(project.priority))}>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-xs font-medium",
+                            getPriorityColor(project.priority),
+                          )}
+                        >
                           {project.priority.toUpperCase()}
                         </Badge>
                       </div>
@@ -406,10 +490,17 @@ export default function ProjectsPage() {
                       {/* Progress */}
                       <div className="mb-4">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">Progress</span>
-                          <span className="text-sm font-bold text-gray-900">{project.completionPercent}%</span>
+                          <span className="text-sm font-medium text-gray-700">
+                            Progress
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">
+                            {project.completionPercent}%
+                          </span>
                         </div>
-                        <Progress value={project.completionPercent} className="h-2" />
+                        <Progress
+                          value={project.completionPercent}
+                          className="h-2"
+                        />
                       </div>
 
                       <Separator className="my-4" />
@@ -423,13 +514,18 @@ export default function ProjectsPage() {
                               {getInitials(project.projectManager.name)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm text-gray-600">PM: {project.projectManager.name}</span>
+                          <span className="text-sm text-gray-600">
+                            PM: {project.projectManager.name}
+                          </span>
                         </div>
-                        
+
                         {/* Team Members */}
                         <div className="flex -space-x-2">
                           {project.teamMembers.slice(0, 3).map((member) => (
-                            <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
+                            <Avatar
+                              key={member.id}
+                              className="h-6 w-6 border-2 border-white"
+                            >
                               <AvatarImage src={member.name} />
                               <AvatarFallback className="text-xs bg-gradient-secondary text-white">
                                 {getInitials(member.name)}
@@ -438,7 +534,9 @@ export default function ProjectsPage() {
                           ))}
                           {project.teamMembers.length > 3 && (
                             <div className="h-6 w-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                              <span className="text-xs text-gray-600">+{project.teamMembers.length - 3}</span>
+                              <span className="text-xs text-gray-600">
+                                +{project.teamMembers.length - 3}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -499,11 +597,14 @@ export default function ProjectsPage() {
                     No projects found
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all'
-                      ? 'Try adjusting your filters'
-                      : 'Create your first project to get started'}
+                    {searchTerm ||
+                    statusFilter !== "all" ||
+                    priorityFilter !== "all"
+                      ? "Try adjusting your filters"
+                      : "Create your first project to get started"}
                   </p>
-                  {(user?.userRole === 'super_admin' || user?.userRole === 'project_manager') && (
+                  {(user?.userRole === "super_admin" ||
+                    user?.userRole === "project_manager") && (
                     <Button
                       onClick={handleCreateProject}
                       className="modern-button"
@@ -536,7 +637,8 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Are you sure you want to delete &quot;{projectToDelete?.name}&quot;? This action cannot be undone.
+                  Are you sure you want to delete &quot;{projectToDelete?.name}
+                  &quot;? This action cannot be undone.
                 </p>
               </CardContent>
               <CardContent className="flex justify-end gap-2 pt-0">
@@ -546,10 +648,7 @@ export default function ProjectsPage() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={confirmDeleteProject}
-                >
+                <Button variant="destructive" onClick={confirmDeleteProject}>
                   Delete
                 </Button>
               </CardContent>

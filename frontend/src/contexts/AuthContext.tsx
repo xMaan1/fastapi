@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, LoginCredentials } from '@/src/models/auth';
-import { apiService } from '@/src/services/ApiService';
-import { SessionManager } from '@/src/services/SessionManager';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { User, LoginCredentials } from "@/src/models/auth";
+import { apiService } from "@/src/services/ApiService";
+import { SessionManager } from "@/src/services/SessionManager";
 
 interface Tenant {
   id: string;
@@ -33,34 +33,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(null);
 
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const sessionManager = new SessionManager();
-        const session = sessionManager.getSession();
         
-        if (session && session.token && session.user) {
-          setUser(session.user);
+        // Check if session exists and is valid
+        if (sessionManager.isSessionValid() && !sessionManager.isTokenExpired()) {
+          const session = sessionManager.getSession();
           
-          // Load tenants from localStorage (no API call)
-          const storedTenants = apiService.getUserTenants();
-          if (storedTenants.length > 0) {
-            setTenants(storedTenants);
-            
-            // Get current tenant from localStorage
-            const currentTenant = apiService.getCurrentTenant();
-            if (currentTenant) {
-              setCurrentTenant(currentTenant);
-            } else {
-              // Fallback to first tenant if no current tenant is set
-              setCurrentTenant(storedTenants[0]);
-              apiService.setTenantId(storedTenants[0].id);
+          if (session && session.token && session.user) {
+            setUser(session.user);
+
+            // Load tenants from localStorage (no API call)
+            const storedTenants = apiService.getUserTenants();
+            if (storedTenants.length > 0) {
+              setTenants(storedTenants);
+
+              // Get current tenant from localStorage
+              const currentTenant = apiService.getCurrentTenant();
+              if (currentTenant) {
+                setCurrentTenant(currentTenant);
+              } else {
+                // Fallback to first tenant if no current tenant is set
+                setCurrentTenant(storedTenants[0]);
+                apiService.setTenantId(storedTenants[0].id);
+              }
             }
+          } else {
+            // Session exists but data is corrupted, clear it
+            sessionManager.clearSession();
+            setUser(null);
           }
         } else {
+          // No valid session, clear any corrupted data
+          sessionManager.clearSession();
           setUser(null);
         }
       } catch (error) {
-        console.error('AuthContext - Auth initialization error:', error);
+        console.error("AuthContext - Auth initialization error:", error);
+        // Clear session on error
+        const sessionManager = new SessionManager();
+        sessionManager.clearSession();
         setUser(null);
       } finally {
         setLoading(false);
@@ -74,28 +87,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       const response = await apiService.login(credentials);
-      
+
       if (response.success && response.user) {
         setUser(response.user);
-        
+
         // Tenants are already fetched and stored during apiService.login()
         // Just load them from localStorage
         const storedTenants = apiService.getUserTenants();
         if (storedTenants.length > 0) {
           setTenants(storedTenants);
-          
+
           // Current tenant is already set during login, just get it
           const currentTenant = apiService.getCurrentTenant();
           if (currentTenant) {
             setCurrentTenant(currentTenant);
           }
         }
-        
+
         return true;
       }
       return false;
     } catch (error) {
-      console.error('AuthContext - Login failed:', error);
+      console.error("AuthContext - Login failed:", error);
       return false;
     } finally {
       setLoading(false);
@@ -106,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error('AuthContext - Logout error:', error);
+      console.error("AuthContext - Logout error:", error);
     } finally {
       const sessionManager = new SessionManager();
       setUser(null);
@@ -114,8 +127,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setCurrentTenant(null);
       sessionManager.clearSession();
       apiService.setTenantId(null);
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
   };
@@ -127,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setCurrentTenant(tenant);
       return true;
     } catch (error) {
-      console.error('AuthContext - Failed to switch tenant:', error);
+      console.error("AuthContext - Failed to switch tenant:", error);
       return false;
     }
   };
@@ -143,17 +156,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     switchTenant,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}

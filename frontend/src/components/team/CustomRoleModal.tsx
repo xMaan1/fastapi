@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Badge } from '../ui/badge';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2, Shield, Check } from 'lucide-react';
-import apiService from '../../services/ApiService';
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Badge } from "../ui/badge";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Loader2, Shield, Check } from "lucide-react";
+import apiService from "../../services/ApiService";
 
 interface Permission {
   code: string;
@@ -36,18 +36,20 @@ interface CustomRoleModalProps {
   tenantId: string;
 }
 
-export default function CustomRoleModal({ 
-  open, 
-  onClose, 
-  onSave, 
-  role, 
-  tenantId 
+export default function CustomRoleModal({
+  open,
+  onClose,
+  onSave,
+  role,
+  tenantId,
 }: CustomRoleModalProps) {
   const [formData, setFormData] = useState<CustomRole>({
-    name: '',
-    permissions: []
+    name: "",
+    permissions: [],
   });
-  const [availablePermissions, setAvailablePermissions] = useState<Permission[]>([]);
+  const [availablePermissions, setAvailablePermissions] = useState<
+    Permission[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +59,7 @@ export default function CustomRoleModal({
       if (role) {
         setFormData(role);
       } else {
-        setFormData({ name: '', permissions: [] });
+        setFormData({ name: "", permissions: [] });
       }
     }
   }, [open, role]);
@@ -67,17 +69,17 @@ export default function CustomRoleModal({
       const response = await apiService.getPermissions();
       setAvailablePermissions(response || []);
     } catch (err) {
-      console.error('Failed to fetch permissions:', err);
-      setError('Failed to load permissions');
+      console.error("Failed to fetch permissions:", err);
+      setError("Failed to load permissions");
     }
   };
 
   const handlePermissionToggle = (permissionCode: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: prev.permissions.includes(permissionCode)
-        ? prev.permissions.filter(p => p !== permissionCode)
-        : [...prev.permissions, permissionCode]
+        ? prev.permissions.filter((p) => p !== permissionCode)
+        : [...prev.permissions, permissionCode],
     }));
   };
 
@@ -91,7 +93,11 @@ export default function CustomRoleModal({
 
       let savedRole;
       if (role?.id) {
-        savedRole = await apiService.updateCustomRole(tenantId, role.id, formData);
+        savedRole = await apiService.updateCustomRole(
+          tenantId,
+          role.id,
+          formData,
+        );
       } else {
         savedRole = await apiService.createCustomRole(tenantId, formData);
       }
@@ -99,8 +105,8 @@ export default function CustomRoleModal({
       onSave(savedRole);
       onClose();
     } catch (err: any) {
-      console.error('Failed to save role:', err);
-      setError(err.response?.data?.detail || 'Failed to save role');
+      console.error("Failed to save role:", err);
+      setError(err.response?.data?.detail || "Failed to save role");
     } finally {
       setLoading(false);
     }
@@ -112,10 +118,11 @@ export default function CustomRoleModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            {role ? 'Edit Custom Role' : 'Create Custom Role'}
+            {role ? "Edit Custom Role" : "Create Custom Role"}
           </DialogTitle>
           <DialogDescription>
-            Define a custom role with specific permissions for your team members.
+            Define a custom role with specific permissions for your team
+            members.
           </DialogDescription>
         </DialogHeader>
 
@@ -125,7 +132,9 @@ export default function CustomRoleModal({
             <Input
               id="roleName"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
               placeholder="Enter role name"
               required
             />
@@ -141,7 +150,9 @@ export default function CustomRoleModal({
                   onClick={() => handlePermissionToggle(permission.code)}
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{permission.label}</p>
+                    <p className="font-medium text-gray-900">
+                      {permission.label}
+                    </p>
                     <p className="text-sm text-gray-500">{permission.code}</p>
                   </div>
                   <div className="flex items-center">
@@ -159,9 +170,15 @@ export default function CustomRoleModal({
               <Label>Selected Permissions</Label>
               <div className="flex flex-wrap gap-2">
                 {formData.permissions.map((permCode) => {
-                  const permission = availablePermissions.find(p => p.code === permCode);
+                  const permission = availablePermissions.find(
+                    (p) => p.code === permCode,
+                  );
                   return (
-                    <Badge key={permCode} variant="secondary" className="text-xs">
+                    <Badge
+                      key={permCode}
+                      variant="secondary"
+                      className="text-xs"
+                    >
                       {permission?.label || permCode}
                     </Badge>
                   );
@@ -188,8 +205,10 @@ export default function CustomRoleModal({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
+              ) : role ? (
+                "Update Role"
               ) : (
-                role ? 'Update Role' : 'Create Role'
+                "Create Role"
               )}
             </Button>
           </DialogFooter>

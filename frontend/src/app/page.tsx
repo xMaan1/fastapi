@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Progress } from '../components/ui/progress';
-import { Separator } from '../components/ui/separator';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Progress } from "../components/ui/progress";
+import { Separator } from "../components/ui/separator";
 import {
   TrendingUp,
   FolderOpen,
@@ -18,14 +23,14 @@ import {
   CheckCircle2,
   Star,
   BarChart3,
-  Loader2
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiService } from '../services/ApiService';
-import { Project } from '../models/project/Project';
-import { DashboardLayout } from '../components/layout';
+  Loader2,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { apiService } from "../services/ApiService";
+import { Project } from "../models/project/Project";
+import { DashboardLayout } from "../components/layout";
 
-import { cn, getStatusColor, getInitials, formatDate } from '../lib/utils';
+import { cn, getStatusColor, getInitials, formatDate } from "../lib/utils";
 
 interface DashboardStats {
   totalProjects: number;
@@ -59,7 +64,7 @@ export default function DashboardPage() {
       setLoading(true);
       const [projectsResponse, usersResponse] = await Promise.all([
         apiService.getProjects(),
-        apiService.getUsers().catch(() => ({ users: [] }))
+        apiService.getUsers().catch(() => ({ users: [] })),
       ]);
 
       const projectsData = projectsResponse.projects || [];
@@ -69,12 +74,22 @@ export default function DashboardPage() {
 
       // Calculate stats
       const totalProjects = projectsData.length;
-      const activeProjects = projectsData.filter((p: Project) => p.status === 'in_progress').length;
-      const completedProjects = projectsData.filter((p: Project) => p.status === 'completed').length;
+      const activeProjects = projectsData.filter(
+        (p: Project) => p.status === "in_progress",
+      ).length;
+      const completedProjects = projectsData.filter(
+        (p: Project) => p.status === "completed",
+      ).length;
       const totalTeamMembers = usersData.length;
-      const averageProgress = totalProjects > 0
-        ? Math.round(projectsData.reduce((sum: number, p: Project) => sum + p.completionPercent, 0) / totalProjects)
-        : 0;
+      const averageProgress =
+        totalProjects > 0
+          ? Math.round(
+              projectsData.reduce(
+                (sum: number, p: Project) => sum + p.completionPercent,
+                0,
+              ) / totalProjects,
+            )
+          : 0;
 
       setStats({
         totalProjects,
@@ -84,7 +99,7 @@ export default function DashboardPage() {
         averageProgress,
       });
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -92,15 +107,19 @@ export default function DashboardPage() {
 
   const toggleStarred = (projectId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    setStarredProjects(prev =>
+    setStarredProjects((prev) =>
       prev.includes(projectId)
-        ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId],
     );
   };
 
   const recentProjects = projects
-    .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt || b.createdAt).getTime() -
+        new Date(a.updatedAt || a.createdAt).getTime(),
+    )
     .slice(0, 6);
 
   if (loading) {
@@ -129,7 +148,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <Button
-            onClick={() => router.push('/projects')}
+            onClick={() => router.push("/projects")}
             className="modern-button"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -146,7 +165,9 @@ export default function DashboardPage() {
                   <FolderOpen className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalProjects}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Total Projects</p>
                 </div>
               </div>
@@ -160,7 +181,9 @@ export default function DashboardPage() {
                   <CheckCircle2 className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.activeProjects}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.activeProjects}
+                  </p>
                   <p className="text-sm text-gray-600">Active Projects</p>
                 </div>
               </div>
@@ -174,7 +197,9 @@ export default function DashboardPage() {
                   <Users className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalTeamMembers}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.totalTeamMembers}
+                  </p>
                   <p className="text-sm text-gray-600">Team Members</p>
                 </div>
               </div>
@@ -188,7 +213,9 @@ export default function DashboardPage() {
                   <TrendingUp className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.averageProgress}%</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.averageProgress}%
+                  </p>
                   <p className="text-sm text-gray-600">Avg Progress</p>
                 </div>
               </div>
@@ -210,7 +237,7 @@ export default function DashboardPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => router.push('/projects')}
+                    onClick={() => router.push("/projects")}
                     className="text-blue-600 hover:text-blue-700"
                   >
                     View All
@@ -231,8 +258,14 @@ export default function DashboardPage() {
                         <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                           {project.name}
                         </h3>
-                        <Badge variant="outline" className={cn("text-xs", getStatusColor(project.status))}>
-                          {project.status.replace('_', ' ').toUpperCase()}
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-xs",
+                            getStatusColor(project.status),
+                          )}
+                        >
+                          {project.status.replace("_", " ").toUpperCase()}
                         </Badge>
                       </div>
                       <Button
@@ -241,12 +274,14 @@ export default function DashboardPage() {
                         onClick={(e) => toggleStarred(project.id, e)}
                         className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <Star className={cn(
-                          "h-4 w-4",
-                          starredProjects.includes(project.id)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-400"
-                        )} />
+                        <Star
+                          className={cn(
+                            "h-4 w-4",
+                            starredProjects.includes(project.id)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-400",
+                          )}
+                        />
                       </Button>
                     </div>
 
@@ -264,7 +299,10 @@ export default function DashboardPage() {
                             </AvatarFallback>
                           </Avatar>
                           {project.teamMembers.slice(0, 2).map((member) => (
-                            <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
+                            <Avatar
+                              key={member.id}
+                              className="h-6 w-6 border-2 border-white"
+                            >
                               <AvatarImage src={member.name} />
                               <AvatarFallback className="text-xs bg-gradient-secondary text-white">
                                 {getInitials(member.name)}
@@ -273,7 +311,9 @@ export default function DashboardPage() {
                           ))}
                           {project.teamMembers.length > 2 && (
                             <div className="h-6 w-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                              <span className="text-xs text-gray-600">+{project.teamMembers.length - 2}</span>
+                              <span className="text-xs text-gray-600">
+                                +{project.teamMembers.length - 2}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -283,8 +323,13 @@ export default function DashboardPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">{project.completionPercent}%</span>
-                        <Progress value={project.completionPercent} className="w-16 h-2" />
+                        <span className="text-xs text-gray-600">
+                          {project.completionPercent}%
+                        </span>
+                        <Progress
+                          value={project.completionPercent}
+                          className="w-16 h-2"
+                        />
                       </div>
                     </div>
                   </div>
@@ -300,7 +345,7 @@ export default function DashboardPage() {
                       Create your first project to get started
                     </p>
                     <Button
-                      onClick={() => router.push('/projects')}
+                      onClick={() => router.push("/projects")}
                       className="modern-button"
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -311,8 +356,6 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-
-
         </div>
 
         {/* Quick Actions */}
@@ -325,7 +368,7 @@ export default function DashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col gap-2"
-                onClick={() => router.push('/projects')}
+                onClick={() => router.push("/projects")}
               >
                 <FolderOpen className="h-6 w-6" />
                 <span>Manage Projects</span>
@@ -334,7 +377,7 @@ export default function DashboardPage() {
               <Button
                 variant="outline"
                 className="h-20 flex-col gap-2"
-                onClick={() => router.push('/team')}
+                onClick={() => router.push("/team")}
               >
                 <Users className="h-6 w-6" />
                 <span>Team Management</span>
