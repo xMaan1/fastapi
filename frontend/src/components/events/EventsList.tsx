@@ -10,12 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Calendar, Plus, Search, Filter, Grid, List } from "lucide-react";
+import { Card, CardContent } from "../ui/card";
+import { Calendar, Plus, Search, Grid, List } from "lucide-react";
 import EventCard from "./EventCard";
 import EventForm from "./EventForm";
 import { useApiService } from "../../hooks/useApiService";
+import { useCustomOptions } from "../../hooks/useCustomOptions";
 import { useAuth } from "../../hooks/useAuth";
 
 interface Event {

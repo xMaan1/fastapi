@@ -49,6 +49,8 @@ import {
   CompanyCreate,
 } from "@/src/models/crm";
 import { DashboardLayout } from "../../../components/layout";
+import { useCustomOptions } from "../../../hooks/useCustomOptions";
+import { CustomOptionDialog } from "../../../components/common/CustomOptionDialog";
 
 export default function CRMCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -63,6 +65,11 @@ export default function CRMCompaniesPage() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showCustomIndustryDialog, setShowCustomIndustryDialog] = useState(false);
+  
+  // Custom options hook
+  const { customIndustries, createCustomIndustry, loading: customOptionsLoading } = useCustomOptions();
+  
   const [formData, setFormData] = useState<CompanyCreate>({
     name: "",
     industry: undefined,
@@ -106,6 +113,14 @@ export default function CRMCompaniesPage() {
   const resetFilters = () => {
     setFilters({});
     setSearch("");
+  };
+
+  const handleCreateCustomIndustry = async (name: string, description: string) => {
+    try {
+      await createCustomIndustry(name, description);
+    } catch (error) {
+      console.error('Failed to create custom industry:', error);
+    }
   };
 
   const resetForm = () => {
@@ -493,13 +508,17 @@ export default function CRMCompaniesPage() {
                   <Label htmlFor="industry">Industry</Label>
                   <Select
                     value={formData.industry || "all"}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        industry:
-                          value === "all" ? undefined : (value as Industry),
-                      })
-                    }
+                    onValueChange={(value) => {
+                      if (value === "create_new") {
+                        setShowCustomIndustryDialog(true);
+                      } else {
+                        setFormData({
+                          ...formData,
+                          industry:
+                            value === "all" ? undefined : (value as Industry),
+                        });
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select industry" />
@@ -511,6 +530,17 @@ export default function CRMCompaniesPage() {
                           {industry.charAt(0).toUpperCase() + industry.slice(1)}
                         </SelectItem>
                       ))}
+                      
+                      {/* Custom Industries */}
+                      {customIndustries && customIndustries.length > 0 && customIndustries.map((customIndustry) => (
+                        <SelectItem key={customIndustry.id} value={customIndustry.id}>
+                          {customIndustry.name}
+                        </SelectItem>
+                      ))}
+                      
+                      <SelectItem value="create_new" className="font-semibold text-blue-600">
+                        + Create New Industry
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1016,6 +1046,18 @@ export default function CRMCompaniesPage() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Custom Industry Dialog */}
+        <CustomOptionDialog
+          open={showCustomIndustryDialog}
+          onOpenChange={setShowCustomIndustryDialog}
+          title="Create New Industry"
+          description="Create a custom industry that will be available for your tenant."
+          optionName="Industry"
+          placeholder="e.g., Fintech, EdTech"
+          onSubmit={handleCreateCustomIndustry}
+          loading={customOptionsLoading.industry}
+        />
       </div>
     </DashboardLayout>
   );

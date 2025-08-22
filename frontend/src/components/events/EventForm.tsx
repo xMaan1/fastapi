@@ -15,6 +15,8 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Calendar, Clock, MapPin, Users, Video } from "lucide-react";
 import { useApiService } from "../../hooks/useApiService";
+import { useCustomOptions } from "../../hooks/useCustomOptions";
+import { CustomOptionDialog } from "../common/CustomOptionDialog";
 
 interface EventFormProps {
   event?: any;
@@ -35,6 +37,7 @@ export default function EventForm({
   loading = false,
 }: EventFormProps) {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [showCustomEventTypeDialog, setShowCustomEventTypeDialog] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -53,6 +56,7 @@ export default function EventForm({
   });
 
   const apiService = useApiService();
+  const { customEventTypes, createCustomEventType, loading: customOptionsLoading } = useCustomOptions();
 
   useEffect(() => {
     // Fetch projects for the dropdown
@@ -95,6 +99,14 @@ export default function EventForm({
       });
     }
   }, [event]);
+
+  const handleCreateCustomEventType = async (name: string, description: string) => {
+    try {
+      await createCustomEventType(name, description);
+    } catch (error) {
+      console.error('Failed to create custom event type:', error);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,10 +178,16 @@ export default function EventForm({
 
         {/* Event Type */}
         <div>
-          <Label htmlFor="eventType">Event Type</Label>
+          <Label htmlFor="eventType">Event Type *</Label>
           <Select
             value={formData.eventType}
-            onValueChange={(value) => handleInputChange("eventType", value)}
+            onValueChange={(value) => {
+              if (value === "create_new") {
+                setShowCustomEventTypeDialog(true);
+              } else {
+                handleInputChange("eventType", value);
+              }
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -179,6 +197,17 @@ export default function EventForm({
               <SelectItem value="workshop">Workshop</SelectItem>
               <SelectItem value="deadline">Deadline</SelectItem>
               <SelectItem value="other">Other</SelectItem>
+              
+              {/* Custom Event Types */}
+              {customEventTypes && customEventTypes.length > 0 && customEventTypes.map((customType) => (
+                <SelectItem key={customType.id} value={customType.id}>
+                  {customType.name}
+                </SelectItem>
+              ))}
+              
+              <SelectItem value="create_new" className="font-semibold text-blue-600">
+                + Create New Event Type
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -353,6 +382,18 @@ export default function EventForm({
           {loading ? "Saving..." : event ? "Update Event" : "Create Event"}
         </Button>
       </div>
+      
+      {/* Custom Event Type Dialog */}
+      <CustomOptionDialog
+        open={showCustomEventTypeDialog}
+        onOpenChange={setShowCustomEventTypeDialog}
+        title="Create New Event Type"
+        description="Create a custom event type that will be available for your tenant."
+        optionName="Event Type"
+        placeholder="e.g., Training Session, Client Meeting"
+        onSubmit={handleCreateCustomEventType}
+        loading={customOptionsLoading.eventType}
+      />
     </form>
   );
 }

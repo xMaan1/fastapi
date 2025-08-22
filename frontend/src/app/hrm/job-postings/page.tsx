@@ -54,6 +54,8 @@ import {
   HRMJobFilters,
 } from "@/src/models/hrm";
 import { DashboardLayout } from "@/src/components/layout";
+import { useCustomOptions } from "@/src/hooks/useCustomOptions";
+import { CustomOptionDialog } from "@/src/components/common/CustomOptionDialog";
 
 export default function HRMJobPostingsPage() {
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
@@ -73,6 +75,10 @@ export default function HRMJobPostingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showCustomDepartmentDialog, setShowCustomDepartmentDialog] = useState(false);
+  
+  // Custom options hook
+  const { customDepartments, createCustomDepartment, loading: customOptionsLoading } = useCustomOptions();
   const [formData, setFormData] = useState<JobPostingCreate>({
     title: "",
     department: Department.ENGINEERING,
@@ -114,6 +120,14 @@ export default function HRMJobPostingsPage() {
   const resetFilters = () => {
     setFilters({});
     setSearch("");
+  };
+
+  const handleCreateCustomDepartment = async (name: string, description: string) => {
+    try {
+      await createCustomDepartment(name, description);
+    } catch (error) {
+      console.error('Failed to create custom department:', error);
+    }
   };
 
   const resetForm = () => {
@@ -616,12 +630,16 @@ export default function HRMJobPostingsPage() {
                 <Label htmlFor="department">Department *</Label>
                 <Select
                   value={formData.department}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      department: value as Department,
-                    }))
-                  }
+                  onValueChange={(value) => {
+                    if (value === "create_new") {
+                      setShowCustomDepartmentDialog(true);
+                    } else {
+                      setFormData((prev) => ({
+                        ...prev,
+                        department: value as Department,
+                      }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -632,6 +650,17 @@ export default function HRMJobPostingsPage() {
                         {dept.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
+                    
+                    {/* Custom Departments */}
+                    {customDepartments && customDepartments.length > 0 && customDepartments.map((customDept) => (
+                      <SelectItem key={customDept.id} value={customDept.id}>
+                        {customDept.name}
+                      </SelectItem>
+                    ))}
+                    
+                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      + Create New Department
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1047,6 +1076,18 @@ export default function HRMJobPostingsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Custom Department Dialog */}
+        <CustomOptionDialog
+          open={showCustomDepartmentDialog}
+          onOpenChange={setShowCustomDepartmentDialog}
+          title="Create New Department"
+          description="Create a custom department that will be available for your tenant."
+          optionName="Department"
+          placeholder="e.g., Data Science, DevOps"
+          onSubmit={handleCreateCustomDepartment}
+          loading={customOptionsLoading.department}
+        />
       </div>
     </DashboardLayout>
   );

@@ -1749,3 +1749,52 @@ class HRMTrainingFilters(BaseModel):
     status: Optional[str] = None
     provider: Optional[str] = None
     search: Optional[str] = None
+
+# Custom Tenant-Specific Options Models
+class CustomEventType(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomDepartment(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomLeaveType(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomLeadSource(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomContactSource(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomCompanyIndustry(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomContactType(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str
+
+class CustomIndustry(BaseModel):
+    name: str
+    description: Optional[str] = None
+    tenant_id: str
+    created_by: str

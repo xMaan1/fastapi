@@ -56,6 +56,8 @@ import {
   OpportunityStage,
   LeadSource,
 } from "../../models/sales";
+import { useCustomOptions } from "../../hooks/useCustomOptions";
+import { CustomOptionDialog } from "../../components/common/CustomOptionDialog";
 
 export default function SalesPage() {
   const apiService = useApiService();
@@ -66,6 +68,10 @@ export default function SalesPage() {
   const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false);
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] =
     useState(false);
+  const [showCustomLeadSourceDialog, setShowCustomLeadSourceDialog] = useState(false);
+  
+  // Custom options hook
+  const { customLeadSources, createCustomLeadSource, loading: customOptionsLoading } = useCustomOptions();
   const [leadFormData, setLeadFormData] = useState({
     firstName: "",
     lastName: "",
@@ -111,6 +117,14 @@ export default function SalesPage() {
   useEffect(() => {
     loadSalesData();
   }, [loadSalesData]);
+
+  const handleCreateCustomLeadSource = async (name: string, description: string) => {
+    try {
+      await createCustomLeadSource(name, description);
+    } catch (error) {
+      console.error('Failed to create custom lead source:', error);
+    }
+  };
 
   const handleCreateLead = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -592,12 +606,16 @@ export default function SalesPage() {
                 <Label htmlFor="leadSource">Lead Source</Label>
                 <Select
                   value={leadFormData.leadSource}
-                  onValueChange={(value) =>
-                    setLeadFormData({
-                      ...leadFormData,
-                      leadSource: value as LeadSource,
-                    })
-                  }
+                  onValueChange={(value) => {
+                    if (value === "create_new") {
+                      setShowCustomLeadSourceDialog(true);
+                    } else {
+                      setLeadFormData({
+                        ...leadFormData,
+                        leadSource: value as LeadSource,
+                      });
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -608,6 +626,17 @@ export default function SalesPage() {
                         {source.replace("_", " ")}
                       </SelectItem>
                     ))}
+                    
+                    {/* Custom Lead Sources */}
+                    {customLeadSources && customLeadSources.length > 0 && customLeadSources.map((customSource) => (
+                      <SelectItem key={customSource.id} value={customSource.id}>
+                        {customSource.name}
+                      </SelectItem>
+                    ))}
+                    
+                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      + Create New Lead Source
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -841,6 +870,18 @@ export default function SalesPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Custom Lead Source Dialog */}
+      <CustomOptionDialog
+        open={showCustomLeadSourceDialog}
+        onOpenChange={setShowCustomLeadSourceDialog}
+        title="Create New Lead Source"
+        description="Create a custom lead source that will be available for your tenant."
+        optionName="Lead Source"
+        placeholder="e.g., LinkedIn Campaign, Webinar"
+        onSubmit={handleCreateCustomLeadSource}
+        loading={customOptionsLoading.leadSource}
+      />
     </DashboardLayout>
   );
 }

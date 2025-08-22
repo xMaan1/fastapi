@@ -46,6 +46,8 @@ import {
   ContactCreate,
 } from "@/src/models/crm";
 import { DashboardLayout } from "../../../components/layout";
+import { useCustomOptions } from "../../../hooks/useCustomOptions";
+import { CustomOptionDialog } from "../../../components/common/CustomOptionDialog";
 
 export default function CRMContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -60,6 +62,11 @@ export default function CRMContactsPage() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showCustomContactTypeDialog, setShowCustomContactTypeDialog] = useState(false);
+  
+  // Custom options hook
+  const { customContactTypes, createCustomContactType, loading: customOptionsLoading } = useCustomOptions();
+  
   const [formData, setFormData] = useState<ContactCreate>({
     firstName: "",
     lastName: "",
@@ -109,6 +116,14 @@ export default function CRMContactsPage() {
   const resetFilters = () => {
     setFilters({});
     setSearch("");
+  };
+
+  const handleCreateCustomContactType = async (name: string, description: string) => {
+    try {
+      await createCustomContactType(name, description);
+    } catch (error) {
+      console.error('Failed to create custom contact type:', error);
+    }
   };
 
   const resetForm = () => {
@@ -545,9 +560,13 @@ export default function CRMContactsPage() {
                   <Label htmlFor="type">Contact Type</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, type: value as ContactType })
-                    }
+                    onValueChange={(value) => {
+                      if (value === "create_new") {
+                        setShowCustomContactTypeDialog(true);
+                      } else {
+                        setFormData({ ...formData, type: value as ContactType });
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -558,6 +577,17 @@ export default function CRMContactsPage() {
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </SelectItem>
                       ))}
+                      
+                      {/* Custom Contact Types */}
+                      {customContactTypes && customContactTypes.length > 0 && customContactTypes.map((customType) => (
+                        <SelectItem key={customType.id} value={customType.id}>
+                          {customType.name}
+                        </SelectItem>
+                      ))}
+                      
+                      <SelectItem value="create_new" className="font-semibold text-blue-600">
+                        + Create New Contact Type
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -843,6 +873,18 @@ export default function CRMContactsPage() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Custom Contact Type Dialog */}
+        <CustomOptionDialog
+          open={showCustomContactTypeDialog}
+          onOpenChange={setShowCustomContactTypeDialog}
+          title="Create New Contact Type"
+          description="Create a custom contact type that will be available for your tenant."
+          optionName="Contact Type"
+          placeholder="e.g., Partner, Vendor"
+          onSubmit={handleCreateCustomContactType}
+          loading={customOptionsLoading.contactType}
+        />
       </div>
     </DashboardLayout>
   );

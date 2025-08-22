@@ -122,6 +122,16 @@ class User(Base):
     assigned_tasks = relationship("Task", foreign_keys="Task.assignedToId", back_populates="assignedTo")
     created_tasks = relationship("Task", foreign_keys="Task.createdById", back_populates="createdBy")
     team_projects = relationship("Project", secondary=project_team_members, back_populates="teamMembers")
+    
+    # Custom tenant-specific options relationships
+    createdCustomEventTypes = relationship("CustomEventType", back_populates="createdByUser")
+    createdCustomDepartments = relationship("CustomDepartment", back_populates="createdByUser")
+    createdCustomLeaveTypes = relationship("CustomLeaveType", back_populates="createdByUser")
+    createdCustomLeadSources = relationship("CustomLeadSource", back_populates="createdByUser")
+    createdCustomContactSources = relationship("CustomContactSource", back_populates="createdByUser")
+    createdCustomCompanyIndustries = relationship("CustomCompanyIndustry", back_populates="createdByUser")
+    createdCustomContactTypes = relationship("CustomContactType", back_populates="createdByUser")
+    createdCustomIndustries = relationship("CustomIndustry", back_populates="createdByUser")
 
 class Tenant(Base):
     __tablename__ = "tenants"
@@ -140,6 +150,16 @@ class Tenant(Base):
     projects = relationship("Project", back_populates="tenant")
     subscriptions = relationship("Subscription", back_populates="tenant")
     tenant_users = relationship("TenantUser", back_populates="tenant")
+    
+    # Custom tenant-specific options relationships
+    customEventTypes = relationship("CustomEventType", back_populates="tenant")
+    customDepartments = relationship("CustomDepartment", back_populates="tenant")
+    customLeaveTypes = relationship("CustomLeaveType", back_populates="tenant")
+    customLeadSources = relationship("CustomLeadSource", back_populates="tenant")
+    customContactSources = relationship("CustomContactSource", back_populates="tenant")
+    customCompanyIndustries = relationship("CustomCompanyIndustry", back_populates="tenant")
+    customContactTypes = relationship("CustomContactType", back_populates="tenant")
+    customIndustries = relationship("CustomIndustry", back_populates="tenant")
 
 class Plan(Base):
     __tablename__ = "plans"
@@ -1674,3 +1694,124 @@ def get_hrm_dashboard_data(db: Session, tenant_id: str):
     except Exception as e:
         print(f"Error getting HRM dashboard data: {e}")
         return None
+
+# Custom Tenant-Specific Options Models
+class CustomEventType(Base):
+    __tablename__ = "custom_event_types"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customEventTypes")
+    createdByUser = relationship("User", back_populates="createdCustomEventTypes")
+
+class CustomDepartment(Base):
+    __tablename__ = "custom_departments"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customDepartments")
+    createdByUser = relationship("User", back_populates="createdCustomDepartments")
+
+class CustomLeaveType(Base):
+    __tablename__ = "custom_leave_types"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customLeaveTypes")
+    createdByUser = relationship("User", back_populates="createdCustomLeaveTypes")
+
+class CustomLeadSource(Base):
+    __tablename__ = "custom_lead_sources"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customLeadSources")
+    createdByUser = relationship("User", back_populates="createdCustomLeadSources")
+
+class CustomContactSource(Base):
+    __tablename__ = "custom_contact_sources"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customContactSources")
+    createdByUser = relationship("User", back_populates="createdCustomContactSources")
+
+class CustomCompanyIndustry(Base):
+    __tablename__ = "custom_company_industries"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customCompanyIndustries")
+    createdByUser = relationship("User", back_populates="createdCustomCompanyIndustries")
+
+class CustomContactType(Base):
+    __tablename__ = "custom_contact_types"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customContactTypes")
+    createdByUser = relationship("User", back_populates="createdCustomContactTypes")
+
+class CustomIndustry(Base):
+    __tablename__ = "custom_industry"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant", back_populates="customIndustries")
+    createdByUser = relationship("User", back_populates="createdCustomIndustries")

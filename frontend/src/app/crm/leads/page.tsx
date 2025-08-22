@@ -52,6 +52,8 @@ import {
   CRMLeadFilters,
 } from "@/src/models/crm";
 import { DashboardLayout } from "../../../components/layout";
+import { useCustomOptions } from "../../../hooks/useCustomOptions";
+import { CustomOptionDialog } from "../../../components/common/CustomOptionDialog";
 
 export default function CRMLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -65,6 +67,11 @@ export default function CRMLeadsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [showCustomLeadSourceDialog, setShowCustomLeadSourceDialog] = useState(false);
+  
+  // Custom options hook
+  const { customLeadSources, createCustomLeadSource, loading: customOptionsLoading } = useCustomOptions();
+  
   const [formData, setFormData] = useState<LeadCreate>({
     firstName: "",
     lastName: "",
@@ -98,6 +105,14 @@ export default function CRMLeadsPage() {
   useEffect(() => {
     loadLeads();
   }, [loadLeads]);
+
+  const handleCreateCustomLeadSource = async (name: string, description: string) => {
+    try {
+      await createCustomLeadSource(name, description);
+    } catch (error) {
+      console.error('Failed to create custom lead source:', error);
+    }
+  };
 
   const handleCreateLead = async () => {
     try {
@@ -530,12 +545,16 @@ export default function CRMLeadsPage() {
                 <Label htmlFor="source">Source</Label>
                 <Select
                   value={formData.source}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      source: value as LeadSource,
-                    }))
-                  }
+                  onValueChange={(value) => {
+                    if (value === "create_new") {
+                      setShowCustomLeadSourceDialog(true);
+                    } else {
+                      setFormData((prev) => ({
+                        ...prev,
+                        source: value as LeadSource,
+                      }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -547,6 +566,17 @@ export default function CRMLeadsPage() {
                           source.replace("_", " ").slice(1)}
                       </SelectItem>
                     ))}
+                    
+                    {/* Custom Lead Sources */}
+                    {customLeadSources && customLeadSources.length > 0 && customLeadSources.map((customSource) => (
+                      <SelectItem key={customSource.id} value={customSource.id}>
+                        {customSource.name}
+                      </SelectItem>
+                    ))}
+                    
+                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      + Create New Lead Source
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -896,6 +926,18 @@ export default function CRMLeadsPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Custom Lead Source Dialog */}
+        <CustomOptionDialog
+          open={showCustomLeadSourceDialog}
+          onOpenChange={setShowCustomLeadSourceDialog}
+          title="Create New Lead Source"
+          description="Create a custom lead source that will be available for your tenant."
+          optionName="Lead Source"
+          placeholder="e.g., LinkedIn Campaign, Webinar"
+          onSubmit={handleCreateCustomLeadSource}
+          loading={customOptionsLoading.leadSource}
+        />
       </div>
     </DashboardLayout>
   );

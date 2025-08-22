@@ -62,6 +62,8 @@ import {
   Employee,
 } from "@/src/models/hrm";
 import { DashboardLayout } from "@/src/components/layout";
+import { useCustomOptions } from "@/src/hooks/useCustomOptions";
+import { CustomOptionDialog } from "@/src/components/common/CustomOptionDialog";
 
 export default function HRMLeaveManagementPage() {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
@@ -89,6 +91,10 @@ export default function HRMLeaveManagementPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showCustomLeaveTypeDialog, setShowCustomLeaveTypeDialog] = useState(false);
+  
+  // Custom options hook
+  const { customLeaveTypes, createCustomLeaveType, loading: customOptionsLoading } = useCustomOptions();
   const [formData, setFormData] = useState<LeaveRequestCreate>({
     employeeId: "",
     leaveType: LeaveType.ANNUAL,
@@ -134,6 +140,14 @@ export default function HRMLeaveManagementPage() {
   const resetFilters = () => {
     setFilters({});
     setSearch("");
+  };
+
+  const handleCreateCustomLeaveType = async (name: string, description: string) => {
+    try {
+      await createCustomLeaveType(name, description);
+    } catch (error) {
+      console.error('Failed to create custom leave type:', error);
+    }
   };
 
   const resetForm = () => {
@@ -691,12 +705,16 @@ export default function HRMLeaveManagementPage() {
                 <Label htmlFor="leaveType">Leave Type *</Label>
                 <Select
                   value={formData.leaveType}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      leaveType: value as LeaveType,
-                    }))
-                  }
+                  onValueChange={(value) => {
+                    if (value === "create_new") {
+                      setShowCustomLeaveTypeDialog(true);
+                    } else {
+                      setFormData((prev) => ({
+                        ...prev,
+                        leaveType: value as LeaveType,
+                      }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -707,6 +725,17 @@ export default function HRMLeaveManagementPage() {
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </SelectItem>
                     ))}
+                    
+                    {/* Custom Leave Types */}
+                    {customLeaveTypes && customLeaveTypes.length > 0 && customLeaveTypes.map((customType) => (
+                      <SelectItem key={customType.id} value={customType.id}>
+                        {customType.name}
+                      </SelectItem>
+                    ))}
+                    
+                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      + Create New Leave Type
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -978,6 +1007,18 @@ export default function HRMLeaveManagementPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Custom Leave Type Dialog */}
+        <CustomOptionDialog
+          open={showCustomLeaveTypeDialog}
+          onOpenChange={setShowCustomLeaveTypeDialog}
+          title="Create New Leave Type"
+          description="Create a custom leave type that will be available for your tenant."
+          optionName="Leave Type"
+          placeholder="e.g., Sabbatical, Study Leave"
+          onSubmit={handleCreateCustomLeaveType}
+          loading={customOptionsLoading.leaveType}
+        />
       </div>
     </DashboardLayout>
   );
