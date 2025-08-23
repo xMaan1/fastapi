@@ -522,3 +522,7 @@ export interface SalesActivitiesResponse {
     pages: number;
   };
 }
+
+export * from './Invoice';
+export * from './Payment';
+export * from './InvoiceDashboard';

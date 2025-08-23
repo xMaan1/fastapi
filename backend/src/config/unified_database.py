@@ -1,4 +1,3 @@
-
 import os
 import uuid
 from datetime import datetime, timedelta
@@ -73,22 +72,6 @@ def delete_custom_role(role_id: str, db: Session) -> bool:
         db.commit()
         return True
     return False
-import os
-import uuid
-from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, String, Boolean, DateTime, Float, Integer, Text, JSON, ForeignKey, Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session, relationship
-from sqlalchemy.dialects.postgresql import UUID
-from dotenv import load_dotenv
-
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 # Association tables
 project_team_members = Table(
@@ -1815,3 +1798,86 @@ class CustomIndustry(Base):
     # Relationships
     tenant = relationship("Tenant", back_populates="customIndustries")
     createdByUser = relationship("User", back_populates="createdCustomIndustries")
+
+# Invoice and Payment Models
+class Invoice(Base):
+    __tablename__ = "invoices"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    invoiceNumber = Column(String, nullable=False, unique=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Customer information
+    customerId = Column(String)
+    customerName = Column(String, nullable=False)
+    customerEmail = Column(String)
+    billingAddress = Column(Text)
+    shippingAddress = Column(Text)
+    
+    # Invoice details
+    issueDate = Column(DateTime, nullable=False)
+    dueDate = Column(DateTime, nullable=False)
+    paymentTerms = Column(String)
+    currency = Column(String, default="USD")
+    
+    # Financial information
+    subtotal = Column(Float, default=0.0)
+    taxRate = Column(Float, default=0.0)
+    taxAmount = Column(Float, default=0.0)
+    discount = Column(Float, default=0.0)
+    total = Column(Float, default=0.0)
+    totalPaid = Column(Float, default=0.0)
+    balance = Column(Float, default=0.0)
+    
+    # Status and tracking
+    status = Column(String, default="draft")  # draft, sent, viewed, paid, overdue, partially_paid
+    sentAt = Column(DateTime)
+    viewedAt = Column(DateTime)
+    paidAt = Column(DateTime)
+    
+    # Additional information
+    notes = Column(Text)
+    terms = Column(Text)
+    
+    # Related entities
+    opportunityId = Column(String)
+    quoteId = Column(String)
+    projectId = Column(String)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    payments = relationship("Payment", back_populates="invoice")
+
+class Payment(Base):
+    __tablename__ = "payments"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    invoiceId = Column(UUID(as_uuid=True), ForeignKey("invoices.id"), nullable=False)
+    
+    # Payment details
+    amount = Column(Float, nullable=False)
+    paymentMethod = Column(String, nullable=False)  # credit_card, bank_transfer, cash, check, etc.
+    paymentDate = Column(DateTime, nullable=False)
+    reference = Column(String)  # transaction ID, check number, etc.
+    notes = Column(Text)
+    
+    # Status
+    status = Column(String, default="completed")  # pending, completed, failed, refunded
+    processedAt = Column(DateTime)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    invoice = relationship("Invoice", back_populates="payments")

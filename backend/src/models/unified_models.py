@@ -1798,3 +1798,230 @@ class CustomIndustry(BaseModel):
     description: Optional[str] = None
     tenant_id: str
     created_by: str
+
+# Invoice Enums
+class InvoiceStatus(str, Enum):
+    DRAFT = "draft"
+    SENT = "sent"
+    VIEWED = "viewed"
+    PAID = "paid"
+    PARTIALLY_PAID = "partially_paid"
+    OVERDUE = "overdue"
+    CANCELLED = "cancelled"
+    VOID = "void"
+
+class PaymentMethod(str, Enum):
+    CREDIT_CARD = "credit_card"
+    BANK_TRANSFER = "bank_transfer"
+    CASH = "cash"
+    CHECK = "check"
+    PAYPAL = "paypal"
+    STRIPE = "stripe"
+    OTHER = "other"
+
+class PaymentStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+    CANCELLED = "cancelled"
+
+class InvoiceItem(BaseModel):
+    id: str
+    description: str
+    quantity: float
+    unitPrice: float
+    discount: float = 0.0
+    taxRate: float = 0.0
+    taxAmount: float = 0.0
+    total: float
+    productId: Optional[str] = None
+    projectId: Optional[str] = None
+    taskId: Optional[str] = None
+
+class InvoiceItemCreate(BaseModel):
+    description: str
+    quantity: float
+    unitPrice: float
+    discount: float = 0.0
+    taxRate: float = 0.0
+    productId: Optional[str] = None
+    projectId: Optional[str] = None
+    taskId: Optional[str] = None
+
+class InvoiceItemUpdate(BaseModel):
+    description: Optional[str] = None
+    quantity: Optional[float] = None
+    unitPrice: Optional[float] = None
+    discount: Optional[float] = None
+    taxRate: Optional[float] = None
+    productId: Optional[str] = None
+    projectId: Optional[str] = None
+    taskId: Optional[str] = None
+
+# Invoice Models
+class InvoiceBase(BaseModel):
+    invoiceNumber: str
+    customerId: str
+    customerName: str
+    customerEmail: str
+    billingAddress: str
+    shippingAddress: Optional[str] = None
+    issueDate: str
+    dueDate: str
+    paymentTerms: str = "Net 30"
+    currency: str = "USD"
+    subtotal: float = 0.0
+    taxRate: float = 0.0
+    taxAmount: float = 0.0
+    discount: float = 0.0
+    total: float = 0.0
+    notes: Optional[str] = None
+    terms: Optional[str] = None
+    status: InvoiceStatus = InvoiceStatus.DRAFT
+    items: List[InvoiceItem] = []
+
+class InvoiceCreate(BaseModel):
+    customerId: str
+    customerName: str
+    customerEmail: str
+    billingAddress: str
+    shippingAddress: Optional[str] = None
+    issueDate: str
+    dueDate: str
+    paymentTerms: str = "Net 30"
+    currency: str = "USD"
+    taxRate: float = 0.0
+    discount: float = 0.0
+    notes: Optional[str] = None
+    terms: Optional[str] = None
+    items: List[InvoiceItemCreate] = []
+    opportunityId: Optional[str] = None
+    quoteId: Optional[str] = None
+    projectId: Optional[str] = None
+
+class InvoiceUpdate(BaseModel):
+    customerName: Optional[str] = None
+    customerEmail: Optional[str] = None
+    billingAddress: Optional[str] = None
+    shippingAddress: Optional[str] = None
+    issueDate: Optional[str] = None
+    dueDate: Optional[str] = None
+    paymentTerms: Optional[str] = None
+    currency: Optional[str] = None
+    taxRate: Optional[float] = None
+    discount: Optional[float] = None
+    notes: Optional[str] = None
+    terms: Optional[str] = None
+    status: Optional[InvoiceStatus] = None
+    items: Optional[List[InvoiceItemCreate]] = None
+
+class Invoice(InvoiceBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    opportunityId: Optional[str] = None
+    quoteId: Optional[str] = None
+    projectId: Optional[str] = None
+    sentAt: Optional[datetime] = None
+    viewedAt: Optional[datetime] = None
+    paidAt: Optional[datetime] = None
+    overdueAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+    payments: List[Dict[str, Any]] = []
+    totalPaid: float = 0.0
+    balance: float = 0.0
+    daysOverdue: int = 0
+
+    class Config:
+        from_attributes = True
+
+# Payment Models
+class PaymentBase(BaseModel):
+    invoiceId: str
+    amount: float
+    paymentMethod: PaymentMethod
+    paymentDate: str
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+    status: PaymentStatus = PaymentStatus.PENDING
+
+class PaymentCreate(BaseModel):
+    invoiceId: str
+    amount: float
+    paymentMethod: PaymentMethod
+    paymentDate: str
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
+class PaymentUpdate(BaseModel):
+    amount: Optional[float] = None
+    paymentMethod: Optional[PaymentMethod] = None
+    paymentDate: Optional[str] = None
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[PaymentStatus] = None
+
+class Payment(PaymentBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    processedAt: Optional[datetime] = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Invoice Response Models
+class InvoicesResponse(BaseModel):
+    invoices: List[Invoice]
+    pagination: dict
+
+class InvoiceResponse(BaseModel):
+    invoice: Invoice
+
+class PaymentsResponse(BaseModel):
+    payments: List[Payment]
+    pagination: dict
+
+class PaymentResponse(BaseModel):
+    payment: Payment
+
+# Invoice Dashboard Models
+class InvoiceMetrics(BaseModel):
+    totalInvoices: int
+    paidInvoices: int
+    overdueInvoices: int
+    draftInvoices: int
+    totalRevenue: float
+    outstandingAmount: float
+    overdueAmount: float
+    averagePaymentTime: float
+
+class InvoiceDashboard(BaseModel):
+    metrics: InvoiceMetrics
+    recentInvoices: List[Invoice]
+    overdueInvoices: List[Invoice]
+    topCustomers: List[Dict[str, Any]]
+    monthlyRevenue: List[Dict[str, Any]]
+
+# Invoice Filter Models
+class InvoiceFilters(BaseModel):
+    status: Optional[str] = None
+    customerId: Optional[str] = None
+    dateFrom: Optional[str] = None
+    dateTo: Optional[str] = None
+    amountFrom: Optional[float] = None
+    amountTo: Optional[float] = None
+    search: Optional[str] = None
+
+class PaymentFilters(BaseModel):
+    invoiceId: Optional[str] = None
+    paymentMethod: Optional[str] = None
+    status: Optional[str] = None
+    dateFrom: Optional[str] = None
+    dateTo: Optional[str] = None
+    search: Optional[str] = None

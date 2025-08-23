@@ -117,6 +117,12 @@ const allMenuItems: MenuItem[] = [
         path: "/sales/analytics",
         roles: ["*"],
       },
+      {
+        text: "Invoices",
+        icon: Banknote,
+        path: "/sales/invoices",
+        roles: ["*"],
+      },
     ],
   },
   {
