@@ -25,10 +25,15 @@ class InvoiceService {
     page: number = 1,
     limit: number = 10
   ): Promise<{ invoices: Invoice[]; pagination: any }> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Add filters, filtering out undefined values and converting to strings
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, value.toString());
+      }
     });
     
     const response = await apiService.get(`${this.baseUrl}/?${params}`);
@@ -89,10 +94,15 @@ class InvoiceService {
     page: number = 1,
     limit: number = 10
   ): Promise<{ payments: Payment[]; pagination: any }> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Add filters, filtering out undefined values and converting to strings
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, value.toString());
+      }
     });
     
     const response = await apiService.get(`${this.baseUrl}/payments/?${params}`);

@@ -29,6 +29,9 @@ import {
   FileCheck,
   Banknote,
   BookOpen,
+  Package,
+  Receipt,
+  Plus,
 } from "lucide-react";
 
 interface SubMenuItem {
@@ -121,6 +124,50 @@ const allMenuItems: MenuItem[] = [
         text: "Invoices",
         icon: Banknote,
         path: "/sales/invoices",
+        roles: ["*"],
+      },
+    ],
+  },
+  {
+    text: "POS",
+    icon: Banknote,
+    roles: ["*"],
+    gradient: "from-yellow-500 to-orange-500",
+    subItems: [
+      {
+        text: "Dashboard",
+        icon: LayoutDashboard,
+        path: "/pos",
+        roles: ["*"],
+      },
+      {
+        text: "New Sale",
+        icon: Plus,
+        path: "/pos/sale",
+        roles: ["*"],
+      },
+      {
+        text: "Products",
+        icon: Package,
+        path: "/pos/products",
+        roles: ["*"],
+      },
+      {
+        text: "Transactions",
+        icon: Receipt,
+        path: "/pos/transactions",
+        roles: ["*"],
+      },
+      {
+        text: "Shifts",
+        icon: Clock3,
+        path: "/pos/shifts",
+        roles: ["*"],
+      },
+      {
+        text: "Reports",
+        icon: BarChart3,
+        path: "/pos/reports",
         roles: ["*"],
       },
     ],

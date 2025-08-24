@@ -2,7 +2,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, String, Boolean, DateTime, Float, Integer, Text, JSON, ForeignKey, Table
+from sqlalchemy import create_engine, Column, String, Boolean, DateTime, Float, Integer, Text, JSON, ForeignKey, Table, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -1881,3 +1881,246 @@ class Payment(Base):
     tenant = relationship("Tenant")
     createdByUser = relationship("User")
     invoice = relationship("Invoice", back_populates="payments")
+
+# POS Database Models
+class Product(Base):
+    __tablename__ = "products"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Product information
+    name = Column(String, nullable=False)
+    sku = Column(String, nullable=False, unique=True)
+    description = Column(Text)
+    category = Column(String, nullable=False)
+    unitPrice = Column(Float, nullable=False)
+    costPrice = Column(Float, nullable=False)
+    stockQuantity = Column(Integer, default=0)
+    lowStockThreshold = Column(Integer, default=0)
+    maxStockLevel = Column(Integer)
+    unitOfMeasure = Column(String, default="piece")
+    barcode = Column(String)
+    expiryDate = Column(DateTime)
+    batchNumber = Column(String)
+    serialNumber = Column(String)
+    isActive = Column(Boolean, default=True)
+    imageUrl = Column(String)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+
+class POSShift(Base):
+    __tablename__ = "pos_shifts"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    cashierId = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Shift information
+    shiftNumber = Column(String, nullable=False, unique=True)
+    openingBalance = Column(Float, nullable=False)
+    closingBalance = Column(Float)
+    totalSales = Column(Float, default=0.0)
+    totalTransactions = Column(Integer, default=0)
+    status = Column(String, default="open")  # open, closed
+    notes = Column(Text)
+    
+    # Timestamps
+    openedAt = Column(DateTime, default=datetime.utcnow)
+    closedAt = Column(DateTime)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    cashier = relationship("User")
+
+class POSTransaction(Base):
+    __tablename__ = "pos_transactions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    shiftId = Column(UUID(as_uuid=True), ForeignKey("pos_shifts.id"), nullable=False)
+    cashierId = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Transaction information
+    transactionNumber = Column(String, nullable=False, unique=True)
+    customerId = Column(String)
+    customerName = Column(String)
+    items = Column(JSON, nullable=False)  # Array of transaction items
+    subtotal = Column(Float, nullable=False)
+    discount = Column(Float, default=0.0)
+    taxAmount = Column(Float, default=0.0)
+    total = Column(Float, nullable=False)
+    paymentMethod = Column(String, nullable=False)
+    cashAmount = Column(Float, default=0.0)
+    changeAmount = Column(Float, default=0.0)
+    notes = Column(Text)
+    status = Column(String, default="pending")  # pending, completed, cancelled, refunded, void
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    shift = relationship("POSShift")
+    cashier = relationship("User")
+
+# Database functions for POS
+def get_products(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Product).filter(Product.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_product_by_id(db: Session, product_id: str, tenant_id: str):
+    return db.query(Product).filter(Product.id == product_id, Product.tenantId == tenant_id).first()
+
+def create_product(db: Session, product_data: dict):
+    db_product = Product(**product_data)
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+def update_product(db: Session, product_id: str, product_update: dict, tenant_id: str):
+    product = get_product_by_id(db, product_id, tenant_id)
+    if product:
+        for key, value in product_update.items():
+            if hasattr(product, key) and value is not None:
+                setattr(product, key, value)
+        product.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(product)
+    return product
+
+def delete_product(db: Session, product_id: str, tenant_id: str):
+    product = get_product_by_id(db, product_id, tenant_id)
+    if product:
+        db.delete(product)
+        db.commit()
+        return True
+    return False
+
+def get_pos_shifts(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(POSShift).filter(POSShift.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_pos_shift_by_id(db: Session, shift_id: str, tenant_id: str):
+    return db.query(POSShift).filter(POSShift.id == shift_id, POSShift.tenantId == tenant_id).first()
+
+def get_open_pos_shift(db: Session, tenant_id: str, cashier_id: str):
+    return db.query(POSShift).filter(
+        POSShift.tenantId == tenant_id,
+        POSShift.cashierId == cashier_id,
+        POSShift.status == "open"
+    ).first()
+
+def create_pos_shift(db: Session, shift_data: dict):
+    db_shift = POSShift(**shift_data)
+    db.add(db_shift)
+    db.commit()
+    db.refresh(db_shift)
+    return db_shift
+
+def update_pos_shift(db: Session, shift_id: str, shift_update: dict, tenant_id: str):
+    shift = get_pos_shift_by_id(db, shift_id, tenant_id)
+    if shift:
+        for key, value in shift_update.items():
+            if hasattr(shift, key) and value is not None:
+                setattr(shift, key, value)
+        shift.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(shift)
+    return shift
+
+def get_pos_transactions(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(POSTransaction).filter(POSTransaction.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_pos_transaction_by_id(db: Session, transaction_id: str, tenant_id: str):
+    return db.query(POSTransaction).filter(POSTransaction.id == transaction_id, POSTransaction.tenantId == tenant_id).first()
+
+def create_pos_transaction(db: Session, transaction_data: dict):
+    db_transaction = POSTransaction(**transaction_data)
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+def update_pos_transaction(db: Session, transaction_id: str, transaction_update: dict, tenant_id: str):
+    transaction = get_pos_transaction_by_id(db, transaction_id, tenant_id)
+    if transaction:
+        for key, value in transaction_update.items():
+            if hasattr(transaction, key) and value is not None:
+                setattr(transaction, key, value)
+        transaction.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(transaction)
+    return transaction
+
+def get_pos_dashboard_data(db: Session, tenant_id: str):
+    # Get open shift
+    open_shift = db.query(POSShift).filter(
+        POSShift.tenantId == tenant_id,
+        POSShift.status == "open"
+    ).first()
+    
+    # Get recent transactions
+    recent_transactions = db.query(POSTransaction).filter(
+        POSTransaction.tenantId == tenant_id
+    ).order_by(POSTransaction.createdAt.desc()).limit(10).all()
+    
+    # Get low stock products
+    low_stock_products = db.query(Product).filter(
+        Product.tenantId == tenant_id,
+        Product.stockQuantity <= Product.lowStockThreshold,
+        Product.isActive == True
+    ).limit(10).all()
+    
+    # Calculate metrics
+    total_sales = db.query(POSTransaction).filter(
+        POSTransaction.tenantId == tenant_id,
+        POSTransaction.status == "completed"
+    ).with_entities(func.sum(POSTransaction.total)).scalar() or 0.0
+    
+    total_transactions = db.query(POSTransaction).filter(
+        POSTransaction.tenantId == tenant_id,
+        POSTransaction.status == "completed"
+    ).count()
+    
+    avg_transaction_value = total_sales / total_transactions if total_transactions > 0 else 0.0
+    
+    # Get top products (simplified - you can enhance this)
+    top_products = []
+    
+    # Get daily sales for the last 7 days
+    daily_sales = []
+    for i in range(7):
+        date = datetime.utcnow() - timedelta(days=i)
+        day_sales = db.query(POSTransaction).filter(
+            POSTransaction.tenantId == tenant_id,
+            POSTransaction.status == "completed",
+            func.date(POSTransaction.createdAt) == date.date()
+        ).with_entities(func.sum(POSTransaction.total)).scalar() or 0.0
+        
+        daily_sales.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "sales": day_sales
+        })
+    
+    return {
+        "openShift": open_shift,
+        "recentTransactions": recent_transactions,
+        "lowStockProducts": low_stock_products,
+        "metrics": {
+            "totalSales": total_sales,
+            "totalTransactions": total_transactions,
+            "averageTransactionValue": avg_transaction_value,
+            "topProducts": top_products,
+            "dailySales": daily_sales
+        }
+    }
