@@ -2052,7 +2052,64 @@ class ProductCategory(str, Enum):
     HEALTHCARE = "healthcare"
     PHARMACEUTICALS = "pharmaceuticals"
     OFFICE_SUPPLIES = "office_supplies"
+    AUTOMOTIVE = "automotive"
+    CONSTRUCTION = "construction"
+    CHEMICALS = "chemicals"
+    TEXTILES = "textiles"
+    FURNITURE = "furniture"
+    TOOLS = "tools"
     OTHER = "other"
+
+class UnitOfMeasure(str, Enum):
+    PIECE = "piece"
+    KILOGRAM = "kg"
+    GRAM = "g"
+    LITER = "l"
+    MILLILITER = "ml"
+    METER = "m"
+    CENTIMETER = "cm"
+    SQUARE_METER = "m²"
+    CUBIC_METER = "m³"
+    BOX = "box"
+    PACK = "pack"
+    ROLL = "roll"
+    SET = "set"
+    PAIR = "pair"
+    DOZEN = "dozen"
+    OTHER = "other"
+
+class StockMovementType(str, Enum):
+    INBOUND = "inbound"
+    OUTBOUND = "outbound"
+    TRANSFER = "transfer"
+    ADJUSTMENT = "adjustment"
+    RETURN = "return"
+    DAMAGE = "damage"
+    EXPIRY = "expiry"
+    CYCLE_COUNT = "cycle_count"
+
+class StockMovementStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    FAILED = "failed"
+
+class PurchaseOrderStatus(str, Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    APPROVED = "approved"
+    ORDERED = "ordered"
+    PARTIALLY_RECEIVED = "partially_received"
+    RECEIVED = "received"
+    CANCELLED = "cancelled"
+
+class ReceivingStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    PARTIAL = "partial"
+    CANCELLED = "cancelled"
 
 # Product Models
 class ProductBase(BaseModel):
@@ -2065,13 +2122,27 @@ class ProductBase(BaseModel):
     stockQuantity: int
     minStockLevel: int = 0
     maxStockLevel: Optional[int] = None
-    unitOfMeasure: str = "piece"
+    unitOfMeasure: UnitOfMeasure = UnitOfMeasure.PIECE
     barcode: Optional[str] = None
     expiryDate: Optional[str] = None
     batchNumber: Optional[str] = None
     serialNumber: Optional[str] = None
     isActive: bool = True
     imageUrl: Optional[str] = None
+    # Enhanced inventory fields
+    weight: Optional[float] = None
+    dimensions: Optional[str] = None  # "LxWxH in cm"
+    supplierId: Optional[str] = None
+    supplierName: Optional[str] = None
+    leadTime: Optional[int] = None  # days
+    reorderPoint: Optional[int] = None
+    reorderQuantity: Optional[int] = None
+    isSerialized: bool = False
+    isBatchTracked: bool = False
+    storageLocation: Optional[str] = None
+    warehouseId: Optional[str] = None
+    lastStockCount: Optional[datetime] = None
+    lastStockMovement: Optional[datetime] = None
 
 class ProductCreate(BaseModel):
     name: str
@@ -2110,6 +2181,327 @@ class ProductUpdate(BaseModel):
     imageUrl: Optional[str] = None
 
 class Product(ProductBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Warehouse Models
+class WarehouseBase(BaseModel):
+    name: str
+    code: str
+    description: Optional[str] = None
+    address: str
+    city: str
+    state: str
+    country: str
+    postalCode: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    managerId: Optional[str] = None
+    isActive: bool = True
+    capacity: Optional[float] = None  # in cubic meters
+    usedCapacity: Optional[float] = None
+    temperatureZone: Optional[str] = None
+    securityLevel: Optional[str] = None
+
+class WarehouseCreate(WarehouseBase):
+    pass
+
+class WarehouseUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postalCode: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    managerId: Optional[str] = None
+    isActive: Optional[bool] = None
+    capacity: Optional[float] = None
+    usedCapacity: Optional[float] = None
+    temperatureZone: Optional[str] = None
+    securityLevel: Optional[str] = None
+
+class Warehouse(WarehouseBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Storage Location Models
+class StorageLocationBase(BaseModel):
+    warehouseId: str
+    name: str
+    code: str
+    description: Optional[str] = None
+    locationType: str  # shelf, rack, bin, area, etc.
+    parentLocationId: Optional[str] = None
+    capacity: Optional[float] = None
+    usedCapacity: Optional[float] = None
+    isActive: bool = True
+
+class StorageLocationCreate(StorageLocationBase):
+    pass
+
+class StorageLocationUpdate(BaseModel):
+    warehouseId: Optional[str] = None
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    locationType: Optional[str] = None
+    parentLocationId: Optional[str] = None
+    capacity: Optional[float] = None
+    usedCapacity: Optional[float] = None
+    isActive: Optional[bool] = None
+
+class StorageLocation(StorageLocationBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Stock Movement Models
+class StockMovementBase(BaseModel):
+    productId: str
+    warehouseId: str
+    locationId: Optional[str] = None
+    movementType: StockMovementType
+    quantity: int
+    unitCost: float
+    referenceNumber: Optional[str] = None
+    referenceType: Optional[str] = None  # PO, SO, Transfer, etc.
+    notes: Optional[str] = None
+    batchNumber: Optional[str] = None
+    serialNumber: Optional[str] = None
+    expiryDate: Optional[str] = None
+
+class StockMovementCreate(StockMovementBase):
+    pass
+
+class StockMovementUpdate(BaseModel):
+    productId: Optional[str] = None
+    warehouseId: Optional[str] = None
+    locationId: Optional[str] = None
+    movementType: Optional[StockMovementType] = None
+    quantity: Optional[int] = None
+    unitCost: Optional[float] = None
+    referenceNumber: Optional[str] = None
+    referenceType: Optional[str] = None
+    notes: Optional[str] = None
+    batchNumber: Optional[str] = None
+    serialNumber: Optional[str] = None
+    expiryDate: Optional[str] = None
+
+class StockMovement(StockMovementBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    status: StockMovementStatus
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Purchase Order Models
+class PurchaseOrderItemBase(BaseModel):
+    productId: str
+    productName: str
+    sku: str
+    quantity: int
+    unitCost: float
+    totalCost: float
+    receivedQuantity: int = 0
+    notes: Optional[str] = None
+
+class PurchaseOrderItemCreate(PurchaseOrderItemBase):
+    pass
+
+class PurchaseOrderItemUpdate(BaseModel):
+    productId: Optional[str] = None
+    productName: Optional[str] = None
+    sku: Optional[str] = None
+    quantity: Optional[int] = None
+    unitCost: Optional[float] = None
+    totalCost: Optional[float] = None
+    receivedQuantity: Optional[int] = None
+    notes: Optional[str] = None
+
+class PurchaseOrderItem(PurchaseOrderItemBase):
+    id: str
+    purchaseOrderId: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+class PurchaseOrderBase(BaseModel):
+    orderNumber: str
+    supplierId: str
+    supplierName: str
+    expectedDeliveryDate: str
+    status: PurchaseOrderStatus
+    totalAmount: float
+    notes: Optional[str] = None
+    items: List[PurchaseOrderItemCreate]
+
+class PurchaseOrderCreate(BaseModel):
+    orderNumber: str
+    supplierId: str
+    supplierName: str
+    expectedDeliveryDate: str
+    notes: Optional[str] = None
+    items: List[PurchaseOrderItemCreate]
+
+class PurchaseOrderUpdate(BaseModel):
+    orderNumber: Optional[str] = None
+    supplierId: Optional[str] = None
+    supplierName: Optional[str] = None
+    expectedDeliveryDate: Optional[str] = None
+    status: Optional[PurchaseOrderStatus] = None
+    totalAmount: Optional[float] = None
+    notes: Optional[str] = None
+
+class PurchaseOrder(PurchaseOrderBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Supplier Models
+class SupplierBase(BaseModel):
+    name: str
+    code: str
+    contactPerson: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postalCode: Optional[str] = None
+    website: Optional[str] = None
+    paymentTerms: Optional[str] = None
+    creditLimit: Optional[float] = None
+    isActive: bool = True
+
+class SupplierCreate(SupplierBase):
+    pass
+
+class SupplierUpdate(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    contactPerson: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postalCode: Optional[str] = None
+    website: Optional[str] = None
+    paymentTerms: Optional[str] = None
+    creditLimit: Optional[float] = None
+    isActive: Optional[bool] = None
+
+class Supplier(SupplierBase):
+    id: str
+    tenantId: str
+    createdBy: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+# Receiving Models
+class ReceivingItemBase(BaseModel):
+    purchaseOrderId: str
+    productId: str
+    productName: str
+    sku: str
+    quantity: int
+    unitCost: float
+    totalCost: float
+    receivedQuantity: int
+    batchNumber: Optional[str] = None
+    serialNumber: Optional[str] = None
+    expiryDate: Optional[str] = None
+    notes: Optional[str] = None
+
+class ReceivingItemCreate(ReceivingItemBase):
+    pass
+
+class ReceivingItemUpdate(BaseModel):
+    purchaseOrderId: Optional[str] = None
+    productId: Optional[str] = None
+    productName: Optional[str] = None
+    sku: Optional[str] = None
+    quantity: Optional[int] = None
+    unitCost: Optional[float] = None
+    totalCost: Optional[float] = None
+    receivedQuantity: Optional[int] = None
+    batchNumber: Optional[str] = None
+    serialNumber: Optional[str] = None
+    expiryDate: Optional[str] = None
+    notes: Optional[str] = None
+
+class ReceivingItem(ReceivingItemBase):
+    id: str
+    receivingId: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+class ReceivingBase(BaseModel):
+    receivingNumber: str
+    purchaseOrderId: str
+    warehouseId: str
+    status: ReceivingStatus
+    receivedDate: str
+    notes: Optional[str] = None
+    items: List[ReceivingItemCreate]
+
+class ReceivingCreate(BaseModel):
+    receivingNumber: str
+    purchaseOrderId: str
+    warehouseId: str
+    receivedDate: str
+    notes: Optional[str] = None
+    items: List[ReceivingItemCreate]
+
+class ReceivingUpdate(BaseModel):
+    receivingNumber: Optional[str] = None
+    purchaseOrderId: Optional[str] = None
+    warehouseId: Optional[str] = None
+    status: Optional[ReceivingStatus] = None
+    receivedDate: Optional[str] = None
+    notes: Optional[str] = None
+
+class Receiving(ReceivingBase):
     id: str
     tenantId: str
     createdBy: str
@@ -2259,3 +2651,73 @@ class POSShiftFilters(BaseModel):
     cashierId: Optional[str] = None
     dateFrom: Optional[str] = None
     dateTo: Optional[str] = None
+
+# Inventory Response Models
+class WarehouseResponse(BaseModel):
+    warehouse: Warehouse
+
+class WarehousesResponse(BaseModel):
+    warehouses: List[Warehouse]
+    total: int
+
+class StorageLocationResponse(BaseModel):
+    storageLocation: StorageLocation
+
+class StorageLocationsResponse(BaseModel):
+    storageLocations: List[StorageLocation]
+    total: int
+
+class StockMovementResponse(BaseModel):
+    stockMovement: StockMovement
+
+class StockMovementsResponse(BaseModel):
+    stockMovements: List[StockMovement]
+    total: int
+
+class PurchaseOrderResponse(BaseModel):
+    purchaseOrder: PurchaseOrder
+
+class PurchaseOrdersResponse(BaseModel):
+    purchaseOrders: List[PurchaseOrder]
+    total: int
+
+class SupplierResponse(BaseModel):
+    supplier: Supplier
+
+class SuppliersResponse(BaseModel):
+    suppliers: List[Supplier]
+    total: int
+
+class ReceivingResponse(BaseModel):
+    receiving: Receiving
+
+class ReceivingsResponse(BaseModel):
+    receivings: List[Receiving]
+    total: int
+
+# Inventory Dashboard Models
+class InventoryDashboardStats(BaseModel):
+    totalProducts: int
+    lowStockProducts: int
+    outOfStockProducts: int
+    totalWarehouses: int
+    totalSuppliers: int
+    pendingPurchaseOrders: int
+    pendingReceivings: int
+    totalStockValue: float
+    lowStockAlerts: List[Dict[str, Any]]
+
+class StockAlert(BaseModel):
+    productId: str
+    productName: str
+    sku: str
+    currentStock: int
+    minStockLevel: int
+    alertType: str  # low_stock, out_of_stock, expiry_warning
+    message: str
+
+class InventoryReport(BaseModel):
+    reportType: str
+    dateRange: str
+    data: List[Dict[str, Any]]
+    summary: Dict[str, Any]

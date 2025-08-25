@@ -99,7 +99,9 @@ export function InvoiceList({
                 <TableCell>
                   <div>
                     <div className="font-medium">{invoice.customerName}</div>
-                    <div className="text-sm text-gray-500">{invoice.customerEmail}</div>
+                    <div className="text-sm text-gray-500">
+                      {invoice.customerEmail}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -111,7 +113,13 @@ export function InvoiceList({
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className={InvoiceService.isOverdue(invoice.dueDate) ? "text-red-600 font-medium" : ""}>
+                    <span
+                      className={
+                        InvoiceService.isOverdue(invoice.dueDate)
+                          ? "text-red-600 font-medium"
+                          : ""
+                      }
+                    >
                       {InvoiceService.formatDate(invoice.dueDate)}
                     </span>
                   </div>
@@ -120,20 +128,34 @@ export function InvoiceList({
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">
-                      {InvoiceService.formatCurrency(invoice.total, invoice.currency)}
+                      {InvoiceService.formatCurrency(
+                        invoice.total,
+                        invoice.currency,
+                      )}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={InvoiceService.getStatusColor(invoice.status)}>
+                  <Badge
+                    className={InvoiceService.getStatusColor(invoice.status)}
+                  >
                     {InvoiceService.getStatusLabel(invoice.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-gray-500" />
-                    <span className={invoice.balance > 0 ? "text-red-600 font-medium" : "text-green-600 font-medium"}>
-                      {InvoiceService.formatCurrency(invoice.balance, invoice.currency)}
+                    <span
+                      className={
+                        invoice.balance > 0
+                          ? "text-red-600 font-medium"
+                          : "text-green-600 font-medium"
+                      }
+                    >
+                      {InvoiceService.formatCurrency(
+                        invoice.balance,
+                        invoice.currency,
+                      )}
                     </span>
                   </div>
                 </TableCell>
@@ -161,7 +183,9 @@ export function InvoiceList({
                         </DropdownMenuItem>
                       )}
                       {invoice.status === "sent" && (
-                        <DropdownMenuItem onClick={() => onMarkAsPaid(invoice.id)}>
+                        <DropdownMenuItem
+                          onClick={() => onMarkAsPaid(invoice.id)}
+                        >
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Mark as Paid
                         </DropdownMenuItem>

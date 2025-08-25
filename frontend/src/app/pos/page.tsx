@@ -1,23 +1,39 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
-import { 
-  DollarSign, 
-  ShoppingCart, 
-  TrendingUp, 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
+import {
+  DollarSign,
+  ShoppingCart,
+  TrendingUp,
   Package,
   Clock,
   AlertTriangle,
   Plus,
-  Receipt
+  Receipt,
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
-import { POSMetrics, POSShift, POSTransaction, Product } from "@/src/models/pos";
+import {
+  POSMetrics,
+  POSShift,
+  POSTransaction,
+  Product,
+} from "@/src/models/pos";
 import { DashboardLayout } from "../../components/layout";
 import { useRouter } from "next/navigation";
 
@@ -26,7 +42,9 @@ const POSDashboard = () => {
   const router = useRouter();
   const [metrics, setMetrics] = useState<POSMetrics | null>(null);
   const [openShift, setOpenShift] = useState<POSShift | null>(null);
-  const [recentTransactions, setRecentTransactions] = useState<POSTransaction[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<
+    POSTransaction[]
+  >([]);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [shiftLoading, setShiftLoading] = useState(false);
@@ -65,7 +83,7 @@ const POSDashboard = () => {
     try {
       const response = await apiService.post("/pos/shifts", {
         openingBalance: 0,
-        notes: "Shift opened"
+        notes: "Shift opened",
       });
       setOpenShift(response.shift);
     } catch (error) {
@@ -77,12 +95,12 @@ const POSDashboard = () => {
 
   const closeShift = async () => {
     if (!openShift) return;
-    
+
     setShiftLoading(true);
     try {
       const response = await apiService.put(`/pos/shifts/${openShift.id}`, {
         status: "closed",
-        closingBalance: openShift.openingBalance + openShift.totalSales
+        closingBalance: openShift.openingBalance + openShift.totalSales,
       });
       setOpenShift(null);
       fetchDashboardData(); // Refresh dashboard data
@@ -106,18 +124,18 @@ const POSDashboard = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -142,19 +160,22 @@ const POSDashboard = () => {
               Manage your point of sale operations and monitor sales performance
             </p>
           </div>
-          
+
           {/* Shift Management */}
           <div className="flex items-center space-x-4">
             {openShift ? (
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800"
+                >
                   Shift Open
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   {openShift.shiftNumber}
                 </span>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={closeShift}
                   disabled={shiftLoading}
                 >
@@ -162,7 +183,7 @@ const POSDashboard = () => {
                 </Button>
               </div>
             ) : (
-              <Button 
+              <Button
                 onClick={handleOpenShift}
                 disabled={shiftLoading}
                 className="bg-green-600 hover:bg-green-700"
@@ -184,15 +205,15 @@ const POSDashboard = () => {
               <div className="text-2xl font-bold">
                 {formatCurrency(metrics?.totalSales || 0)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                All time sales
-              </p>
+              <p className="text-xs text-muted-foreground">All time sales</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Transactions
+              </CardTitle>
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -207,7 +228,9 @@ const POSDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg Transaction</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Avg Transaction
+              </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -222,7 +245,9 @@ const POSDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Low Stock Items
+              </CardTitle>
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -250,14 +275,21 @@ const POSDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Daily Sales (Last 7 Days)</CardTitle>
-                  <CardDescription>Sales performance over the past week</CardDescription>
+                  <CardDescription>
+                    Sales performance over the past week
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {metrics?.dailySales && metrics.dailySales.length > 0 ? (
                     <div className="space-y-2">
                       {metrics.dailySales.map((day, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{day.date}</span>
+                        <div
+                          key={index}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="text-sm font-medium">
+                            {day.date}
+                          </span>
                           <span className="text-sm text-muted-foreground">
                             {formatCurrency(day.sales)}
                           </span>
@@ -279,24 +311,24 @@ const POSDashboard = () => {
                   <CardDescription>Common POS operations</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full justify-start" 
+                  <Button
+                    className="w-full justify-start"
                     variant="outline"
                     onClick={navigateToNewSale}
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     New Sale
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
+                  <Button
+                    className="w-full justify-start"
                     variant="outline"
                     onClick={navigateToProducts}
                   >
                     <Package className="mr-2 h-4 w-4" />
                     Add Product
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
+                  <Button
+                    className="w-full justify-start"
                     variant="outline"
                     onClick={navigateToReports}
                   >
@@ -318,21 +350,36 @@ const POSDashboard = () => {
                 {recentTransactions.length > 0 ? (
                   <div className="space-y-3">
                     {recentTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex items-center space-x-3">
                           <Receipt className="h-5 w-5 text-muted-foreground" />
                           <div>
-                            <p className="font-medium">{transaction.transactionNumber}</p>
+                            <p className="font-medium">
+                              {transaction.transactionNumber}
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               {transaction.customerName || "Walk-in Customer"}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">{formatCurrency(transaction.total)}</p>
+                          <p className="font-medium">
+                            {formatCurrency(transaction.total)}
+                          </p>
                           <div className="flex items-center space-x-2">
-                            <Badge variant="outline">{transaction.paymentMethod}</Badge>
-                            <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                            <Badge variant="outline">
+                              {transaction.paymentMethod}
+                            </Badge>
+                            <Badge
+                              variant={
+                                transaction.status === "completed"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
                               {transaction.status}
                             </Badge>
                           </div>
@@ -362,16 +409,23 @@ const POSDashboard = () => {
                 {lowStockProducts.length > 0 ? (
                   <div className="space-y-3">
                     {lowStockProducts.map((product) => (
-                      <div key={product.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={product.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex items-center space-x-3">
                           <Package className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+                            <p className="text-sm text-muted-foreground">
+                              SKU: {product.sku}
+                            </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">{formatCurrency(product.price)}</p>
+                          <p className="font-medium">
+                            {formatCurrency(product.price)}
+                          </p>
                           <div className="flex items-center space-x-2">
                             <Badge variant="destructive">
                               Stock: {product.stockQuantity}

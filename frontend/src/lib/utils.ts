@@ -71,3 +71,10 @@ export function getPriorityColor(priority: string) {
       return "bg-gray-100 text-gray-800 border-gray-200";
   }
 }
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+}

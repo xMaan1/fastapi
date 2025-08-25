@@ -1,17 +1,48 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import { Badge } from "@/src/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
-import { POSTransaction, POSTransactionStatus, POSPaymentMethod } from "@/src/models/pos";
-import { Receipt, Search, Filter, Eye, Calendar, DollarSign, Package } from "lucide-react";
+import {
+  POSTransaction,
+  POSTransactionStatus,
+  POSPaymentMethod,
+} from "@/src/models/pos";
+import {
+  Receipt,
+  Search,
+  Filter,
+  Eye,
+  Calendar,
+  DollarSign,
+  Package,
+} from "lucide-react";
 import { DashboardLayout } from "../../../components/layout";
 
 const POSTransactions = () => {
@@ -19,9 +50,14 @@ const POSTransactions = () => {
   const [transactions, setTransactions] = useState<POSTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<POSTransactionStatus | "all">("all");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<POSPaymentMethod | "all">("all");
-  const [selectedTransaction, setSelectedTransaction] = useState<POSTransaction | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<
+    POSTransactionStatus | "all"
+  >("all");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    POSPaymentMethod | "all"
+  >("all");
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<POSTransaction | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
@@ -44,32 +80,40 @@ const POSTransactions = () => {
     setIsDetailsOpen(true);
   };
 
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.transactionNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.cashierName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = selectedStatus === "all" || transaction.status === selectedStatus;
-    
-    const matchesPaymentMethod = selectedPaymentMethod === "all" || transaction.paymentMethod === selectedPaymentMethod;
-    
+  const filteredTransactions = transactions.filter((transaction) => {
+    const matchesSearch =
+      transaction.transactionNumber
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      transaction.customerName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      transaction.cashierName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      selectedStatus === "all" || transaction.status === selectedStatus;
+
+    const matchesPaymentMethod =
+      selectedPaymentMethod === "all" ||
+      transaction.paymentMethod === selectedPaymentMethod;
+
     return matchesSearch && matchesStatus && matchesPaymentMethod;
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -116,7 +160,9 @@ const POSTransactions = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">POS Transactions</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              POS Transactions
+            </h1>
             <p className="text-muted-foreground">
               View and manage all point of sale transactions
             </p>
@@ -146,10 +192,15 @@ const POSTransactions = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={selectedStatus} onValueChange={(value: string) => setSelectedStatus(value as POSTransactionStatus | "all")}>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={(value: string) =>
+                    setSelectedStatus(value as POSTransactionStatus | "all")
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
@@ -163,10 +214,15 @@ const POSTransactions = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="paymentMethod">Payment Method</Label>
-                <Select value={selectedPaymentMethod} onValueChange={(value: string) => setSelectedPaymentMethod(value as POSPaymentMethod | "all")}>
+                <Select
+                  value={selectedPaymentMethod}
+                  onValueChange={(value: string) =>
+                    setSelectedPaymentMethod(value as POSPaymentMethod | "all")
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Methods" />
                   </SelectTrigger>
@@ -174,16 +230,17 @@ const POSTransactions = () => {
                     <SelectItem value="all">All Methods</SelectItem>
                     {Object.values(POSPaymentMethod).map((method) => (
                       <SelectItem key={method} value={method}>
-                        {method.charAt(0).toUpperCase() + method.slice(1).replace('_', ' ')}
+                        {method.charAt(0).toUpperCase() +
+                          method.slice(1).replace("_", " ")}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-end">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedStatus("all");
@@ -200,14 +257,17 @@ const POSTransactions = () => {
         {/* Transactions List */}
         <div className="space-y-4">
           {filteredTransactions.map((transaction) => (
-            <Card key={transaction.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={transaction.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <Receipt className="h-6 w-6 text-blue-600" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <h3 className="font-semibold text-lg">
@@ -217,43 +277,47 @@ const POSTransactions = () => {
                           {transaction.status}
                         </Badge>
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
                           <span>{formatDate(transaction.createdAt)}</span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-1">
                           <span>Cashier:</span>
-                          <span className="font-medium">{transaction.cashierName}</span>
+                          <span className="font-medium">
+                            {transaction.cashierName}
+                          </span>
                         </div>
-                        
+
                         {transaction.customerName && (
                           <div className="flex items-center space-x-1">
                             <span>Customer:</span>
-                            <span className="font-medium">{transaction.customerName}</span>
+                            <span className="font-medium">
+                              {transaction.customerName}
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="text-right space-y-2">
                     <div className="text-2xl font-bold text-green-600">
                       {formatCurrency(transaction.total)}
                     </div>
-                    
+
                     <div className="flex items-center justify-center space-x-1 text-sm text-muted-foreground">
                       {getPaymentMethodIcon(transaction.paymentMethod)}
-                      <span>{transaction.paymentMethod.replace('_', ' ')}</span>
+                      <span>{transaction.paymentMethod.replace("_", " ")}</span>
                     </div>
-                    
+
                     <div className="text-sm text-muted-foreground">
                       {transaction.items.length} items
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
@@ -273,12 +337,15 @@ const POSTransactions = () => {
         {filteredTransactions.length === 0 && (
           <div className="text-center py-12">
             <Receipt className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">No transactions found</h3>
+            <h3 className="mt-4 text-lg font-semibold">
+              No transactions found
+            </h3>
             <p className="mt-2 text-muted-foreground">
-              {searchTerm || selectedStatus !== "all" || selectedPaymentMethod !== "all"
+              {searchTerm ||
+              selectedStatus !== "all" ||
+              selectedPaymentMethod !== "all"
                 ? "Try adjusting your filters or search terms."
-                : "No transactions have been made yet."
-              }
+                : "No transactions have been made yet."}
             </p>
           </div>
         )}
@@ -294,55 +361,78 @@ const POSTransactions = () => {
                 Complete information about this transaction
               </DialogDescription>
             </DialogHeader>
-            
+
             {selectedTransaction && (
               <div className="space-y-6">
                 {/* Transaction Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Transaction Number</Label>
-                    <p className="font-semibold">#{selectedTransaction.transactionNumber}</p>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Transaction Number
+                    </Label>
+                    <p className="font-semibold">
+                      #{selectedTransaction.transactionNumber}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-                    <Badge className={getStatusColor(selectedTransaction.status)}>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </Label>
+                    <Badge
+                      className={getStatusColor(selectedTransaction.status)}
+                    >
                       {selectedTransaction.status}
                     </Badge>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Date & Time</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Date & Time
+                    </Label>
                     <p>{formatDate(selectedTransaction.createdAt)}</p>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Cashier</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Cashier
+                    </Label>
                     <p>{selectedTransaction.cashierName}</p>
                   </div>
-                  
+
                   {selectedTransaction.customerName && (
                     <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Customer</Label>
+                      <Label className="text-sm font-medium text-muted-foreground">
+                        Customer
+                      </Label>
                       <p>{selectedTransaction.customerName}</p>
                     </div>
                   )}
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Payment Method</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Payment Method
+                    </Label>
                     <div className="flex items-center space-x-2">
                       {getPaymentMethodIcon(selectedTransaction.paymentMethod)}
-                      <span>{selectedTransaction.paymentMethod.replace('_', ' ')}</span>
+                      <span>
+                        {selectedTransaction.paymentMethod.replace("_", " ")}
+                      </span>
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Items */}
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Items</Label>
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Items
+                  </Label>
                   <div className="space-y-2 mt-2">
                     {selectedTransaction.items.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                      >
                         <div>
                           <p className="font-medium">{item.productName}</p>
                           <p className="text-sm text-muted-foreground">
@@ -350,7 +440,9 @@ const POSTransactions = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">{formatCurrency(item.unitPrice)}</p>
+                          <p className="font-semibold">
+                            {formatCurrency(item.unitPrice)}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             Total: {formatCurrency(item.total)}
                           </p>
@@ -359,29 +451,35 @@ const POSTransactions = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Totals */}
                 <div className="border-t pt-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span>{formatCurrency(selectedTransaction.subtotal)}</span>
+                      <span>
+                        {formatCurrency(selectedTransaction.subtotal)}
+                      </span>
                     </div>
-                    
+
                     {selectedTransaction.discount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount:</span>
-                        <span>-{formatCurrency(selectedTransaction.discount)}</span>
+                        <span>
+                          -{formatCurrency(selectedTransaction.discount)}
+                        </span>
                       </div>
                     )}
-                    
+
                     {selectedTransaction.taxAmount > 0 && (
                       <div className="flex justify-between">
                         <span>Tax:</span>
-                        <span>{formatCurrency(selectedTransaction.taxAmount)}</span>
+                        <span>
+                          {formatCurrency(selectedTransaction.taxAmount)}
+                        </span>
                       </div>
                     )}
-                    
+
                     <div className="flex justify-between text-lg font-bold border-t pt-2">
                       <span>Total:</span>
                       <span>{formatCurrency(selectedTransaction.total)}</span>

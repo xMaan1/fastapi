@@ -1,17 +1,49 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import { Badge } from "@/src/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
-import { Product, POSTransactionCreate, POSTransactionItem, POSPaymentMethod } from "@/src/models/pos";
-import { ShoppingCart, Plus, Minus, Search, Receipt, DollarSign, Package } from "lucide-react";
+import {
+  Product,
+  POSTransactionCreate,
+  POSTransactionItem,
+  POSPaymentMethod,
+} from "@/src/models/pos";
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  Search,
+  Receipt,
+  DollarSign,
+  Package,
+} from "lucide-react";
 import { DashboardLayout } from "../../../components/layout";
 
 interface CartItem {
@@ -25,7 +57,8 @@ const POSSale = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<POSPaymentMethod>(POSPaymentMethod.CASH);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<POSPaymentMethod>(POSPaymentMethod.CASH);
   const [customerName, setCustomerName] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +79,7 @@ const POSSale = () => {
 
   const searchProducts = async (query: string) => {
     if (query.length < 2) return;
-    
+
     try {
       const response = await apiService.get(`/pos/products/search?q=${query}`);
       setProducts(response.products || []);
@@ -56,22 +89,31 @@ const POSSale = () => {
   };
 
   const addToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.product.id === product.id);
-    
+    const existingItem = cart.find((item) => item.product.id === product.id);
+
     if (existingItem) {
-      setCart(cart.map(item => 
-        item.product.id === product.id 
-          ? { ...item, quantity: item.quantity + 1, total: (item.quantity + 1) * product.price }
-          : item
-      ));
+      setCart(
+        cart.map((item) =>
+          item.product.id === product.id
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+                total: (item.quantity + 1) * product.price,
+              }
+            : item,
+        ),
+      );
     } else {
-      setCart([...cart, {
-        product,
-        quantity: 1,
-        total: product.price
-      }]);
+      setCart([
+        ...cart,
+        {
+          product,
+          quantity: 1,
+          total: product.price,
+        },
+      ]);
     }
-    
+
     setShowProductSearch(false);
     setSearchTerm("");
   };
@@ -81,16 +123,22 @@ const POSSale = () => {
       removeFromCart(productId);
       return;
     }
-    
-    setCart(cart.map(item => 
-      item.product.id === productId 
-        ? { ...item, quantity: newQuantity, total: newQuantity * item.product.price }
-        : item
-    ));
+
+    setCart(
+      cart.map((item) =>
+        item.product.id === productId
+          ? {
+              ...item,
+              quantity: newQuantity,
+              total: newQuantity * item.product.price,
+            }
+          : item,
+      ),
+    );
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(cart.filter(item => item.product.id !== productId));
+    setCart(cart.filter((item) => item.product.id !== productId));
   };
 
   const clearCart = () => {
@@ -109,12 +157,12 @@ const POSSale = () => {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
-    
+
     setLoading(true);
     try {
       const transactionData: POSTransactionCreate = {
         customerName: customerName || undefined,
-        items: cart.map(item => ({
+        items: cart.map((item) => ({
           productId: item.product.id,
           productName: item.product.name,
           quantity: item.quantity,
@@ -122,16 +170,16 @@ const POSSale = () => {
           discount: 0,
           taxRate: 0,
           taxAmount: 0,
-          total: item.total
+          total: item.total,
         })),
         taxRate: 0,
         discount: 0,
         paymentMethod: selectedPaymentMethod,
-        notes: notes || undefined
+        notes: notes || undefined,
       };
 
       await apiService.post("/pos/transactions", transactionData);
-      
+
       // Clear cart and show success
       clearCart();
       alert("Transaction completed successfully!");
@@ -144,9 +192,9 @@ const POSSale = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
@@ -161,8 +209,8 @@ const POSSale = () => {
               Create a new point of sale transaction
             </p>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={() => setShowProductSearch(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
@@ -199,23 +247,26 @@ const POSSale = () => {
                       className="pl-10"
                     />
                   </div>
-                  
+
                   {searchTerm && (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {products.map((product) => (
-                        <div 
-                          key={product.id} 
+                        <div
+                          key={product.id}
                           className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                           onClick={() => addToCart(product)}
                         >
                           <div>
                             <p className="font-medium">{product.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              SKU: {product.sku} | Stock: {product.stockQuantity}
+                              SKU: {product.sku} | Stock:{" "}
+                              {product.stockQuantity}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">{formatCurrency(product.price)}</p>
+                            <p className="font-semibold">
+                              {formatCurrency(product.price)}
+                            </p>
                             <Badge variant="outline" className="text-xs">
                               {product.category}
                             </Badge>
@@ -235,15 +286,15 @@ const POSSale = () => {
                   <ShoppingCart className="h-5 w-5" />
                   Cart ({cart.length} items)
                 </CardTitle>
-                <CardDescription>
-                  Review items before checkout
-                </CardDescription>
+                <CardDescription>Review items before checkout</CardDescription>
               </CardHeader>
               <CardContent>
                 {cart.length === 0 ? (
                   <div className="text-center py-8">
                     <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <p className="mt-2 text-muted-foreground">No items in cart</p>
+                    <p className="mt-2 text-muted-foreground">
+                      No items in cart
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       Search and add products to get started
                     </p>
@@ -251,37 +302,46 @@ const POSSale = () => {
                 ) : (
                   <div className="space-y-3">
                     {cart.map((item) => (
-                      <div key={item.product.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={item.product.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
                         <div className="flex-1">
                           <p className="font-medium">{item.product.name}</p>
                           <p className="text-sm text-muted-foreground">
                             {formatCurrency(item.product.price)} each
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity - 1)
+                            }
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
-                          
+
                           <span className="w-12 text-center font-medium">
                             {item.quantity}
                           </span>
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity + 1)
+                            }
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
-                          
+
                           <div className="text-right ml-4">
-                            <p className="font-semibold">{formatCurrency(item.total)}</p>
+                            <p className="font-semibold">
+                              {formatCurrency(item.total)}
+                            </p>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -324,9 +384,11 @@ const POSSale = () => {
                 {/* Payment Method */}
                 <div className="space-y-2">
                   <Label htmlFor="paymentMethod">Payment Method</Label>
-                  <Select 
-                    value={selectedPaymentMethod} 
-                    onValueChange={(value: string) => setSelectedPaymentMethod(value as POSPaymentMethod)}
+                  <Select
+                    value={selectedPaymentMethod}
+                    onValueChange={(value: string) =>
+                      setSelectedPaymentMethod(value as POSPaymentMethod)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -340,7 +402,7 @@ const POSSale = () => {
                             ) : (
                               <Package className="h-4 w-4" />
                             )}
-                            <span>{method.replace('_', ' ')}</span>
+                            <span>{method.replace("_", " ")}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -365,7 +427,7 @@ const POSSale = () => {
                     <span>Subtotal:</span>
                     <span>{formatCurrency(getSubtotal())}</span>
                   </div>
-                  
+
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total:</span>
                     <span>{formatCurrency(getTotal())}</span>
@@ -374,16 +436,16 @@ const POSSale = () => {
 
                 {/* Action Buttons */}
                 <div className="space-y-2">
-                  <Button 
+                  <Button
                     onClick={handleCheckout}
                     disabled={cart.length === 0 || loading}
                     className="w-full bg-green-600 hover:bg-green-700"
                   >
                     {loading ? "Processing..." : "Complete Sale"}
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     onClick={clearCart}
                     disabled={cart.length === 0}
                     className="w-full"

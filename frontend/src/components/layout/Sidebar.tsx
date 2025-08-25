@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
@@ -32,6 +32,12 @@ import {
   Package,
   Receipt,
   Plus,
+  Warehouse,
+  MapPin,
+  Truck,
+  ClipboardList,
+  PackageCheck,
+  AlertTriangle,
 } from "lucide-react";
 
 interface SubMenuItem {
@@ -173,6 +179,62 @@ const allMenuItems: MenuItem[] = [
     ],
   },
   {
+    text: "Inventory",
+    icon: Warehouse,
+    roles: ["*"],
+    gradient: "from-teal-500 to-green-500",
+    subItems: [
+      {
+        text: "Dashboard",
+        icon: LayoutDashboard,
+        path: "/inventory",
+        roles: ["*"],
+      },
+      {
+        text: "Warehouses",
+        icon: Warehouse,
+        path: "/inventory/warehouses",
+        roles: ["*"],
+      },
+      {
+        text: "Storage Locations",
+        icon: MapPin,
+        path: "/inventory/storage-locations",
+        roles: ["*"],
+      },
+      {
+        text: "Stock Movements",
+        icon: Truck,
+        path: "/inventory/stock-movements",
+        roles: ["*"],
+      },
+      {
+        text: "Purchase Orders",
+        icon: ClipboardList,
+        path: "/inventory/purchase-orders",
+        roles: ["*"],
+      },
+      {
+        text: "Receiving",
+        icon: PackageCheck,
+        path: "/inventory/receiving",
+        roles: ["*"],
+      },
+      {
+        text: "Suppliers",
+        icon: Building,
+        path: "/inventory/suppliers",
+        roles: ["*"],
+      },
+      {
+        text: "Stock Alerts",
+        icon: AlertTriangle,
+        path: "/inventory/alerts",
+        roles: ["*"],
+      },
+    ],
+  },
+  {
     text: "HRM",
     icon: UserCheck,
     roles: ["*"],
@@ -298,9 +360,19 @@ export default function Sidebar() {
       return false;
     });
 
-    // Auto-expand items that have matching sub-items
+    return filtered;
+  }, [searchQuery]);
+
+  // Handle auto-expanding items when searching
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
     const newExpanded = new Set(expandedItems);
-    filtered.forEach((item) => {
+
+    allMenuItems.forEach((item) => {
       if (
         item.subItems &&
         item.subItems.some((subItem) =>
@@ -310,10 +382,9 @@ export default function Sidebar() {
         newExpanded.add(item.text);
       }
     });
-    setExpandedItems(newExpanded);
 
-    return filtered;
-  }, [searchQuery, expandedItems]);
+    setExpandedItems(newExpanded);
+  }, [searchQuery]);
 
   const isActive = (path: string) => {
     if (path === "/") {

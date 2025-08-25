@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -18,12 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Plus,
   Trash2,
@@ -64,7 +54,9 @@ export function InvoiceDialog({
     billingAddress: "",
     shippingAddress: "",
     issueDate: new Date().toISOString().split("T")[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     paymentTerms: "Net 30",
     currency: "USD",
     taxRate: 0,
@@ -102,16 +94,18 @@ export function InvoiceDialog({
         quoteId: invoice.quoteId || "",
         projectId: invoice.projectId || "",
       });
-      setItems(invoice.items.map(item => ({
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        discount: item.discount,
-        taxRate: item.taxRate,
-        productId: item.productId,
-        projectId: item.projectId,
-        taskId: item.taskId,
-      })));
+      setItems(
+        invoice.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+          taxRate: item.taxRate,
+          productId: item.productId,
+          projectId: item.projectId,
+          taskId: item.taskId,
+        })),
+      );
     } else {
       // Reset form for create mode
       setFormData({
@@ -121,7 +115,9 @@ export function InvoiceDialog({
         billingAddress: "",
         shippingAddress: "",
         issueDate: new Date().toISOString().split("T")[0],
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
         paymentTerms: "Net 30",
         currency: "USD",
         taxRate: 0,
@@ -138,10 +134,13 @@ export function InvoiceDialog({
     setErrors({});
   }, [invoice, mode, open]);
 
-  const handleInputChange = (field: keyof InvoiceCreate, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof InvoiceCreate,
+    value: string | number,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: "" }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -153,21 +152,28 @@ export function InvoiceDialog({
       discount: 0,
       taxRate: 0,
     };
-    setItems(prev => [...prev, newItem]);
+    setItems((prev) => [...prev, newItem]);
   };
 
-  const updateItem = (index: number, field: keyof InvoiceItemCreate, value: string | number) => {
+  const updateItem = (
+    index: number,
+    field: keyof InvoiceItemCreate,
+    value: string | number,
+  ) => {
     const updatedItems = [...items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
     setItems(updatedItems);
   };
 
   const removeItem = (index: number) => {
-    setItems(prev => prev.filter((_, i) => i !== index));
+    setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice,
+      0,
+    );
     const discountAmount = subtotal * (formData.discount / 100);
     const taxableAmount = subtotal - discountAmount;
     const taxAmount = taxableAmount * (formData.taxRate / 100);
@@ -222,7 +228,7 @@ export function InvoiceDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -234,7 +240,7 @@ export function InvoiceDialog({
         ...formData,
         items: items,
       };
-      
+
       await onSubmit(submitData);
       onOpenChange(false);
     } catch (error) {
@@ -271,12 +277,16 @@ export function InvoiceDialog({
                 <Input
                   id="customerName"
                   value={formData.customerName}
-                  onChange={(e) => handleInputChange("customerName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("customerName", e.target.value)
+                  }
                   placeholder="Enter customer name"
                   className={errors.customerName ? "border-red-500" : ""}
                 />
                 {errors.customerName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.customerName}
+                  </p>
                 )}
               </div>
 
@@ -286,12 +296,16 @@ export function InvoiceDialog({
                   id="customerEmail"
                   type="email"
                   value={formData.customerEmail}
-                  onChange={(e) => handleInputChange("customerEmail", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("customerEmail", e.target.value)
+                  }
                   placeholder="Enter customer email"
                   className={errors.customerEmail ? "border-red-500" : ""}
                 />
                 {errors.customerEmail && (
-                  <p className="text-red-500 text-sm mt-1">{errors.customerEmail}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.customerEmail}
+                  </p>
                 )}
               </div>
 
@@ -300,21 +314,29 @@ export function InvoiceDialog({
                 <Textarea
                   id="billingAddress"
                   value={formData.billingAddress}
-                  onChange={(e) => handleInputChange("billingAddress", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("billingAddress", e.target.value)
+                  }
                   placeholder="Enter billing address"
                   className={errors.billingAddress ? "border-red-500" : ""}
                 />
                 {errors.billingAddress && (
-                  <p className="text-red-500 text-sm mt-1">{errors.billingAddress}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.billingAddress}
+                  </p>
                 )}
               </div>
 
               <div className="md:col-span-2">
-                <Label htmlFor="shippingAddress">Shipping Address (Optional)</Label>
+                <Label htmlFor="shippingAddress">
+                  Shipping Address (Optional)
+                </Label>
                 <Textarea
                   id="shippingAddress"
                   value={formData.shippingAddress}
-                  onChange={(e) => handleInputChange("shippingAddress", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("shippingAddress", e.target.value)
+                  }
                   placeholder="Enter shipping address (leave blank if same as billing)"
                 />
               </div>
@@ -336,11 +358,15 @@ export function InvoiceDialog({
                   id="issueDate"
                   type="date"
                   value={formData.issueDate}
-                  onChange={(e) => handleInputChange("issueDate", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("issueDate", e.target.value)
+                  }
                   className={errors.issueDate ? "border-red-500" : ""}
                 />
                 {errors.issueDate && (
-                  <p className="text-red-500 text-sm mt-1">{errors.issueDate}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.issueDate}
+                  </p>
                 )}
               </div>
 
@@ -362,7 +388,9 @@ export function InvoiceDialog({
                 <Label htmlFor="paymentTerms">Payment Terms</Label>
                 <Select
                   value={formData.paymentTerms}
-                  onValueChange={(value) => handleInputChange("paymentTerms", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("paymentTerms", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -372,7 +400,9 @@ export function InvoiceDialog({
                     <SelectItem value="Net 30">Net 30</SelectItem>
                     <SelectItem value="Net 45">Net 45</SelectItem>
                     <SelectItem value="Net 60">Net 60</SelectItem>
-                    <SelectItem value="Due on Receipt">Due on Receipt</SelectItem>
+                    <SelectItem value="Due on Receipt">
+                      Due on Receipt
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -381,7 +411,9 @@ export function InvoiceDialog({
                 <Label htmlFor="currency">Currency</Label>
                 <Select
                   value={formData.currency}
-                  onValueChange={(value) => handleInputChange("currency", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("currency", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -404,7 +436,12 @@ export function InvoiceDialog({
                   min="0"
                   max="100"
                   value={formData.taxRate}
-                  onChange={(e) => handleInputChange("taxRate", parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "taxRate",
+                      parseFloat(e.target.value) || 0,
+                    )
+                  }
                   placeholder="0.00"
                 />
               </div>
@@ -418,7 +455,12 @@ export function InvoiceDialog({
                   min="0"
                   max="100"
                   value={formData.discount}
-                  onChange={(e) => handleInputChange("discount", parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "discount",
+                      parseFloat(e.target.value) || 0,
+                    )
+                  }
                   placeholder="0.00"
                 />
               </div>
@@ -438,18 +480,31 @@ export function InvoiceDialog({
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-end border p-3 rounded-lg">
+                <div
+                  key={index}
+                  className="grid grid-cols-12 gap-2 items-end border p-3 rounded-lg"
+                >
                   <div className="col-span-4">
-                    <Label htmlFor={`item_${index}_description`}>Description *</Label>
+                    <Label htmlFor={`item_${index}_description`}>
+                      Description *
+                    </Label>
                     <Input
                       id={`item_${index}_description`}
                       value={item.description}
-                      onChange={(e) => updateItem(index, "description", e.target.value)}
+                      onChange={(e) =>
+                        updateItem(index, "description", e.target.value)
+                      }
                       placeholder="Item description"
-                      className={errors[`item_${index}_description`] ? "border-red-500" : ""}
+                      className={
+                        errors[`item_${index}_description`]
+                          ? "border-red-500"
+                          : ""
+                      }
                     />
                     {errors[`item_${index}_description`] && (
-                      <p className="text-red-500 text-sm mt-1">{errors[`item_${index}_description`]}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors[`item_${index}_description`]}
+                      </p>
                     )}
                   </div>
 
@@ -461,33 +516,59 @@ export function InvoiceDialog({
                       min="0.01"
                       step="0.01"
                       value={item.quantity}
-                      onChange={(e) => updateItem(index, "quantity", parseFloat(e.target.value) || 0)}
-                      className={errors[`item_${index}_quantity`] ? "border-red-500" : ""}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "quantity",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className={
+                        errors[`item_${index}_quantity`] ? "border-red-500" : ""
+                      }
                     />
                     {errors[`item_${index}_quantity`] && (
-                      <p className="text-red-500 text-sm mt-1">{errors[`item_${index}_quantity`]}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors[`item_${index}_quantity`]}
+                      </p>
                     )}
                   </div>
 
                   <div className="col-span-2">
-                    <Label htmlFor={`item_${index}_unitPrice`}>Unit Price *</Label>
+                    <Label htmlFor={`item_${index}_unitPrice`}>
+                      Unit Price *
+                    </Label>
                     <Input
                       id={`item_${index}_unitPrice`}
                       type="number"
                       min="0"
                       step="0.01"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(index, "unitPrice", parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "unitPrice",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       placeholder="0.00"
-                      className={errors[`item_${index}_unitPrice`] ? "border-red-500" : ""}
+                      className={
+                        errors[`item_${index}_unitPrice`]
+                          ? "border-red-500"
+                          : ""
+                      }
                     />
                     {errors[`item_${index}_unitPrice`] && (
-                      <p className="text-red-500 text-sm mt-1">{errors[`item_${index}_unitPrice`]}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors[`item_${index}_unitPrice`]}
+                      </p>
                     )}
                   </div>
 
                   <div className="col-span-2">
-                    <Label htmlFor={`item_${index}_discount`}>Discount (%)</Label>
+                    <Label htmlFor={`item_${index}_discount`}>
+                      Discount (%)
+                    </Label>
                     <Input
                       id={`item_${index}_discount`}
                       type="number"
@@ -495,7 +576,13 @@ export function InvoiceDialog({
                       max="100"
                       step="0.01"
                       value={item.discount}
-                      onChange={(e) => updateItem(index, "discount", parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(
+                          index,
+                          "discount",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       placeholder="0.00"
                     />
                   </div>
@@ -503,7 +590,11 @@ export function InvoiceDialog({
                   <div className="col-span-1">
                     <Label>Total</Label>
                     <div className="text-sm font-medium p-2 bg-gray-50 rounded">
-                      {InvoiceService.formatCurrency(item.quantity * item.unitPrice * (1 - item.discount / 100))}
+                      {InvoiceService.formatCurrency(
+                        item.quantity *
+                          item.unitPrice *
+                          (1 - item.discount / 100),
+                      )}
                     </div>
                   </div>
 
@@ -540,15 +631,21 @@ export function InvoiceDialog({
                 <div className="w-64 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>{InvoiceService.formatCurrency(totals.subtotal)}</span>
+                    <span>
+                      {InvoiceService.formatCurrency(totals.subtotal)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Discount ({formData.discount}%):</span>
-                    <span>-{InvoiceService.formatCurrency(totals.discount)}</span>
+                    <span>
+                      -{InvoiceService.formatCurrency(totals.discount)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax ({formData.taxRate}%):</span>
-                    <span>{InvoiceService.formatCurrency(totals.taxAmount)}</span>
+                    <span>
+                      {InvoiceService.formatCurrency(totals.taxAmount)}
+                    </span>
                   </div>
                   <div className="border-t pt-2 font-bold text-lg">
                     <div className="flex justify-between">
@@ -600,12 +697,12 @@ export function InvoiceDialog({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="modern-button"
-            >
-              {loading ? "Saving..." : mode === "create" ? "Create Invoice" : "Update Invoice"}
+            <Button type="submit" disabled={loading} className="modern-button">
+              {loading
+                ? "Saving..."
+                : mode === "create"
+                  ? "Create Invoice"
+                  : "Update Invoice"}
             </Button>
           </div>
         </form>

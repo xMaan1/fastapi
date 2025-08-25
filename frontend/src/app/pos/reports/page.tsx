@@ -1,25 +1,42 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import { Badge } from "@/src/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
 import { POSPaymentMethod } from "@/src/models/pos";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Package, 
-  Clock, 
-  DollarSign, 
+import {
+  BarChart3,
+  TrendingUp,
+  Package,
+  Clock,
+  DollarSign,
   ShoppingCart,
   Calendar,
-  Download
+  Download,
 } from "lucide-react";
 import { DashboardLayout } from "../../../components/layout";
 
@@ -45,7 +62,10 @@ interface InventoryReport {
     lowStockItems: number;
     outOfStockItems: number;
   };
-  categorySummary: Record<string, { count: number; totalValue: number; lowStock: number }>;
+  categorySummary: Record<
+    string,
+    { count: number; totalValue: number; lowStock: number }
+  >;
   lowStockProducts: any[];
   products: any[];
 }
@@ -62,7 +82,10 @@ interface ShiftsReport {
       to?: string;
     };
   };
-  cashierSummary: Record<string, { shifts: number; totalSales: number; totalTransactions: number }>;
+  cashierSummary: Record<
+    string,
+    { shifts: number; totalSales: number; totalTransactions: number }
+  >;
   shifts: any[];
 }
 
@@ -75,11 +98,12 @@ const POSReports = () => {
   const [cashierId, setCashierId] = useState<string>("");
   const [category, setCategory] = useState<string>("all");
   const [lowStockOnly, setLowStockOnly] = useState(false);
-  
+
   const [salesReport, setSalesReport] = useState<SalesReport | null>(null);
-  const [inventoryReport, setInventoryReport] = useState<InventoryReport | null>(null);
+  const [inventoryReport, setInventoryReport] =
+    useState<InventoryReport | null>(null);
   const [shiftsReport, setShiftsReport] = useState<ShiftsReport | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -90,7 +114,15 @@ const POSReports = () => {
     } else if (activeTab === "shifts") {
       fetchShiftsReport();
     }
-  }, [activeTab, dateFrom, dateTo, paymentMethod, cashierId, category, lowStockOnly]);
+  }, [
+    activeTab,
+    dateFrom,
+    dateTo,
+    paymentMethod,
+    cashierId,
+    category,
+    lowStockOnly,
+  ]);
 
   const fetchSalesReport = async () => {
     setLoading(true);
@@ -98,10 +130,13 @@ const POSReports = () => {
       const params = new URLSearchParams();
       if (dateFrom) params.append("date_from", dateFrom);
       if (dateTo) params.append("date_to", dateTo);
-      if (paymentMethod && paymentMethod !== "all") params.append("payment_method", paymentMethod);
+      if (paymentMethod && paymentMethod !== "all")
+        params.append("payment_method", paymentMethod);
       if (cashierId) params.append("cashier_id", cashierId);
-      
-      const response = await apiService.get(`/pos/reports/sales?${params.toString()}`);
+
+      const response = await apiService.get(
+        `/pos/reports/sales?${params.toString()}`,
+      );
       setSalesReport(response);
     } catch (error) {
       console.error("Error fetching sales report:", error);
@@ -116,8 +151,10 @@ const POSReports = () => {
       const params = new URLSearchParams();
       if (lowStockOnly) params.append("low_stock_only", "true");
       if (category && category !== "all") params.append("category", category);
-      
-      const response = await apiService.get(`/pos/reports/inventory?${params.toString()}`);
+
+      const response = await apiService.get(
+        `/pos/reports/inventory?${params.toString()}`,
+      );
       setInventoryReport(response);
     } catch (error) {
       console.error("Error fetching inventory report:", error);
@@ -133,8 +170,10 @@ const POSReports = () => {
       if (dateFrom) params.append("date_from", dateFrom);
       if (dateTo) params.append("date_to", dateTo);
       if (cashierId) params.append("cashier_id", cashierId);
-      
-      const response = await apiService.get(`/pos/reports/shifts?${params.toString()}`);
+
+      const response = await apiService.get(
+        `/pos/reports/shifts?${params.toString()}`,
+      );
       setShiftsReport(response);
     } catch (error) {
       console.error("Error fetching shifts report:", error);
@@ -153,14 +192,14 @@ const POSReports = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US');
+    return new Date(dateString).toLocaleDateString("en-US");
   };
 
   const exportReport = (type: string) => {
@@ -179,7 +218,7 @@ const POSReports = () => {
               View detailed analytics and reports for your POS operations
             </p>
           </div>
-          
+
           <Button onClick={() => exportReport(activeTab)} variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Export Report
@@ -205,7 +244,7 @@ const POSReports = () => {
                   onChange={(e) => setDateFrom(e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="dateTo">To Date</Label>
                 <Input
@@ -215,11 +254,14 @@ const POSReports = () => {
                   onChange={(e) => setDateTo(e.target.value)}
                 />
               </div>
-              
+
               {activeTab === "sales" && (
                 <div className="space-y-2">
                   <Label htmlFor="paymentMethod">Payment Method</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <Select
+                    value={paymentMethod}
+                    onValueChange={setPaymentMethod}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="All Methods" />
                     </SelectTrigger>
@@ -227,14 +269,14 @@ const POSReports = () => {
                       <SelectItem value="all">All Methods</SelectItem>
                       {Object.values(POSPaymentMethod).map((method) => (
                         <SelectItem key={method} value={method}>
-                          {method.replace('_', ' ')}
+                          {method.replace("_", " ")}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               )}
-              
+
               {activeTab === "inventory" && (
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
@@ -253,7 +295,7 @@ const POSReports = () => {
                   </Select>
                 </div>
               )}
-              
+
               {activeTab === "inventory" && (
                 <div className="flex items-end">
                   <div className="flex items-center space-x-2">
@@ -267,7 +309,7 @@ const POSReports = () => {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex items-end">
                 <Button variant="outline" onClick={clearFilters}>
                   Clear Filters
@@ -278,7 +320,11 @@ const POSReports = () => {
         </Card>
 
         {/* Reports Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="sales" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -306,7 +352,9 @@ const POSReports = () => {
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Sales
+                      </CardTitle>
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -321,7 +369,9 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Avg Transaction</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Avg Transaction
+                      </CardTitle>
                       <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -336,12 +386,15 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Date Range</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Date Range
+                      </CardTitle>
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-sm font-medium">
-                        {salesReport.summary.dateRange.from || "All time"} - {salesReport.summary.dateRange.to || "Today"}
+                        {salesReport.summary.dateRange.from || "All time"} -{" "}
+                        {salesReport.summary.dateRange.to || "Today"}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Report period
@@ -354,23 +407,32 @@ const POSReports = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Payment Methods Breakdown</CardTitle>
-                    <CardDescription>Sales distribution by payment method</CardDescription>
+                    <CardDescription>
+                      Sales distribution by payment method
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {Object.entries(salesReport.paymentMethods).map(([method, data]) => (
-                        <div key={method} className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="outline">{method.replace('_', ' ')}</Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {data.count} transactions
+                      {Object.entries(salesReport.paymentMethods).map(
+                        ([method, data]) => (
+                          <div
+                            key={method}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">
+                                {method.replace("_", " ")}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {data.count} transactions
+                              </span>
+                            </div>
+                            <span className="font-semibold">
+                              {formatCurrency(data.total)}
                             </span>
                           </div>
-                          <span className="font-semibold">
-                            {formatCurrency(data.total)}
-                          </span>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -379,21 +441,32 @@ const POSReports = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Daily Sales</CardTitle>
-                    <CardDescription>Sales performance over time</CardDescription>
+                    <CardDescription>
+                      Sales performance over time
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries(salesReport.dailySales).map(([date, data]) => (
-                        <div key={date} className="flex items-center justify-between p-2 border rounded">
-                          <span className="font-medium">{formatDate(date)}</span>
-                          <div className="text-right">
-                            <div className="font-semibold">{formatCurrency(data.sales)}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {data.transactions} transactions
+                      {Object.entries(salesReport.dailySales).map(
+                        ([date, data]) => (
+                          <div
+                            key={date}
+                            className="flex items-center justify-between p-2 border rounded"
+                          >
+                            <span className="font-medium">
+                              {formatDate(date)}
+                            </span>
+                            <div className="text-right">
+                              <div className="font-semibold">
+                                {formatCurrency(data.sales)}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {data.transactions} transactions
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -401,7 +474,9 @@ const POSReports = () => {
             ) : (
               <div className="text-center py-12">
                 <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No sales data available</h3>
+                <h3 className="mt-4 text-lg font-semibold">
+                  No sales data available
+                </h3>
                 <p className="mt-2 text-muted-foreground">
                   Try adjusting your filters or check back later
                 </p>
@@ -421,7 +496,9 @@ const POSReports = () => {
                 <div className="grid gap-4 md:grid-cols-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Products
+                      </CardTitle>
                       <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -436,12 +513,16 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Value
+                      </CardTitle>
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(inventoryReport.summary.totalInventoryValue)}
+                        {formatCurrency(
+                          inventoryReport.summary.totalInventoryValue,
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Inventory worth
@@ -451,7 +532,9 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Low Stock
+                      </CardTitle>
                       <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -466,7 +549,9 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Out of Stock
+                      </CardTitle>
                       <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -484,26 +569,37 @@ const POSReports = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Category Summary</CardTitle>
-                    <CardDescription>Inventory breakdown by category</CardDescription>
+                    <CardDescription>
+                      Inventory breakdown by category
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {Object.entries(inventoryReport.categorySummary).map(([cat, data]) => (
-                        <div key={cat} className="flex items-center justify-between p-3 border rounded">
-                          <div>
-                            <div className="font-medium capitalize">{cat}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {data.count} products
+                      {Object.entries(inventoryReport.categorySummary).map(
+                        ([cat, data]) => (
+                          <div
+                            key={cat}
+                            className="flex items-center justify-between p-3 border rounded"
+                          >
+                            <div>
+                              <div className="font-medium capitalize">
+                                {cat}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {data.count} products
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-semibold">
+                                {formatCurrency(data.totalValue)}
+                              </div>
+                              <div className="text-sm text-amber-600">
+                                {data.lowStock} low stock
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold">{formatCurrency(data.totalValue)}</div>
-                            <div className="text-sm text-amber-600">
-                              {data.lowStock} low stock
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -513,26 +609,39 @@ const POSReports = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle>Low Stock Products</CardTitle>
-                      <CardDescription>Products that need restocking</CardDescription>
+                      <CardDescription>
+                        Products that need restocking
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {inventoryReport.lowStockProducts.slice(0, 10).map((product) => (
-                          <div key={product.id} className="flex items-center justify-between p-3 border rounded">
-                            <div>
-                              <div className="font-medium">{product.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                SKU: {product.sku} | Category: {product.category}
+                        {inventoryReport.lowStockProducts
+                          .slice(0, 10)
+                          .map((product) => (
+                            <div
+                              key={product.id}
+                              className="flex items-center justify-between p-3 border rounded"
+                            >
+                              <div>
+                                <div className="font-medium">
+                                  {product.name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  SKU: {product.sku} | Category:{" "}
+                                  {product.category}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-semibold">
+                                  {formatCurrency(product.price)}
+                                </div>
+                                <div className="text-sm text-red-600">
+                                  Stock: {product.stockQuantity} (Min:{" "}
+                                  {product.lowStockThreshold})
+                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="font-semibold">{formatCurrency(product.price)}</div>
-                              <div className="text-sm text-red-600">
-                                Stock: {product.stockQuantity} (Min: {product.lowStockThreshold})
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -541,7 +650,9 @@ const POSReports = () => {
             ) : (
               <div className="text-center py-12">
                 <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No inventory data available</h3>
+                <h3 className="mt-4 text-lg font-semibold">
+                  No inventory data available
+                </h3>
                 <p className="mt-2 text-muted-foreground">
                   Try adjusting your filters or check back later
                 </p>
@@ -561,22 +672,24 @@ const POSReports = () => {
                 <div className="grid gap-4 md:grid-cols-5">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Shifts</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Shifts
+                      </CardTitle>
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
                         {shiftsReport.summary.totalShifts}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        All time
-                      </p>
+                      <p className="text-xs text-muted-foreground">All time</p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Open Shifts</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Open Shifts
+                      </CardTitle>
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -591,22 +704,24 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Closed Shifts</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Closed Shifts
+                      </CardTitle>
                       <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold text-gray-600">
                         {shiftsReport.summary.closedShifts}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Completed
-                      </p>
+                      <p className="text-xs text-muted-foreground">Completed</p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Sales
+                      </CardTitle>
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -621,7 +736,9 @@ const POSReports = () => {
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Transactions
+                      </CardTitle>
                       <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -639,26 +756,35 @@ const POSReports = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Cashier Performance</CardTitle>
-                    <CardDescription>Sales performance by cashier</CardDescription>
+                    <CardDescription>
+                      Sales performance by cashier
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {Object.entries(shiftsReport.cashierSummary).map(([cashier, data]) => (
-                        <div key={cashier} className="flex items-center justify-between p-3 border rounded">
-                          <div>
-                            <div className="font-medium">{cashier}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {data.shifts} shifts
+                      {Object.entries(shiftsReport.cashierSummary).map(
+                        ([cashier, data]) => (
+                          <div
+                            key={cashier}
+                            className="flex items-center justify-between p-3 border rounded"
+                          >
+                            <div>
+                              <div className="font-medium">{cashier}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {data.shifts} shifts
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-semibold">
+                                {formatCurrency(data.totalSales)}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {data.totalTransactions} transactions
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold">{formatCurrency(data.totalSales)}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {data.totalTransactions} transactions
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -666,7 +792,9 @@ const POSReports = () => {
             ) : (
               <div className="text-center py-12">
                 <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No shifts data available</h3>
+                <h3 className="mt-4 text-lg font-semibold">
+                  No shifts data available
+                </h3>
                 <p className="mt-2 text-muted-foreground">
                   Try adjusting your filters or check back later
                 </p>

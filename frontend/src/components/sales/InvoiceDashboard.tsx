@@ -27,7 +27,13 @@ interface InvoiceDashboardProps {
 }
 
 export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
-  const { metrics, recentInvoices, overdueInvoices, topCustomers, monthlyRevenue } = dashboard;
+  const {
+    metrics,
+    recentInvoices,
+    overdueInvoices,
+    topCustomers,
+    monthlyRevenue,
+  } = dashboard;
 
   return (
     <div className="space-y-6">
@@ -40,7 +46,9 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                 <FileText className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.totalInvoices}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.totalInvoices}
+                </p>
                 <p className="text-sm text-gray-600">Total Invoices</p>
               </div>
             </div>
@@ -54,7 +62,9 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.paidInvoices}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.paidInvoices}
+                </p>
                 <p className="text-sm text-gray-600">Paid Invoices</p>
               </div>
             </div>
@@ -68,7 +78,9 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.overdueInvoices}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.overdueInvoices}
+                </p>
                 <p className="text-sm text-gray-600">Overdue Invoices</p>
               </div>
             </div>
@@ -82,7 +94,9 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                 <Clock className="h-6 w-6 text-gray-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{metrics.draftInvoices}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.draftInvoices}
+                </p>
                 <p className="text-sm text-gray-600">Draft Invoices</p>
               </div>
             </div>
@@ -120,9 +134,7 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
             <p className="text-3xl font-bold text-orange-600">
               {InvoiceService.formatCurrency(metrics.outstandingAmount)}
             </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Awaiting payment
-            </p>
+            <p className="text-sm text-gray-600 mt-2">Awaiting payment</p>
           </CardContent>
         </Card>
 
@@ -137,9 +149,7 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
             <p className="text-3xl font-bold text-red-600">
               {InvoiceService.formatCurrency(metrics.overdueAmount)}
             </p>
-            <p className="text-sm text-gray-600 mt-2">
-              Past due date
-            </p>
+            <p className="text-sm text-gray-600 mt-2">Past due date</p>
           </CardContent>
         </Card>
       </div>
@@ -168,13 +178,20 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                     <h4 className="font-medium text-gray-900">
                       {invoice.invoiceNumber}
                     </h4>
-                    <p className="text-sm text-gray-600">{invoice.customerName}</p>
+                    <p className="text-sm text-gray-600">
+                      {invoice.customerName}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      {InvoiceService.formatCurrency(invoice.total, invoice.currency)}
+                      {InvoiceService.formatCurrency(
+                        invoice.total,
+                        invoice.currency,
+                      )}
                     </p>
-                    <Badge className={InvoiceService.getStatusColor(invoice.status)}>
+                    <Badge
+                      className={InvoiceService.getStatusColor(invoice.status)}
+                    >
                       {InvoiceService.getStatusLabel(invoice.status)}
                     </Badge>
                   </div>
@@ -209,8 +226,12 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                       </span>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900">{customer.name}</h4>
-                      <p className="text-sm text-gray-600">{customer.count} invoices</p>
+                      <h4 className="font-medium text-gray-900">
+                        {customer.name}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {customer.count} invoices
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -239,10 +260,16 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
         <CardContent>
           <div className="h-64 flex items-end justify-between gap-2">
             {monthlyRevenue.map((month, index) => (
-              <div key={month.month} className="flex-1 flex flex-col items-center">
-                <div className="w-full bg-blue-100 rounded-t-sm" style={{
-                  height: `${Math.max((month.revenue / Math.max(...monthlyRevenue.map(m => m.revenue))) * 200, 20)}px`
-                }}></div>
+              <div
+                key={month.month}
+                className="flex-1 flex flex-col items-center"
+              >
+                <div
+                  className="w-full bg-blue-100 rounded-t-sm"
+                  style={{
+                    height: `${Math.max((month.revenue / Math.max(...monthlyRevenue.map((m) => m.revenue))) * 200, 20)}px`,
+                  }}
+                ></div>
                 <p className="text-xs text-gray-600 mt-2 text-center">
                   {month.month}
                 </p>
@@ -279,13 +306,17 @@ export function InvoiceDashboard({ dashboard }: InvoiceDashboardProps) {
                       {invoice.invoiceNumber} - {invoice.customerName}
                     </h4>
                     <p className="text-sm text-gray-600">
-                      Due: {InvoiceService.formatDate(invoice.dueDate)} • 
-                      {InvoiceService.getDaysOverdue(invoice.dueDate)} days overdue
+                      Due: {InvoiceService.formatDate(invoice.dueDate)} •
+                      {InvoiceService.getDaysOverdue(invoice.dueDate)} days
+                      overdue
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-red-600">
-                      {InvoiceService.formatCurrency(invoice.total, invoice.currency)}
+                      {InvoiceService.formatCurrency(
+                        invoice.total,
+                        invoice.currency,
+                      )}
                     </p>
                   </div>
                 </div>

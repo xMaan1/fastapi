@@ -2124,3 +2124,498 @@ def get_pos_dashboard_data(db: Session, tenant_id: str):
             "dailySales": daily_sales
         }
     }
+
+# Inventory Database Models
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Warehouse information
+    name = Column(String, nullable=False)
+    code = Column(String, nullable=False, unique=True)
+    description = Column(Text)
+    address = Column(String, nullable=False)
+    city = Column(String, nullable=False)
+    state = Column(String, nullable=False)
+    country = Column(String, nullable=False)
+    postalCode = Column(String, nullable=False)
+    phone = Column(String)
+    email = Column(String)
+    managerId = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    isActive = Column(Boolean, default=True)
+    capacity = Column(Float)  # in cubic meters
+    usedCapacity = Column(Float, default=0.0)
+    temperatureZone = Column(String)
+    securityLevel = Column(String)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User", foreign_keys=[createdBy])
+    manager = relationship("User", foreign_keys=[managerId])
+
+class StorageLocation(Base):
+    __tablename__ = "storage_locations"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Location information
+    warehouseId = Column(UUID(as_uuid=True), ForeignKey("warehouses.id"), nullable=False)
+    name = Column(String, nullable=False)
+    code = Column(String, nullable=False)
+    description = Column(Text)
+    locationType = Column(String, nullable=False)  # shelf, rack, bin, area, etc.
+    parentLocationId = Column(UUID(as_uuid=True), ForeignKey("storage_locations.id"))
+    capacity = Column(Float)
+    usedCapacity = Column(Float, default=0.0)
+    isActive = Column(Boolean, default=True)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    warehouse = relationship("Warehouse")
+    parentLocation = relationship("StorageLocation", remote_side=[id])
+
+class StockMovement(Base):
+    __tablename__ = "stock_movements"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Movement information
+    productId = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    warehouseId = Column(UUID(as_uuid=True), ForeignKey("warehouses.id"), nullable=False)
+    locationId = Column(UUID(as_uuid=True), ForeignKey("storage_locations.id"))
+    movementType = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unitCost = Column(Float, nullable=False)
+    status = Column(String, default="pending")
+    referenceNumber = Column(String)
+    referenceType = Column(String)  # PO, SO, Transfer, etc.
+    notes = Column(Text)
+    batchNumber = Column(String)
+    serialNumber = Column(String)
+    expiryDate = Column(DateTime)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    product = relationship("Product")
+    warehouse = relationship("Warehouse")
+    location = relationship("StorageLocation")
+
+class Supplier(Base):
+    __tablename__ = "suppliers"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Supplier information
+    name = Column(String, nullable=False)
+    code = Column(String, nullable=False, unique=True)
+    contactPerson = Column(String)
+    email = Column(String)
+    phone = Column(String)
+    address = Column(String)
+    city = Column(String)
+    state = Column(String)
+    country = Column(String)
+    postalCode = Column(String)
+    website = Column(String)
+    paymentTerms = Column(String)
+    creditLimit = Column(Float)
+    isActive = Column(Boolean, default=True)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+
+class PurchaseOrder(Base):
+    __tablename__ = "purchase_orders"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Purchase order information
+    orderNumber = Column(String, nullable=False, unique=True)
+    supplierId = Column(UUID(as_uuid=True), ForeignKey("suppliers.id"), nullable=False)
+    supplierName = Column(String, nullable=False)
+    expectedDeliveryDate = Column(DateTime, nullable=False)
+    status = Column(String, default="draft")
+    totalAmount = Column(Float, default=0.0)
+    notes = Column(Text)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    supplier = relationship("Supplier")
+
+class PurchaseOrderItem(Base):
+    __tablename__ = "purchase_order_items"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    purchaseOrderId = Column(UUID(as_uuid=True), ForeignKey("purchase_orders.id"), nullable=False)
+    
+    # Item information
+    productId = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    productName = Column(String, nullable=False)
+    sku = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unitCost = Column(Float, nullable=False)
+    totalCost = Column(Float, nullable=False)
+    receivedQuantity = Column(Integer, default=0)
+    notes = Column(Text)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    purchaseOrder = relationship("PurchaseOrder")
+    product = relationship("Product")
+
+class Receiving(Base):
+    __tablename__ = "receivings"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenantId = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    createdBy = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    # Receiving information
+    receivingNumber = Column(String, nullable=False, unique=True)
+    purchaseOrderId = Column(UUID(as_uuid=True), ForeignKey("purchase_orders.id"), nullable=False)
+    warehouseId = Column(UUID(as_uuid=True), ForeignKey("warehouses.id"), nullable=False)
+    status = Column(String, default="pending")
+    receivedDate = Column(DateTime, nullable=False)
+    notes = Column(Text)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    tenant = relationship("Tenant")
+    createdByUser = relationship("User")
+    purchaseOrder = relationship("PurchaseOrder")
+    warehouse = relationship("Warehouse")
+
+class ReceivingItem(Base):
+    __tablename__ = "receiving_items"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    receivingId = Column(UUID(as_uuid=True), ForeignKey("receivings.id"), nullable=False)
+    
+    # Item information
+    purchaseOrderId = Column(UUID(as_uuid=True), ForeignKey("purchase_orders.id"), nullable=False)
+    productId = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    productName = Column(String, nullable=False)
+    sku = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unitCost = Column(Float, nullable=False)
+    totalCost = Column(Float, nullable=False)
+    receivedQuantity = Column(Integer, nullable=False)
+    batchNumber = Column(String)
+    serialNumber = Column(String)
+    expiryDate = Column(DateTime)
+    notes = Column(Text)
+    
+    # Timestamps
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    receiving = relationship("Receiving")
+    purchaseOrder = relationship("PurchaseOrder")
+    product = relationship("Product")
+
+# Inventory Database Functions
+def get_warehouses(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Warehouse).filter(Warehouse.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_warehouse_by_id(db: Session, warehouse_id: str, tenant_id: str):
+    return db.query(Warehouse).filter(Warehouse.id == warehouse_id, Warehouse.tenantId == tenant_id).first()
+
+def create_warehouse(db: Session, warehouse_data: dict):
+    db_warehouse = Warehouse(**warehouse_data)
+    db.add(db_warehouse)
+    db.commit()
+    db.refresh(db_warehouse)
+    return db_warehouse
+
+def update_warehouse(db: Session, warehouse_id: str, warehouse_update: dict, tenant_id: str):
+    warehouse = get_warehouse_by_id(db, warehouse_id, tenant_id)
+    if warehouse:
+        for key, value in warehouse_update.items():
+            if hasattr(warehouse, key) and value is not None:
+                setattr(warehouse, key, value)
+        warehouse.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(warehouse)
+    return warehouse
+
+def delete_warehouse(db: Session, warehouse_id: str, tenant_id: str):
+    warehouse = get_warehouse_by_id(db, warehouse_id, tenant_id)
+    if warehouse:
+        db.delete(warehouse)
+        db.commit()
+        return True
+    return False
+
+def get_storage_locations(db: Session, tenant_id: str, warehouse_id: str = None, skip: int = 0, limit: int = 100):
+    query = db.query(StorageLocation).filter(StorageLocation.tenantId == tenant_id)
+    if warehouse_id:
+        query = query.filter(StorageLocation.warehouseId == warehouse_id)
+    return query.offset(skip).limit(limit).all()
+
+def get_storage_location_by_id(db: Session, location_id: str, tenant_id: str):
+    return db.query(StorageLocation).filter(StorageLocation.id == location_id, StorageLocation.tenantId == tenant_id).first()
+
+def create_storage_location(db: Session, location_data: dict):
+    db_location = StorageLocation(**location_data)
+    db.add(db_location)
+    db.commit()
+    db.refresh(db_location)
+    return db_location
+
+def update_storage_location(db: Session, location_id: str, location_update: dict, tenant_id: str):
+    location = get_storage_location_by_id(db, location_id, tenant_id)
+    if location:
+        for key, value in location_update.items():
+            if hasattr(location, key) and value is not None:
+                setattr(location, key, value)
+        location.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(location)
+    return location
+
+def delete_storage_location(db: Session, location_id: str, tenant_id: str):
+    location = get_storage_location_by_id(db, location_id, tenant_id)
+    if location:
+        db.delete(location)
+        db.commit()
+        return True
+    return False
+
+def get_stock_movements(db: Session, tenant_id: str, product_id: str = None, warehouse_id: str = None, skip: int = 0, limit: int = 100):
+    query = db.query(StockMovement).filter(StockMovement.tenantId == tenant_id)
+    if product_id:
+        query = query.filter(StockMovement.productId == product_id)
+    if warehouse_id:
+        query = query.filter(StockMovement.warehouseId == warehouse_id)
+    return query.order_by(StockMovement.createdAt.desc()).offset(skip).limit(limit).all()
+
+def get_stock_movement_by_id(db: Session, movement_id: str, tenant_id: str):
+    return db.query(StockMovement).filter(StockMovement.id == movement_id, StockMovement.tenantId == tenant_id).first()
+
+def create_stock_movement(db: Session, movement_data: dict):
+    db_movement = StockMovement(**movement_data)
+    db.add(db_movement)
+    db.commit()
+    db.refresh(db_movement)
+    return db_movement
+
+def update_stock_movement(db: Session, movement_id: str, movement_update: dict, tenant_id: str):
+    movement = get_stock_movement_by_id(db, movement_id, tenant_id)
+    if movement:
+        for key, value in movement_update.items():
+            if hasattr(movement, key) and value is not None:
+                setattr(movement, key, value)
+        movement.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(movement)
+    return movement
+
+def get_suppliers(db: Session, tenant_id: str, skip: int = 0, limit: int = 100):
+    return db.query(Supplier).filter(Supplier.tenantId == tenant_id).offset(skip).limit(limit).all()
+
+def get_supplier_by_id(db: Session, supplier_id: str, tenant_id: str):
+    return db.query(Supplier).filter(Supplier.id == supplier_id, Supplier.tenantId == tenant_id).first()
+
+def create_supplier(db: Session, supplier_data: dict):
+    db_supplier = Supplier(**supplier_data)
+    db.add(db_supplier)
+    db.commit()
+    db.refresh(db_supplier)
+    return db_supplier
+
+def update_supplier(db: Session, supplier_id: str, supplier_update: dict, tenant_id: str):
+    supplier = get_supplier_by_id(db, supplier_id, tenant_id)
+    if supplier:
+        for key, value in supplier_update.items():
+            if hasattr(supplier, key) and value is not None:
+                setattr(supplier, key, value)
+        supplier.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(supplier)
+    return supplier
+
+def delete_supplier(db: Session, supplier_id: str, tenant_id: str):
+    supplier = get_supplier_by_id(db, supplier_id, tenant_id)
+    if supplier:
+        db.delete(supplier)
+        db.commit()
+        return True
+    return False
+
+def get_purchase_orders(db: Session, tenant_id: str, status: str = None, skip: int = 0, limit: int = 100):
+    query = db.query(PurchaseOrder).filter(PurchaseOrder.tenantId == tenant_id)
+    if status:
+        query = query.filter(PurchaseOrder.status == status)
+    return query.order_by(PurchaseOrder.createdAt.desc()).offset(skip).limit(limit).all()
+
+def get_purchase_order_by_id(db: Session, order_id: str, tenant_id: str):
+    return db.query(PurchaseOrder).filter(PurchaseOrder.id == order_id, PurchaseOrder.tenantId == tenant_id).first()
+
+def create_purchase_order(db: Session, order_data: dict):
+    db_order = PurchaseOrder(**order_data)
+    db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+
+def update_purchase_order(db: Session, order_id: str, order_update: dict, tenant_id: str):
+    order = get_purchase_order_by_id(db, order_id, tenant_id)
+    if order:
+        for key, value in order_update.items():
+            if hasattr(order, key) and value is not None:
+                setattr(order, key, value)
+        order.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(order)
+    return order
+
+def delete_purchase_order(db: Session, order_id: str, tenant_id: str):
+    order = get_purchase_order_by_id(db, order_id, tenant_id)
+    if order:
+        db.delete(order)
+        db.commit()
+        return True
+    return False
+
+def get_receivings(db: Session, tenant_id: str, status: str = None, skip: int = 0, limit: int = 100):
+    query = db.query(Receiving).filter(Receiving.tenantId == tenant_id)
+    if status:
+        query = query.filter(Receiving.status == status)
+    return query.order_by(Receiving.createdAt.desc()).offset(skip).limit(limit).all()
+
+def get_receiving_by_id(db: Session, receiving_id: str, tenant_id: str):
+    return db.query(Receiving).filter(Receiving.id == receiving_id, Receiving.tenantId == tenant_id).first()
+
+def create_receiving(db: Session, receiving_data: dict):
+    db_receiving = Receiving(**receiving_data)
+    db.add(db_receiving)
+    db.commit()
+    db.refresh(db_receiving)
+    return db_receiving
+
+def update_receiving(db: Session, receiving_id: str, receiving_update: dict, tenant_id: str):
+    receiving = get_receiving_by_id(db, receiving_id, tenant_id)
+    if receiving:
+        for key, value in receiving_update.items():
+            if hasattr(receiving, key) and value is not None:
+                setattr(receiving, key, value)
+        receiving.updatedAt = datetime.utcnow()
+        db.commit()
+        db.refresh(receiving)
+    return receiving
+
+def delete_receiving(db: Session, receiving_id: str, tenant_id: str):
+    receiving = get_receiving_by_id(db, receiving_id, tenant_id)
+    if receiving:
+        db.delete(receiving)
+        db.commit()
+        return True
+    return False
+
+def get_inventory_dashboard_stats(db: Session, tenant_id: str):
+    # Get basic counts
+    total_products = db.query(Product).filter(Product.tenantId == tenant_id, Product.isActive == True).count()
+    low_stock_products = db.query(Product).filter(
+        Product.tenantId == tenant_id,
+        Product.isActive == True,
+        Product.stockQuantity <= Product.minStockLevel
+    ).count()
+    out_of_stock_products = db.query(Product).filter(
+        Product.tenantId == tenant_id,
+        Product.isActive == True,
+        Product.stockQuantity == 0
+    ).count()
+    total_warehouses = db.query(Warehouse).filter(Warehouse.tenantId == tenant_id, Warehouse.isActive == True).count()
+    total_suppliers = db.query(Supplier).filter(Supplier.tenantId == tenant_id, Supplier.isActive == True).count()
+    pending_purchase_orders = db.query(PurchaseOrder).filter(
+        PurchaseOrder.tenantId == tenant_id,
+        PurchaseOrder.status.in_(["draft", "submitted", "approved", "ordered"])
+    ).count()
+    pending_receivings = db.query(Receiving).filter(
+        Receiving.tenantId == tenant_id,
+        Receiving.status.in_(["pending", "in_progress"])
+    ).count()
+    
+    # Calculate total stock value
+    total_stock_value = db.query(
+        func.sum(Product.stockQuantity * Product.costPrice)
+    ).filter(
+        Product.tenantId == tenant_id,
+        Product.isActive == True
+    ).scalar() or 0.0
+    
+    # Get low stock alerts
+    low_stock_alerts = []
+    low_stock_products_list = db.query(Product).filter(
+        Product.tenantId == tenant_id,
+        Product.isActive == True,
+        Product.stockQuantity <= Product.minStockLevel
+    ).limit(10).all()
+    
+    for product in low_stock_products_list:
+        alert_type = "out_of_stock" if product.stockQuantity == 0 else "low_stock"
+        message = f"Product {product.name} (SKU: {product.sku}) is running low on stock. Current: {product.stockQuantity}, Minimum: {product.minStockLevel}"
+        
+        low_stock_alerts.append({
+            "productId": str(product.id),
+            "productName": product.name,
+            "sku": product.sku,
+            "currentStock": product.stockQuantity,
+            "minStockLevel": product.minStockLevel,
+            "alertType": alert_type,
+            "message": message
+        })
+    
+    return {
+        "totalProducts": total_products,
+        "lowStockProducts": low_stock_products,
+        "outOfStockProducts": out_of_stock_products,
+        "totalWarehouses": total_warehouses,
+        "totalSuppliers": total_suppliers,
+        "pendingPurchaseOrders": pending_purchase_orders,
+        "pendingReceivings": pending_receivings,
+        "totalStockValue": total_stock_value,
+        "lowStockAlerts": low_stock_alerts
+    }

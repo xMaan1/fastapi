@@ -1,17 +1,49 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import { Badge } from "@/src/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
-import { Product, ProductCategory, ProductCreate, ProductUpdate } from "@/src/models/pos";
-import { Package, Plus, Search, Edit, Trash2, AlertTriangle } from "lucide-react";
+import {
+  Product,
+  ProductCategory,
+  ProductCreate,
+  ProductUpdate,
+} from "@/src/models/pos";
+import {
+  Package,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
 import { DashboardLayout } from "../../../components/layout";
 
 interface ProductFormData {
@@ -34,7 +66,9 @@ const POSProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategory>(ProductCategory.OTHER);
+  const [selectedCategory, setSelectedCategory] = useState<ProductCategory>(
+    ProductCategory.OTHER,
+  );
   const [showLowStock, setShowLowStock] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -50,7 +84,7 @@ const POSProducts = () => {
     barcode: "",
     expiryDate: "",
     batchNumber: "",
-    serialNumber: ""
+    serialNumber: "",
   });
 
   const categories = Object.values(ProductCategory);
@@ -82,7 +116,7 @@ const POSProducts = () => {
         // Create new product
         await apiService.post("/pos/products", formData);
       }
-      
+
       setEditingProduct(null);
       setFormData({
         name: "",
@@ -96,7 +130,7 @@ const POSProducts = () => {
         barcode: "",
         expiryDate: "",
         batchNumber: "",
-        serialNumber: ""
+        serialNumber: "",
       });
       fetchProducts();
     } catch (error) {
@@ -118,14 +152,14 @@ const POSProducts = () => {
       barcode: product.barcode || "",
       expiryDate: product.expiryDate || "",
       batchNumber: product.batchNumber || "",
-      serialNumber: product.serialNumber || ""
+      serialNumber: product.serialNumber || "",
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    
+
     try {
       await apiService.delete(`/pos/products/${productId}`);
       fetchProducts();
@@ -147,7 +181,7 @@ const POSProducts = () => {
       barcode: "",
       expiryDate: "",
       batchNumber: "",
-      serialNumber: ""
+      serialNumber: "",
     });
   };
 
@@ -157,28 +191,33 @@ const POSProducts = () => {
     setIsDialogOpen(true);
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === ProductCategory.OTHER || product.category === selectedCategory;
-    
-    const matchesLowStock = !showLowStock || product.stockQuantity <= product.lowStockThreshold;
-    
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.barcode &&
+        product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCategory =
+      selectedCategory === ProductCategory.OTHER ||
+      product.category === selectedCategory;
+
+    const matchesLowStock =
+      !showLowStock || product.stockQuantity <= product.lowStockThreshold;
+
     return matchesSearch && matchesCategory && matchesLowStock;
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US');
+    return new Date(dateString).toLocaleDateString("en-US");
   };
 
   if (loading) {
@@ -202,7 +241,7 @@ const POSProducts = () => {
               Manage your product catalog and inventory
             </p>
           </div>
-          
+
           <Button onClick={openNewProductDialog}>
             <Plus className="mr-2 h-4 w-4" />
             Add Product
@@ -232,15 +271,22 @@ const POSProducts = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={selectedCategory} onValueChange={(value: string) => setSelectedCategory(value as ProductCategory)}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={(value: string) =>
+                    setSelectedCategory(value as ProductCategory)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={ProductCategory.OTHER}>All Categories</SelectItem>
+                    <SelectItem value={ProductCategory.OTHER}>
+                      All Categories
+                    </SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -249,10 +295,13 @@ const POSProducts = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="stock">Stock Status</Label>
-                <Select value={showLowStock ? "low" : "all"} onValueChange={(value) => setShowLowStock(value === "low")}>
+                <Select
+                  value={showLowStock ? "low" : "all"}
+                  onValueChange={(value) => setShowLowStock(value === "low")}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -262,10 +311,10 @@ const POSProducts = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-end">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedCategory(ProductCategory.OTHER);
@@ -309,40 +358,44 @@ const POSProducts = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Price</span>
-                  <span className="font-semibold">{formatCurrency(product.price)}</span>
+                  <span className="font-semibold">
+                    {formatCurrency(product.price)}
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Stock</span>
                   <div className="flex items-center space-x-2">
                     <span className="font-medium">{product.stockQuantity}</span>
-                    <span className="text-xs text-muted-foreground">pieces</span>
+                    <span className="text-xs text-muted-foreground">
+                      pieces
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Category</span>
+                  <span className="text-sm text-muted-foreground">
+                    Category
+                  </span>
                   <Badge variant="outline" className="text-xs">
                     {product.category}
                   </Badge>
                 </div>
-                
+
                 {product.stockQuantity <= product.lowStockThreshold && (
                   <div className="flex items-center space-x-2 text-amber-600">
                     <AlertTriangle className="h-4 w-4" />
                     <span className="text-xs font-medium">Low Stock</span>
                   </div>
                 )}
-                
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Added: {formatDate(product.createdAt)}</span>
-                  <Badge variant="default">
-                    Active
-                  </Badge>
+                  <Badge variant="default">Active</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -354,10 +407,9 @@ const POSProducts = () => {
             <Package className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-semibold">No products found</h3>
             <p className="mt-2 text-muted-foreground">
-              {searchTerm || selectedCategory || showLowStock 
+              {searchTerm || selectedCategory || showLowStock
                 ? "Try adjusting your filters or search terms."
-                : "Get started by adding your first product."
-              }
+                : "Get started by adding your first product."}
             </p>
             {!searchTerm && !selectedCategory && !showLowStock && (
               <Button onClick={openNewProductDialog} className="mt-4">
@@ -376,13 +428,12 @@ const POSProducts = () => {
                 {editingProduct ? "Edit Product" : "Add New Product"}
               </DialogTitle>
               <DialogDescription>
-                {editingProduct 
+                {editingProduct
                   ? "Update the product information below."
-                  : "Fill in the product details to add it to your catalog."
-                }
+                  : "Fill in the product details to add it to your catalog."}
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -390,38 +441,49 @@ const POSProducts = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU *</Label>
                   <Input
                     id="sku"
                     value={formData.sku}
-                    onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sku: e.target.value })
+                    }
                     required
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Input
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   placeholder="Product description..."
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
                   <Select
                     value={formData.category}
-                    onValueChange={(value: string) => setFormData({ ...formData, category: value as ProductCategory })}
+                    onValueChange={(value: string) =>
+                      setFormData({
+                        ...formData,
+                        category: value as ProductCategory,
+                      })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
@@ -436,7 +498,7 @@ const POSProducts = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price *</Label>
@@ -446,11 +508,16 @@ const POSProducts = () => {
                     step="0.01"
                     min="0"
                     value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        price: parseFloat(e.target.value) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="costPrice">Cost Price *</Label>
                   <Input
@@ -459,11 +526,16 @@ const POSProducts = () => {
                     step="0.01"
                     min="0"
                     value={formData.costPrice}
-                    onChange={(e) => setFormData({...formData, costPrice: parseFloat(e.target.value) || 0})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        costPrice: parseFloat(e.target.value) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="stockQuantity">Stock Quantity *</Label>
                   <Input
@@ -471,12 +543,17 @@ const POSProducts = () => {
                     type="number"
                     min="0"
                     value={formData.stockQuantity}
-                    onChange={(e) => setFormData({...formData, stockQuantity: parseInt(e.target.value) || 0})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stockQuantity: parseInt(e.target.value) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="lowStockThreshold">Low Stock Threshold</Label>
@@ -485,21 +562,28 @@ const POSProducts = () => {
                     type="number"
                     min="0"
                     value={formData.lowStockThreshold}
-                    onChange={(e) => setFormData({...formData, lowStockThreshold: parseInt(e.target.value) || 0})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        lowStockThreshold: parseInt(e.target.value) || 0,
+                      })
+                    }
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="barcode">Barcode</Label>
                   <Input
                     id="barcode"
                     value={formData.barcode}
-                    onChange={(e) => setFormData({...formData, barcode: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, barcode: e.target.value })
+                    }
                     placeholder="Product barcode..."
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="expiryDate">Expiry Date</Label>
@@ -507,35 +591,45 @@ const POSProducts = () => {
                     id="expiryDate"
                     type="date"
                     value={formData.expiryDate}
-                    onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, expiryDate: e.target.value })
+                    }
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="batchNumber">Batch Number</Label>
                   <Input
                     id="batchNumber"
                     value={formData.batchNumber}
-                    onChange={(e) => setFormData({...formData, batchNumber: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batchNumber: e.target.value })
+                    }
                     placeholder="Batch number..."
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="serialNumber">Serial Number</Label>
                   <Input
                     id="serialNumber"
                     value={formData.serialNumber}
-                    onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, serialNumber: e.target.value })
+                    }
                     placeholder="Serial number..."
                   />
                 </div>
               </div>
-              
+
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">

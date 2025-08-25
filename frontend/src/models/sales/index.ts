@@ -523,6 +523,6 @@ export interface SalesActivitiesResponse {
   };
 }
 
-export * from './Invoice';
-export * from './Payment';
-export * from './InvoiceDashboard';
+export * from "./Invoice";
+export * from "./Payment";
+export * from "./InvoiceDashboard";

@@ -75,10 +75,15 @@ export default function HRMJobPostingsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showCustomDepartmentDialog, setShowCustomDepartmentDialog] = useState(false);
-  
+  const [showCustomDepartmentDialog, setShowCustomDepartmentDialog] =
+    useState(false);
+
   // Custom options hook
-  const { customDepartments, createCustomDepartment, loading: customOptionsLoading } = useCustomOptions();
+  const {
+    customDepartments,
+    createCustomDepartment,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
   const [formData, setFormData] = useState<JobPostingCreate>({
     title: "",
     department: Department.ENGINEERING,
@@ -122,11 +127,14 @@ export default function HRMJobPostingsPage() {
     setSearch("");
   };
 
-  const handleCreateCustomDepartment = async (name: string, description: string) => {
+  const handleCreateCustomDepartment = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomDepartment(name, description);
     } catch (error) {
-      console.error('Failed to create custom department:', error);
+      console.error("Failed to create custom department:", error);
     }
   };
 
@@ -650,15 +658,20 @@ export default function HRMJobPostingsPage() {
                         {dept.replace("_", " ").toUpperCase()}
                       </SelectItem>
                     ))}
-                    
+
                     {/* Custom Departments */}
-                    {customDepartments && customDepartments.length > 0 && customDepartments.map((customDept) => (
-                      <SelectItem key={customDept.id} value={customDept.id}>
-                        {customDept.name}
-                      </SelectItem>
-                    ))}
-                    
-                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                    {customDepartments &&
+                      customDepartments.length > 0 &&
+                      customDepartments.map((customDept) => (
+                        <SelectItem key={customDept.id} value={customDept.id}>
+                          {customDept.name}
+                        </SelectItem>
+                      ))}
+
+                    <SelectItem
+                      value="create_new"
+                      className="font-semibold text-blue-600"
+                    >
                       + Create New Department
                     </SelectItem>
                   </SelectContent>

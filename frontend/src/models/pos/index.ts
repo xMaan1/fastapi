@@ -6,19 +6,19 @@ export enum POSPaymentMethod {
   DEBIT_CARD = "debit_card",
   BANK_TRANSFER = "bank_transfer",
   CHECK = "check",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 export enum POSTransactionStatus {
   PENDING = "pending",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
-  REFUNDED = "refunded"
+  REFUNDED = "refunded",
 }
 
 export enum POSShiftStatus {
   OPEN = "open",
-  CLOSED = "closed"
+  CLOSED = "closed",
 }
 
 export enum ProductCategory {
@@ -32,7 +32,7 @@ export enum ProductCategory {
   AUTOMOTIVE = "automotive",
   SPORTS = "sports",
   BOOKS = "books",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 // Product Types
@@ -124,7 +124,7 @@ export interface POSTransaction {
 export interface POSTransactionCreate {
   customerId?: string;
   customerName?: string;
-  items: Omit<POSTransactionItem, 'id' | 'total'>[];
+  items: Omit<POSTransactionItem, "id" | "total">[];
   taxRate: number;
   discount: number;
   paymentMethod: POSPaymentMethod;

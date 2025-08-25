@@ -1,17 +1,45 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
 import { Badge } from "@/src/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/src/components/ui/dialog";
 import { useAuth } from "@/src/hooks/useAuth";
 import { apiService } from "@/src/services/ApiService";
 import { POSShift, POSShiftStatus } from "@/src/models/pos";
-import { Clock, Plus, Search, Filter, Eye, CheckCircle, XCircle } from "lucide-react";
+import {
+  Clock,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { DashboardLayout } from "../../../components/layout";
 
 const POSShifts = () => {
@@ -19,13 +47,15 @@ const POSShifts = () => {
   const [shifts, setShifts] = useState<POSShift[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<POSShiftStatus | "all">("all");
+  const [selectedStatus, setSelectedStatus] = useState<POSShiftStatus | "all">(
+    "all",
+  );
   const [selectedShift, setSelectedShift] = useState<POSShift | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isNewShiftOpen, setIsNewShiftOpen] = useState(false);
   const [newShiftData, setNewShiftData] = useState({
     openingBalance: 0,
-    notes: ""
+    notes: "",
   });
 
   useEffect(() => {
@@ -47,12 +77,12 @@ const POSShifts = () => {
     try {
       const response = await apiService.post("/pos/shifts", {
         openingBalance: newShiftData.openingBalance,
-        notes: newShiftData.notes
+        notes: newShiftData.notes,
       });
-      
+
       setNewShiftData({
         openingBalance: 0,
-        notes: ""
+        notes: "",
       });
       setIsNewShiftOpen(false);
       fetchShifts();
@@ -63,12 +93,12 @@ const POSShifts = () => {
 
   const handleCloseShift = async (shiftId: string) => {
     if (!confirm("Are you sure you want to close this shift?")) return;
-    
+
     try {
       await apiService.put(`/pos/shifts/${shiftId}`, {
         status: "closed",
         closingBalance: 0, // This should be calculated from actual cash in drawer
-        notes: "Shift closed"
+        notes: "Shift closed",
       });
       fetchShifts();
     } catch (error) {
@@ -81,29 +111,31 @@ const POSShifts = () => {
     setIsDetailsOpen(true);
   };
 
-  const filteredShifts = shifts.filter(shift => {
-    const matchesSearch = shift.shiftNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         shift.cashierName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = selectedStatus === "all" || shift.status === selectedStatus;
-    
+  const filteredShifts = shifts.filter((shift) => {
+    const matchesSearch =
+      shift.shiftNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shift.cashierName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      selectedStatus === "all" || shift.status === selectedStatus;
+
     return matchesSearch && matchesStatus;
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -150,7 +182,7 @@ const POSShifts = () => {
               Manage cashier shifts and track daily operations
             </p>
           </div>
-          
+
           <Button onClick={() => setIsNewShiftOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Open New Shift
@@ -180,10 +212,15 @@ const POSShifts = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={selectedStatus} onValueChange={(value: string) => setSelectedStatus(value as POSShiftStatus | "all")}>
+                <Select
+                  value={selectedStatus}
+                  onValueChange={(value: string) =>
+                    setSelectedStatus(value as POSShiftStatus | "all")
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
@@ -197,10 +234,10 @@ const POSShifts = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex items-end">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedStatus("all");
@@ -223,7 +260,7 @@ const POSShifts = () => {
                     <div className="p-2 bg-blue-100 rounded-lg">
                       <Clock className="h-6 w-6 text-blue-600" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <h3 className="font-semibold text-lg">
@@ -233,46 +270,57 @@ const POSShifts = () => {
                           {shift.status}
                         </Badge>
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">
                           <span>Cashier:</span>
-                          <span className="font-medium">{shift.cashierName}</span>
+                          <span className="font-medium">
+                            {shift.cashierName}
+                          </span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-1">
                           <span>Opened:</span>
-                          <span className="font-medium">{formatDate(shift.openedAt)}</span>
+                          <span className="font-medium">
+                            {formatDate(shift.openedAt)}
+                          </span>
                         </div>
-                        
+
                         {shift.closedAt && (
                           <div className="flex items-center space-x-1">
                             <span>Closed:</span>
-                            <span className="font-medium">{formatDate(shift.closedAt)}</span>
+                            <span className="font-medium">
+                              {formatDate(shift.closedAt)}
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="text-right space-y-2">
                     <div className="text-lg font-semibold">
                       Opening: {formatCurrency(shift.openingBalance)}
                     </div>
-                    
+
                     {shift.closingBalance && (
                       <div className="text-lg font-semibold text-green-600">
                         Closing: {formatCurrency(shift.closingBalance)}
                       </div>
                     )}
-                    
+
                     {shift.status === POSShiftStatus.OPEN && (
                       <div className="text-sm text-muted-foreground">
-                        Duration: {Math.floor((Date.now() - new Date(shift.openedAt).getTime()) / (1000 * 60 * 60))}h
+                        Duration:{" "}
+                        {Math.floor(
+                          (Date.now() - new Date(shift.openedAt).getTime()) /
+                            (1000 * 60 * 60),
+                        )}
+                        h
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
@@ -282,7 +330,7 @@ const POSShifts = () => {
                       <Eye className="h-4 w-4 mr-2" />
                       Details
                     </Button>
-                    
+
                     {shift.status === POSShiftStatus.OPEN && (
                       <Button
                         variant="destructive"
@@ -306,8 +354,7 @@ const POSShifts = () => {
             <p className="mt-2 text-muted-foreground">
               {searchTerm || selectedStatus !== "all"
                 ? "Try adjusting your filters or search terms."
-                : "No shifts have been created yet."
-              }
+                : "No shifts have been created yet."}
             </p>
             {!searchTerm && selectedStatus === "all" && (
               <Button onClick={() => setIsNewShiftOpen(true)} className="mt-4">
@@ -327,7 +374,7 @@ const POSShifts = () => {
                 Start a new cashier shift with opening cash amount
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="openingBalance">Opening Cash Amount *</Label>
@@ -337,28 +384,42 @@ const POSShifts = () => {
                   step="0.01"
                   min="0"
                   value={newShiftData.openingBalance}
-                  onChange={(e) => setNewShiftData({...newShiftData, openingBalance: parseFloat(e.target.value) || 0})}
+                  onChange={(e) =>
+                    setNewShiftData({
+                      ...newShiftData,
+                      openingBalance: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   placeholder="0.00"
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Input
                   id="notes"
                   value={newShiftData.notes}
-                  onChange={(e) => setNewShiftData({...newShiftData, notes: e.target.value})}
+                  onChange={(e) =>
+                    setNewShiftData({ ...newShiftData, notes: e.target.value })
+                  }
                   placeholder="Optional shift notes..."
                 />
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsNewShiftOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsNewShiftOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleOpenShift} disabled={!newShiftData.openingBalance}>
+              <Button
+                onClick={handleOpenShift}
+                disabled={!newShiftData.openingBalance}
+              >
                 Open Shift
               </Button>
             </DialogFooter>
@@ -376,83 +437,115 @@ const POSShifts = () => {
                 Complete information about this shift
               </DialogDescription>
             </DialogHeader>
-            
+
             {selectedShift && (
               <div className="space-y-6">
                 {/* Shift Info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Shift Number</Label>
-                    <p className="font-semibold">#{selectedShift.shiftNumber}</p>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Shift Number
+                    </Label>
+                    <p className="font-semibold">
+                      #{selectedShift.shiftNumber}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </Label>
                     <Badge className={getStatusColor(selectedShift.status)}>
                       {selectedShift.status}
                     </Badge>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Cashier</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Cashier
+                    </Label>
                     <p>{selectedShift.cashierName}</p>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Opened At</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Opened At
+                    </Label>
                     <p>{formatDate(selectedShift.openedAt)}</p>
                   </div>
-                  
+
                   {selectedShift.closedAt && (
                     <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Closed At</Label>
+                      <Label className="text-sm font-medium text-muted-foreground">
+                        Closed At
+                      </Label>
                       <p>{formatDate(selectedShift.closedAt)}</p>
                     </div>
                   )}
-                  
+
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Opening Amount</Label>
-                    <p className="font-semibold">{formatCurrency(selectedShift.openingBalance)}</p>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Opening Amount
+                    </Label>
+                    <p className="font-semibold">
+                      {formatCurrency(selectedShift.openingBalance)}
+                    </p>
                   </div>
                 </div>
-                
+
                 {selectedShift.closingBalance && (
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Closing Amount</Label>
-                    <p className="font-semibold text-green-600">{formatCurrency(selectedShift.closingBalance)}</p>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Closing Amount
+                    </Label>
+                    <p className="font-semibold text-green-600">
+                      {formatCurrency(selectedShift.closingBalance)}
+                    </p>
                   </div>
                 )}
-                
+
                 {selectedShift.notes && (
                   <div>
-                    <Label className="text-sm font-medium text-muted-foreground">Notes</Label>
-                    <p className="p-3 bg-gray-50 rounded-lg">{selectedShift.notes}</p>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Notes
+                    </Label>
+                    <p className="p-3 bg-gray-50 rounded-lg">
+                      {selectedShift.notes}
+                    </p>
                   </div>
                 )}
-                
+
                 {/* Transactions Summary */}
                 <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Transactions Summary</Label>
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Transactions Summary
+                  </Label>
                   <div className="grid grid-cols-3 gap-4 mt-2 p-4 bg-gray-50 rounded-lg">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">
                         {selectedShift.totalTransactions || 0}
                       </div>
-                      <div className="text-sm text-muted-foreground">Total Transactions</div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Transactions
+                      </div>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">
                         {formatCurrency(selectedShift.totalSales || 0)}
                       </div>
-                      <div className="text-sm text-muted-foreground">Total Sales</div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Sales
+                      </div>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">
                         {formatCurrency(0)}
                       </div>
-                      <div className="text-sm text-muted-foreground">Total Refunds</div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Refunds
+                      </div>
                     </div>
                   </div>
                 </div>

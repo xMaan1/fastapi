@@ -1,29 +1,44 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useApiService } from './useApiService';
-import { CustomOptionsService, CustomOption } from '../services/CustomOptionsService';
+import { useState, useEffect, useCallback } from "react";
+import { useApiService } from "./useApiService";
+import {
+  CustomOptionsService,
+  CustomOption,
+} from "../services/CustomOptionsService";
 
 export function useCustomOptions() {
   const apiService = useApiService();
-  const [customOptionsService] = useState(() => new CustomOptionsService(apiService));
-  
+  const [customOptionsService] = useState(
+    () => new CustomOptionsService(apiService),
+  );
+
   // State for different custom options
   const [customEventTypes, setCustomEventTypes] = useState<CustomOption[]>([]);
-  const [customDepartments, setCustomDepartments] = useState<CustomOption[]>([]);
+  const [customDepartments, setCustomDepartments] = useState<CustomOption[]>(
+    [],
+  );
   const [customLeaveTypes, setCustomLeaveTypes] = useState<CustomOption[]>([]);
-  const [customLeadSources, setCustomLeadSources] = useState<CustomOption[]>([]);
-  const [customContactSources, setCustomContactSources] = useState<CustomOption[]>([]);
-  const [customCompanyIndustries, setCustomCompanyIndustries] = useState<CustomOption[]>([]);
-  const [customContactTypes, setCustomContactTypes] = useState<CustomOption[]>([]);
+  const [customLeadSources, setCustomLeadSources] = useState<CustomOption[]>(
+    [],
+  );
+  const [customContactSources, setCustomContactSources] = useState<
+    CustomOption[]
+  >([]);
+  const [customCompanyIndustries, setCustomCompanyIndustries] = useState<
+    CustomOption[]
+  >([]);
+  const [customContactTypes, setCustomContactTypes] = useState<CustomOption[]>(
+    [],
+  );
   const [customIndustries, setCustomIndustries] = useState<CustomOption[]>([]);
-  
+
   // Loading states
-  const [loading, setLoading] = useState<{[key: string]: boolean}>({});
-  
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+
   // Load all custom options
   const loadAllCustomOptions = useCallback(async () => {
     try {
-      setLoading(prev => ({ ...prev, all: true }));
-      
+      setLoading((prev) => ({ ...prev, all: true }));
+
       const [
         eventTypes,
         departments,
@@ -32,7 +47,7 @@ export function useCustomOptions() {
         contactSources,
         companyIndustries,
         contactTypes,
-        industries
+        industries,
       ] = await Promise.all([
         customOptionsService.getCustomEventTypes(),
         customOptionsService.getCustomDepartments(),
@@ -41,9 +56,9 @@ export function useCustomOptions() {
         customOptionsService.getCustomContactSources(),
         customOptionsService.getCustomCompanyIndustries(),
         customOptionsService.getCustomContactTypes(),
-        customOptionsService.getCustomIndustries()
+        customOptionsService.getCustomIndustries(),
       ]);
-      
+
       setCustomEventTypes(eventTypes);
       setCustomDepartments(departments);
       setCustomLeaveTypes(leaveTypes);
@@ -53,137 +68,186 @@ export function useCustomOptions() {
       setCustomContactTypes(contactTypes);
       setCustomIndustries(industries);
     } catch (error) {
-      console.error('Error loading custom options:', error);
+      console.error("Error loading custom options:", error);
     } finally {
-      setLoading(prev => ({ ...prev, all: false }));
+      setLoading((prev) => ({ ...prev, all: false }));
     }
   }, [customOptionsService]);
-  
+
   // Create custom event type
-  const createCustomEventType = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, eventType: true }));
-      const newType = await customOptionsService.createCustomEventType(name, description);
-      setCustomEventTypes(prev => [...prev, newType]);
-      return newType;
-    } catch (error) {
-      console.error('Error creating custom event type:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, eventType: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomEventType = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, eventType: true }));
+        const newType = await customOptionsService.createCustomEventType(
+          name,
+          description,
+        );
+        setCustomEventTypes((prev) => [...prev, newType]);
+        return newType;
+      } catch (error) {
+        console.error("Error creating custom event type:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, eventType: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom department
-  const createCustomDepartment = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, department: true }));
-      const newDept = await customOptionsService.createCustomDepartment(name, description);
-      setCustomDepartments(prev => [...prev, newDept]);
-      return newDept;
-    } catch (error) {
-      console.error('Error creating custom department:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, department: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomDepartment = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, department: true }));
+        const newDept = await customOptionsService.createCustomDepartment(
+          name,
+          description,
+        );
+        setCustomDepartments((prev) => [...prev, newDept]);
+        return newDept;
+      } catch (error) {
+        console.error("Error creating custom department:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, department: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom leave type
-  const createCustomLeaveType = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, leaveType: true }));
-      const newLeave = await customOptionsService.createCustomLeaveType(name, description);
-      setCustomLeaveTypes(prev => [...prev, newLeave]);
-      return newLeave;
-    } catch (error) {
-      console.error('Error creating custom leave type:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, leaveType: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomLeaveType = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, leaveType: true }));
+        const newLeave = await customOptionsService.createCustomLeaveType(
+          name,
+          description,
+        );
+        setCustomLeaveTypes((prev) => [...prev, newLeave]);
+        return newLeave;
+      } catch (error) {
+        console.error("Error creating custom leave type:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, leaveType: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom lead source
-  const createCustomLeadSource = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, leadSource: true }));
-      const newSource = await customOptionsService.createCustomLeadSource(name, description);
-      setCustomLeadSources(prev => [...prev, newSource]);
-      return newSource;
-    } catch (error) {
-      console.error('Error creating custom lead source:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, leadSource: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomLeadSource = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, leadSource: true }));
+        const newSource = await customOptionsService.createCustomLeadSource(
+          name,
+          description,
+        );
+        setCustomLeadSources((prev) => [...prev, newSource]);
+        return newSource;
+      } catch (error) {
+        console.error("Error creating custom lead source:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, leadSource: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom contact source
-  const createCustomContactSource = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, contactSource: true }));
-      const newSource = await customOptionsService.createCustomContactSource(name, description);
-      setCustomContactSources(prev => [...prev, newSource]);
-      return newSource;
-    } catch (error) {
-      console.error('Error creating custom contact source:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, contactSource: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomContactSource = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, contactSource: true }));
+        const newSource = await customOptionsService.createCustomContactSource(
+          name,
+          description,
+        );
+        setCustomContactSources((prev) => [...prev, newSource]);
+        return newSource;
+      } catch (error) {
+        console.error("Error creating custom contact source:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, contactSource: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom company industry
-  const createCustomCompanyIndustry = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, companyIndustry: true }));
-      const newIndustry = await customOptionsService.createCustomCompanyIndustry(name, description);
-      setCustomCompanyIndustries(prev => [...prev, newIndustry]);
-      return newIndustry;
-    } catch (error) {
-      console.error('Error creating custom company industry:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, companyIndustry: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomCompanyIndustry = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, companyIndustry: true }));
+        const newIndustry =
+          await customOptionsService.createCustomCompanyIndustry(
+            name,
+            description,
+          );
+        setCustomCompanyIndustries((prev) => [...prev, newIndustry]);
+        return newIndustry;
+      } catch (error) {
+        console.error("Error creating custom company industry:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, companyIndustry: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom contact type
-  const createCustomContactType = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, contactType: true }));
-      const newType = await customOptionsService.createCustomContactType(name, description);
-      setCustomContactTypes(prev => [...prev, newType]);
-      return newType;
-    } catch (error) {
-      console.error('Error creating custom contact type:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, contactType: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomContactType = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, contactType: true }));
+        const newType = await customOptionsService.createCustomContactType(
+          name,
+          description,
+        );
+        setCustomContactTypes((prev) => [...prev, newType]);
+        return newType;
+      } catch (error) {
+        console.error("Error creating custom contact type:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, contactType: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Create custom industry
-  const createCustomIndustry = useCallback(async (name: string, description?: string) => {
-    try {
-      setLoading(prev => ({ ...prev, industry: true }));
-      const newIndustry = await customOptionsService.createCustomIndustry(name, description);
-      setCustomIndustries(prev => [...prev, newIndustry]);
-      return newIndustry;
-    } catch (error) {
-      console.error('Error creating custom industry:', error);
-      throw error;
-    } finally {
-      setLoading(prev => ({ ...prev, industry: false }));
-    }
-  }, [customOptionsService]);
-  
+  const createCustomIndustry = useCallback(
+    async (name: string, description?: string) => {
+      try {
+        setLoading((prev) => ({ ...prev, industry: true }));
+        const newIndustry = await customOptionsService.createCustomIndustry(
+          name,
+          description,
+        );
+        setCustomIndustries((prev) => [...prev, newIndustry]);
+        return newIndustry;
+      } catch (error) {
+        console.error("Error creating custom industry:", error);
+        throw error;
+      } finally {
+        setLoading((prev) => ({ ...prev, industry: false }));
+      }
+    },
+    [customOptionsService],
+  );
+
   // Load options on mount
   useEffect(() => {
     loadAllCustomOptions();
   }, [loadAllCustomOptions]);
-  
+
   return {
     // State
     customEventTypes,
@@ -194,10 +258,10 @@ export function useCustomOptions() {
     customCompanyIndustries,
     customContactTypes,
     customIndustries,
-    
+
     // Loading states
     loading,
-    
+
     // Actions
     createCustomEventType,
     createCustomDepartment,
@@ -207,7 +271,7 @@ export function useCustomOptions() {
     createCustomCompanyIndustry,
     createCustomContactType,
     createCustomIndustry,
-    
+
     // Refresh
     loadAllCustomOptions,
   };

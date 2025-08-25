@@ -65,11 +65,16 @@ export default function CRMCompaniesPage() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [showCustomIndustryDialog, setShowCustomIndustryDialog] = useState(false);
-  
+  const [showCustomIndustryDialog, setShowCustomIndustryDialog] =
+    useState(false);
+
   // Custom options hook
-  const { customIndustries, createCustomIndustry, loading: customOptionsLoading } = useCustomOptions();
-  
+  const {
+    customIndustries,
+    createCustomIndustry,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
+
   const [formData, setFormData] = useState<CompanyCreate>({
     name: "",
     industry: undefined,
@@ -115,11 +120,14 @@ export default function CRMCompaniesPage() {
     setSearch("");
   };
 
-  const handleCreateCustomIndustry = async (name: string, description: string) => {
+  const handleCreateCustomIndustry = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomIndustry(name, description);
     } catch (error) {
-      console.error('Failed to create custom industry:', error);
+      console.error("Failed to create custom industry:", error);
     }
   };
 
@@ -530,15 +538,23 @@ export default function CRMCompaniesPage() {
                           {industry.charAt(0).toUpperCase() + industry.slice(1)}
                         </SelectItem>
                       ))}
-                      
+
                       {/* Custom Industries */}
-                      {customIndustries && customIndustries.length > 0 && customIndustries.map((customIndustry) => (
-                        <SelectItem key={customIndustry.id} value={customIndustry.id}>
-                          {customIndustry.name}
-                        </SelectItem>
-                      ))}
-                      
-                      <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      {customIndustries &&
+                        customIndustries.length > 0 &&
+                        customIndustries.map((customIndustry) => (
+                          <SelectItem
+                            key={customIndustry.id}
+                            value={customIndustry.id}
+                          >
+                            {customIndustry.name}
+                          </SelectItem>
+                        ))}
+
+                      <SelectItem
+                        value="create_new"
+                        className="font-semibold text-blue-600"
+                      >
                         + Create New Industry
                       </SelectItem>
                     </SelectContent>

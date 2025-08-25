@@ -24,6 +24,7 @@ import {
   Star,
   BarChart3,
   Loader2,
+  Warehouse,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { apiService } from "../services/ApiService";
@@ -381,6 +382,15 @@ export default function DashboardPage() {
               >
                 <Users className="h-6 w-6" />
                 <span>Team Management</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="h-20 flex-col gap-2"
+                onClick={() => router.push("/inventory")}
+              >
+                <Warehouse className="h-6 w-6" />
+                <span>Inventory Management</span>
               </Button>
             </div>
           </CardContent>

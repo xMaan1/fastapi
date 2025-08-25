@@ -1,4 +1,4 @@
-import { Invoice } from './Invoice';
+import { Invoice } from "./Invoice";
 
 export interface InvoiceMetrics {
   totalInvoices: number;

@@ -91,10 +91,15 @@ export default function HRMLeaveManagementPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showCustomLeaveTypeDialog, setShowCustomLeaveTypeDialog] = useState(false);
-  
+  const [showCustomLeaveTypeDialog, setShowCustomLeaveTypeDialog] =
+    useState(false);
+
   // Custom options hook
-  const { customLeaveTypes, createCustomLeaveType, loading: customOptionsLoading } = useCustomOptions();
+  const {
+    customLeaveTypes,
+    createCustomLeaveType,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
   const [formData, setFormData] = useState<LeaveRequestCreate>({
     employeeId: "",
     leaveType: LeaveType.ANNUAL,
@@ -142,11 +147,14 @@ export default function HRMLeaveManagementPage() {
     setSearch("");
   };
 
-  const handleCreateCustomLeaveType = async (name: string, description: string) => {
+  const handleCreateCustomLeaveType = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomLeaveType(name, description);
     } catch (error) {
-      console.error('Failed to create custom leave type:', error);
+      console.error("Failed to create custom leave type:", error);
     }
   };
 
@@ -725,15 +733,20 @@ export default function HRMLeaveManagementPage() {
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </SelectItem>
                     ))}
-                    
+
                     {/* Custom Leave Types */}
-                    {customLeaveTypes && customLeaveTypes.length > 0 && customLeaveTypes.map((customType) => (
-                      <SelectItem key={customType.id} value={customType.id}>
-                        {customType.name}
-                      </SelectItem>
-                    ))}
-                    
-                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                    {customLeaveTypes &&
+                      customLeaveTypes.length > 0 &&
+                      customLeaveTypes.map((customType) => (
+                        <SelectItem key={customType.id} value={customType.id}>
+                          {customType.name}
+                        </SelectItem>
+                      ))}
+
+                    <SelectItem
+                      value="create_new"
+                      className="font-semibold text-blue-600"
+                    >
                       + Create New Leave Type
                     </SelectItem>
                   </SelectContent>

@@ -68,10 +68,15 @@ export default function SalesPage() {
   const [showCreateLeadDialog, setShowCreateLeadDialog] = useState(false);
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] =
     useState(false);
-  const [showCustomLeadSourceDialog, setShowCustomLeadSourceDialog] = useState(false);
-  
+  const [showCustomLeadSourceDialog, setShowCustomLeadSourceDialog] =
+    useState(false);
+
   // Custom options hook
-  const { customLeadSources, createCustomLeadSource, loading: customOptionsLoading } = useCustomOptions();
+  const {
+    customLeadSources,
+    createCustomLeadSource,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
   const [leadFormData, setLeadFormData] = useState({
     firstName: "",
     lastName: "",
@@ -118,11 +123,14 @@ export default function SalesPage() {
     loadSalesData();
   }, [loadSalesData]);
 
-  const handleCreateCustomLeadSource = async (name: string, description: string) => {
+  const handleCreateCustomLeadSource = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomLeadSource(name, description);
     } catch (error) {
-      console.error('Failed to create custom lead source:', error);
+      console.error("Failed to create custom lead source:", error);
     }
   };
 
@@ -626,15 +634,23 @@ export default function SalesPage() {
                         {source.replace("_", " ")}
                       </SelectItem>
                     ))}
-                    
+
                     {/* Custom Lead Sources */}
-                    {customLeadSources && customLeadSources.length > 0 && customLeadSources.map((customSource) => (
-                      <SelectItem key={customSource.id} value={customSource.id}>
-                        {customSource.name}
-                      </SelectItem>
-                    ))}
-                    
-                    <SelectItem value="create_new" className="font-semibold text-blue-600">
+                    {customLeadSources &&
+                      customLeadSources.length > 0 &&
+                      customLeadSources.map((customSource) => (
+                        <SelectItem
+                          key={customSource.id}
+                          value={customSource.id}
+                        >
+                          {customSource.name}
+                        </SelectItem>
+                      ))}
+
+                    <SelectItem
+                      value="create_new"
+                      className="font-semibold text-blue-600"
+                    >
                       + Create New Lead Source
                     </SelectItem>
                   </SelectContent>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,11 +6,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/src/components/ui/dialog';
-import { Button } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
+} from "@/src/components/ui/dialog";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { Textarea } from "@/src/components/ui/textarea";
 
 interface CustomOptionDialogProps {
   open: boolean;
@@ -33,15 +33,15 @@ export function CustomOptionDialog({
   onSubmit,
   loading = false,
 }: CustomOptionDialogProps) {
-  const [name, setName] = useState('');
-  const [desc, setDesc] = useState('');
+  const [name, setName] = useState("");
+  const [desc, setDesc] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       onSubmit(name.trim(), desc.trim());
-      setName('');
-      setDesc('');
+      setName("");
+      setDesc("");
       onOpenChange(false);
     }
   };
@@ -86,7 +86,7 @@ export function CustomOptionDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={!name.trim() || loading}>
-              {loading ? 'Creating...' : 'Create'}
+              {loading ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
         </form>

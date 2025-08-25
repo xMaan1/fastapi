@@ -71,18 +71,18 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
-  
+
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  
+
   // Filter states
   const [filters, setFilters] = useState<InvoiceFilters>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -101,9 +101,13 @@ export default function InvoicesPage() {
         setDashboard(dashboardData);
       } else {
         const response = await InvoiceService.getInvoices(
-          { ...filters, search: searchTerm, status: statusFilter !== "all" ? statusFilter : undefined },
+          {
+            ...filters,
+            search: searchTerm,
+            status: statusFilter !== "all" ? statusFilter : undefined,
+          },
           currentPage,
-          10
+          10,
         );
         setInvoices(response.invoices);
         setTotalPages(response.pagination.pages);
@@ -125,7 +129,10 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleUpdateInvoice = async (invoiceId: string, invoiceData: Partial<InvoiceCreate>) => {
+  const handleUpdateInvoice = async (
+    invoiceId: string,
+    invoiceData: Partial<InvoiceCreate>,
+  ) => {
     try {
       await InvoiceService.updateInvoice(invoiceId, invoiceData);
       setShowEditDialog(false);
@@ -161,7 +168,9 @@ export default function InvoicesPage() {
       await InvoiceService.markInvoiceAsPaid(invoiceId);
       loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to mark invoice as paid");
+      setError(
+        err instanceof Error ? err.message : "Failed to mark invoice as paid",
+      );
     }
   };
 
@@ -222,7 +231,10 @@ export default function InvoicesPage() {
             </p>
           </div>
           <div className="flex space-x-2">
-            <Button onClick={() => setShowCreateDialog(true)} className="modern-button">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="modern-button"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Invoice
             </Button>
@@ -261,12 +273,15 @@ export default function InvoicesPage() {
                       placeholder="Search invoices..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
                   <div>
                     <Label htmlFor="status">Status</Label>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <Select
+                      value={statusFilter}
+                      onValueChange={setStatusFilter}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="All Statuses" />
                       </SelectTrigger>
@@ -286,7 +301,9 @@ export default function InvoicesPage() {
                       id="dateFrom"
                       type="date"
                       value={filters.dateFrom || ""}
-                      onChange={(e) => handleFilterChange({ dateFrom: e.target.value })}
+                      onChange={(e) =>
+                        handleFilterChange({ dateFrom: e.target.value })
+                      }
                     />
                   </div>
                   <div>
@@ -295,7 +312,9 @@ export default function InvoicesPage() {
                       id="dateTo"
                       type="date"
                       value={filters.dateTo || ""}
-                      onChange={(e) => handleFilterChange({ dateTo: e.target.value })}
+                      onChange={(e) =>
+                        handleFilterChange({ dateTo: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -328,11 +347,13 @@ export default function InvoicesPage() {
                   Overdue Invoices
                 </CardTitle>
                 <CardDescription>
-                  Invoices that are past their due date and require immediate attention
+                  Invoices that are past their due date and require immediate
+                  attention
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {dashboard?.overdueInvoices && dashboard.overdueInvoices.length > 0 ? (
+                {dashboard?.overdueInvoices &&
+                dashboard.overdueInvoices.length > 0 ? (
                   <div className="space-y-4">
                     {dashboard.overdueInvoices.map((invoice) => (
                       <div
@@ -344,8 +365,9 @@ export default function InvoicesPage() {
                             {invoice.invoiceNumber} - {invoice.customerName}
                           </h4>
                           <p className="text-sm text-gray-600">
-                            Due: {InvoiceService.formatDate(invoice.dueDate)} • 
-                            Amount: {InvoiceService.formatCurrency(invoice.total)}
+                            Due: {InvoiceService.formatDate(invoice.dueDate)} •
+                            Amount:{" "}
+                            {InvoiceService.formatCurrency(invoice.total)}
                           </p>
                         </div>
                         <div className="flex space-x-2">
@@ -392,7 +414,9 @@ export default function InvoicesPage() {
         <InvoiceDialog
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
-          onSubmit={(data) => selectedInvoice && handleUpdateInvoice(selectedInvoice.id, data)}
+          onSubmit={(data) =>
+            selectedInvoice && handleUpdateInvoice(selectedInvoice.id, data)
+          }
           mode="edit"
           invoice={selectedInvoice}
         />
@@ -406,16 +430,22 @@ export default function InvoicesPage() {
             <div className="py-4">
               <p>
                 Are you sure you want to delete invoice{" "}
-                <strong>{selectedInvoice?.invoiceNumber}</strong>? This action cannot be undone.
+                <strong>{selectedInvoice?.invoiceNumber}</strong>? This action
+                cannot be undone.
               </p>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+              >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => selectedInvoice && handleDeleteInvoice(selectedInvoice.id)}
+                onClick={() =>
+                  selectedInvoice && handleDeleteInvoice(selectedInvoice.id)
+                }
               >
                 Delete
               </Button>

@@ -62,11 +62,16 @@ export default function CRMContactsPage() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [showCustomContactTypeDialog, setShowCustomContactTypeDialog] = useState(false);
-  
+  const [showCustomContactTypeDialog, setShowCustomContactTypeDialog] =
+    useState(false);
+
   // Custom options hook
-  const { customContactTypes, createCustomContactType, loading: customOptionsLoading } = useCustomOptions();
-  
+  const {
+    customContactTypes,
+    createCustomContactType,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
+
   const [formData, setFormData] = useState<ContactCreate>({
     firstName: "",
     lastName: "",
@@ -118,11 +123,14 @@ export default function CRMContactsPage() {
     setSearch("");
   };
 
-  const handleCreateCustomContactType = async (name: string, description: string) => {
+  const handleCreateCustomContactType = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomContactType(name, description);
     } catch (error) {
-      console.error('Failed to create custom contact type:', error);
+      console.error("Failed to create custom contact type:", error);
     }
   };
 
@@ -564,7 +572,10 @@ export default function CRMContactsPage() {
                       if (value === "create_new") {
                         setShowCustomContactTypeDialog(true);
                       } else {
-                        setFormData({ ...formData, type: value as ContactType });
+                        setFormData({
+                          ...formData,
+                          type: value as ContactType,
+                        });
                       }
                     }}
                   >
@@ -577,15 +588,20 @@ export default function CRMContactsPage() {
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </SelectItem>
                       ))}
-                      
+
                       {/* Custom Contact Types */}
-                      {customContactTypes && customContactTypes.length > 0 && customContactTypes.map((customType) => (
-                        <SelectItem key={customType.id} value={customType.id}>
-                          {customType.name}
-                        </SelectItem>
-                      ))}
-                      
-                      <SelectItem value="create_new" className="font-semibold text-blue-600">
+                      {customContactTypes &&
+                        customContactTypes.length > 0 &&
+                        customContactTypes.map((customType) => (
+                          <SelectItem key={customType.id} value={customType.id}>
+                            {customType.name}
+                          </SelectItem>
+                        ))}
+
+                      <SelectItem
+                        value="create_new"
+                        className="font-semibold text-blue-600"
+                      >
                         + Create New Contact Type
                       </SelectItem>
                     </SelectContent>

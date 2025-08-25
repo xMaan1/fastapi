@@ -6,7 +6,7 @@ export enum InvoiceStatus {
   PARTIALLY_PAID = "partially_paid",
   OVERDUE = "overdue",
   CANCELLED = "cancelled",
-  VOID = "void"
+  VOID = "void",
 }
 
 export enum PaymentMethod {
@@ -16,7 +16,7 @@ export enum PaymentMethod {
   CHECK = "check",
   PAYPAL = "paypal",
   STRIPE = "stripe",
-  OTHER = "other"
+  OTHER = "other",
 }
 
 export interface InvoiceItem {

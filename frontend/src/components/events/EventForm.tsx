@@ -37,7 +37,8 @@ export default function EventForm({
   loading = false,
 }: EventFormProps) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [showCustomEventTypeDialog, setShowCustomEventTypeDialog] = useState(false);
+  const [showCustomEventTypeDialog, setShowCustomEventTypeDialog] =
+    useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -56,7 +57,11 @@ export default function EventForm({
   });
 
   const apiService = useApiService();
-  const { customEventTypes, createCustomEventType, loading: customOptionsLoading } = useCustomOptions();
+  const {
+    customEventTypes,
+    createCustomEventType,
+    loading: customOptionsLoading,
+  } = useCustomOptions();
 
   useEffect(() => {
     // Fetch projects for the dropdown
@@ -100,11 +105,14 @@ export default function EventForm({
     }
   }, [event]);
 
-  const handleCreateCustomEventType = async (name: string, description: string) => {
+  const handleCreateCustomEventType = async (
+    name: string,
+    description: string,
+  ) => {
     try {
       await createCustomEventType(name, description);
     } catch (error) {
-      console.error('Failed to create custom event type:', error);
+      console.error("Failed to create custom event type:", error);
     }
   };
 
@@ -197,15 +205,20 @@ export default function EventForm({
               <SelectItem value="workshop">Workshop</SelectItem>
               <SelectItem value="deadline">Deadline</SelectItem>
               <SelectItem value="other">Other</SelectItem>
-              
+
               {/* Custom Event Types */}
-              {customEventTypes && customEventTypes.length > 0 && customEventTypes.map((customType) => (
-                <SelectItem key={customType.id} value={customType.id}>
-                  {customType.name}
-                </SelectItem>
-              ))}
-              
-              <SelectItem value="create_new" className="font-semibold text-blue-600">
+              {customEventTypes &&
+                customEventTypes.length > 0 &&
+                customEventTypes.map((customType) => (
+                  <SelectItem key={customType.id} value={customType.id}>
+                    {customType.name}
+                  </SelectItem>
+                ))}
+
+              <SelectItem
+                value="create_new"
+                className="font-semibold text-blue-600"
+              >
                 + Create New Event Type
               </SelectItem>
             </SelectContent>
@@ -382,7 +395,7 @@ export default function EventForm({
           {loading ? "Saving..." : event ? "Update Event" : "Create Event"}
         </Button>
       </div>
-      
+
       {/* Custom Event Type Dialog */}
       <CustomOptionDialog
         open={showCustomEventTypeDialog}
